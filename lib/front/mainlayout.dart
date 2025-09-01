@@ -5,7 +5,7 @@ import 'package:indiangrill/front/header.dart';
 class MainLayout extends StatelessWidget {
   final Widget child; // Child page that will be rendered
 
-  const MainLayout({required this.child});
+  const MainLayout({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +13,9 @@ class MainLayout extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Header(), // The header remains the same
+            const Header(), // The header remains the same
             child, // Render the child passed by the router
-            Footer(), // The footer remains the same
+            const Footer(), // The footer remains the same
           ],
         ),
       ),

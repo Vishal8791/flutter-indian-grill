@@ -1,80 +1,143 @@
 import 'package:go_router/go_router.dart';
 import 'package:indiangrill/front/aboutus.dart';
 import 'package:indiangrill/front/banquet.dart';
+import 'package:indiangrill/front/banquet_contact_page.dart';
+import 'package:indiangrill/front/banquet_menu.dart';
 import 'package:indiangrill/front/career.dart';
+import 'package:indiangrill/front/cart_page.dart';
 import 'package:indiangrill/front/catering_enquiry.dart';
+import 'package:indiangrill/front/checkout.dart';
 import 'package:indiangrill/front/contactus.dart';
 import 'package:indiangrill/front/gallery.dart';
 import 'package:indiangrill/front/homepage.dart';
+import 'package:indiangrill/front/my-account.dart';
+import 'package:indiangrill/front/privacy_policy.dart';
 import 'package:indiangrill/front/mainlayout.dart';
 import 'package:indiangrill/front/orderonline.dart';
-import 'package:indiangrill/front/ourcakes.dart'; // Ensure this is included
+import 'package:indiangrill/front/ourcakes.dart';
+import 'package:indiangrill/front/register.dart';
+import 'package:indiangrill/front/lostpassword.dart';
+import 'package:indiangrill/session/user_session.dart'; // Make sure this is imported
 
 class MyAppRouter {
-  GoRouter get router => GoRouter(
-    routes: [
-      GoRoute(
-        name: 'home',
-        path: '/',
-        builder: (context, state) => MainLayout(child: HomePage()), // Home page
-      ),
-      GoRoute(
-        name: 'order_online', // Ensure this name matches your context.go call
-        path: '/order_online',
-        builder: (context, state) {
-         return MainLayout(child: OrderOnline()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'category_enquiry', // Ensure this name matches your context.go call
-        path: '/category_enquiry',
-        builder: (context, state) {
-         return MainLayout(child: CateringEnquiry()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'banquet', // Ensure this name matches your context.go call
-        path: '/banquet',
-        builder: (context, state) {
-         return MainLayout(child: Banquet()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'gallery', // Ensure this name matches your context.go call
-        path: '/gallery',
-        builder: (context, state) {
-         return MainLayout(child: Gallery()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'contactus', // Ensure this name matches your context.go call
-        path: '/contactus',
-        builder: (context, state) {
-         return MainLayout(child: Contactus()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'ourcakes', // Ensure this name matches your context.go call
-        path: '/ourcakes',
-        builder: (context, state) {
-         return MainLayout(child: Ourcakes()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'career', // Ensure this name matches your context.go call
-        path: '/career',
-        builder: (context, state) {
-         return MainLayout(child: Career()); // Ensure this is the correct widget
-        },
-      ),
-      GoRoute(
-        name: 'about-us', // Ensure this name matches your context.go call
-        path: '/about-us',
-        builder: (context, state) {
-         return MainLayout(child: Aboutus()); // Ensure this is the correct widget
-        },
-      ),
-      
-    ],
-  );
+  late final GoRouter router;
+
+  MyAppRouter() {
+    router = GoRouter(
+      routes: [
+        GoRoute(
+          name: 'privacy-policy',
+          path: '/privacy-policy',
+          builder: (context, state) => MainLayout(child: PrivacyPolicy()),
+        ),
+        GoRoute(
+          name: 'banquet-contact-page',
+          path: '/banquet-contact-page',
+          builder: (context, state) => MainLayout(child: BanquetContactPage()),
+        ),
+        GoRoute(
+          name: 'my-account',
+          path: '/my-account',
+          builder: (context, state) => const MainLayout(child: MyAccount()),
+          redirect: (context, state) {
+            // Use your userSession singleton or provider here:
+            if (!userSession.isLoggedIn) {
+              return '/login';
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          name: 'home',
+          path: '/',
+          builder: (context, state) => const MainLayout(child: HomePage()),
+        ),
+        GoRoute(
+          name: 'order-online',
+          path: '/order-online',
+          builder: (context, state) => const MainLayout(child: OrderOnline()),
+        ),
+        GoRoute(
+          name: 'category-enquiry',
+          path: '/category-enquiry',
+          builder: (context, state) =>
+              const MainLayout(child: CateringEnquiry()),
+        ),
+        GoRoute(
+          name: 'banquet',
+          path: '/banquet',
+          builder: (context, state) => const MainLayout(child: Banquet()),
+        ),
+        GoRoute(
+          name: 'gallery',
+          path: '/gallery',
+          builder: (context, state) => const MainLayout(child: Gallery()),
+        ),
+        GoRoute(
+          name: 'contactus',
+          path: '/contactus',
+          builder: (context, state) => MainLayout(child: Contactus()),
+        ),
+        GoRoute(
+          name: 'ourcakes',
+          path: '/ourcakes',
+          builder: (context, state) => const MainLayout(child: OurCakes()),
+        ),
+        GoRoute(
+          name: 'career',
+          path: '/career',
+          builder: (context, state) => const MainLayout(child: Career()),
+        ),
+        GoRoute(
+          name: 'about-us',
+          path: '/about-us',
+          builder: (context, state) => const MainLayout(child: Aboutus()),
+        ),
+        GoRoute(
+          name: 'login',
+          path: '/login',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return MainLayout(
+              child: Register(
+                registration:
+                    extra?['registration'] ?? 'no', // default to 'no' (login)
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          name: 'logout',
+          path: '/logout',
+          redirect: (context, state) {
+            userSession.logOut(); // Clear session
+            return '/login'; // Redirect to login
+          },
+        ),
+        GoRoute(
+          name: 'banquet-menu',
+          path: '/banquet-menu',
+          builder: (context, state) => const MainLayout(child: BanquetMenu()),
+        ),
+        GoRoute(
+          name: 'cart',
+          path: '/cart',
+          builder: (context, state) => const MainLayout(child: CartScreen()),
+        ),
+        GoRoute(
+          name: 'checkout',
+          path: '/checkout',
+          builder: (context, state) => const MainLayout(child: CheckoutPage()),
+        ),
+        GoRoute(
+          name: 'lost-password',
+          path: '/lost-password',
+          builder: (context, state) => const MainLayout(child: LostPassword()),
+        )
+      ],
+    );
+  }
 }
+
+// Create a single global instance to be used app-wide
+final myAppRouter = MyAppRouter();

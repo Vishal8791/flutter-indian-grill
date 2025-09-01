@@ -1,14 +1,877 @@
-// orderonline.dart
-import 'package:flutter/material.dart';
+// import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
 
-class OrderOnline extends StatelessWidget {
+import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:indiangrill/front/cart_page.dart';
+import 'package:provider/provider.dart';
+import 'dart:convert';
+
+import '../providers/cart_provider.dart';
+
+class OrderOnline extends StatefulWidget {
+  const OrderOnline({super.key});
+
+  @override
+  _OrderOnlineState createState() => _OrderOnlineState();
+}
+
+class _OrderOnlineState extends State<OrderOnline> {
+  final WooCommerceService wooCommerceService = WooCommerceService();
+  final WooCommerceCategory wooCommerceCategory = WooCommerceCategory();
+  List<dynamic> products = [];
+  List<Map<String, String>> categories = [];
+  bool isLoading = false;
+  int currentPage = 1;
+  int totalProducts = 0;
+  int productsPerPage = 10;
+  int totalPages = 1;
+  String? selectedCategoryId = '60';
+  final ScrollController _scrollController = ScrollController();
+
+  int? expandedIndex; // Track expanded index
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCategories();
+    fetchTotalProductsCount();
+    fetchProducts(page: currentPage, category: selectedCategoryId);
+  }
+
+  void fetchCategories() async {
+    try {
+      List<dynamic> fetchedCategories =
+          await wooCommerceCategory.fetchSubcategories();
+      setState(() {
+        categories = [
+              {'name': 'ALL', 'id': '60'}
+            ] +
+            fetchedCategories.map<Map<String, String>>((cat) {
+              return {'name': cat['name'], 'id': cat['id'].toString()};
+            }).toList();
+      });
+    } catch (error) {
+      print("Error fetching categories: $error");
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void fetchProducts({required int page, String? category}) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    int offset = (page - 1) * productsPerPage;
+
+    List<dynamic> fetchedProducts = await wooCommerceService.fetchProducts(
+      offset: offset,
+      productsPerPage: productsPerPage,
+      category: category ?? selectedCategoryId,
+    );
+
+    setState(() {
+      isLoading = false;
+      products = fetchedProducts;
+      currentPage = page;
+      if (page == 1) {
+        fetchTotalProductsCount();
+      }
+    });
+  }
+
+  void fetchTotalProductsCount() async {
+    int count = await wooCommerceService.fetchTotalProductsCount(
+        category: selectedCategoryId);
+    setState(() {
+      totalProducts = count;
+      totalPages = (totalProducts / productsPerPage).ceil();
+    });
+  }
+
+  void onCategorySelected(Map<String, String> category) {
+    String? categoryId = category['name'] == 'ALL' ? '60' : category['id'];
+    setState(() {
+      selectedCategoryId = categoryId;
+      currentPage = 1;
+      products = [];
+      expandedIndex = null; // Reset expanded index when category changes
+    });
+    if (categoryId != null) {
+      fetchProducts(page: 1, category: selectedCategoryId);
+      fetchTotalProductsCount();
+    }
+  }
+
+  void onPageSelected(int page) {
+    if (page != currentPage) {
+      fetchProducts(page: page, category: selectedCategoryId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Order Online Page',
-        style: TextStyle(fontSize: 24),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(190, 40, 190, 40),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: SidebarWidget(
+                  items: categories,
+                  onCategorySelected: onCategorySelected,
+                  selectedCategoryId: selectedCategoryId,
+                ),
+              ),
+              Expanded(
+                flex: 7,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : Column(
+                              children: [
+                                ...products.asMap().entries.map((entry) {
+                                  int index = entry.key;
+                                  var product = entry.value;
+                                  // print(product);
+                                  return MenuItemCard(
+                                    key: ValueKey(
+                                        index), // Force rebuild when index changes
+                                    title: product['name'],
+                                    productId: product['productId'],
+                                    optionName: product['optionName'],
+                                    description: product['description'] ??
+                                        'No description available',
+                                    price: double.tryParse(product['price']) ??
+                                        0.0,
+                                    isExpanded: expandedIndex == index,
+                                    onExpand: () {
+                                      setState(() {
+                                        expandedIndex = (expandedIndex == index)
+                                            ? null
+                                            : index;
+                                      });
+                                    },
+                                    baseOptions: List<String>.from(
+                                        product['baseOptions'] ?? []),
+                                    comboOptions: List<String>.from(
+                                        product['comboOptions'] ?? []),
+                                  );
+                                }),
+                                const SizedBox(height: 20),
+                                if (totalProducts > productsPerPage)
+                                  PaginationBar(
+                                    currentPage: currentPage,
+                                    totalPages: totalPages,
+                                    onPageSelected: onPageSelected,
+                                  ),
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+}
+
+class MenuItemCard extends StatefulWidget {
+  final String title;
+  final int productId;
+  final String description;
+  final String optionName;
+  final double price;
+  final bool isExpanded;
+  final VoidCallback onExpand;
+  final List<String> baseOptions;
+  final List<String> comboOptions;
+
+  const MenuItemCard(
+      {super.key,
+      required this.title,
+      required this.productId,
+      required this.optionName,
+      required this.description,
+      required this.price,
+      required this.isExpanded,
+      required this.onExpand,
+      required this.baseOptions,
+      required this.comboOptions});
+
+  @override
+  _MenuItemCardState createState() => _MenuItemCardState();
+}
+
+class _MenuItemCardState extends State<MenuItemCard> {
+  int quantity = 1;
+  String? selectedPreparation; // For Preparation selection
+  String? selectedChoice; // For Choice of with Rice selection
+  void _increaseQuantity() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  void _decreaseQuantity() {
+    setState(() {
+      if (quantity > 1) quantity--;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onExpand,
+      child: Card(
+        shape: Border.all(color: Colors.transparent),
+        elevation: 0,
+        child: Container(
+          color: const Color(0xFFF7F7F7),
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      // const Icon(Icons.verified, color: Colors.green),
+                      //   const SizedBox(width: 8),
+                      Text(
+                        widget.title,
+                        style: GoogleFonts.raleway(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "\$${widget.price.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                widget.description,
+                style: GoogleFonts.raleway(fontSize: 13, color: Colors.black),
+                textAlign: TextAlign.left,
+              ),
+              // const SizedBox(height: 8),
+
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                firstChild: Container(), // Collapsed view
+                secondChild: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Base Options (Preparation)
+                      if (widget.baseOptions.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  widget.optionName,
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: widget.baseOptions.map((option) {
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Transform.scale(
+                                      scale: 0.7,
+                                      child: Radio<String>(
+                                        value: option,
+                                        groupValue: selectedPreparation,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedPreparation = value!;
+                                          });
+                                        },
+                                        activeColor: Colors.blue,
+                                      ),
+                                    ),
+                                    Text(
+                                      option,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(width: 16),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      // Combo Option (Single Radio Only)
+                      if (widget.optionName != "Served With" &&
+                          widget.comboOptions.isNotEmpty &&
+                          selectedPreparation != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Choice of with Rice:",
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Transform.scale(
+                                  scale: 0.7,
+                                  child: Radio<String>(
+                                    value: widget.comboOptions.first,
+                                    groupValue: selectedChoice,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedChoice = value!;
+                                      });
+                                    },
+                                    activeColor: Colors.blue,
+                                  ),
+                                ),
+                                Text(
+                                  widget.comboOptions.first
+                                      .replaceFirst(RegExp(r'^.*\+\s*'),
+                                          '') // remove everything before and including '+'
+                                      .replaceAllMapped(
+                                        RegExp(r'\(\+\s*\$?([\d.]+)\)'),
+                                        (match) => '(\$${match.group(1)})',
+                                      ),
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      // Special Instructions
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Special Instructions:',
+                          labelStyle: TextStyle(color: Colors.black54),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black54),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          fillColor: Colors.white,
+                          filled: true,
+                        ),
+                        maxLines: 3,
+                        style: GoogleFonts.raleway(color: Colors.black),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Quantity and Cart Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove,
+                                    color: Colors.black),
+                                onPressed: _decreaseQuantity,
+                              ),
+                              Text(
+                                quantity.toString(),
+                                style: GoogleFonts.raleway(color: Colors.black),
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.add, color: Colors.black),
+                                onPressed: _increaseQuantity,
+                              ),
+                            ],
+                          ),
+  ElevatedButton(
+  onPressed: () {
+    final String preparation = selectedPreparation ?? '';
+    final String choice = selectedChoice ?? '';
+
+    // Check if preparation is required based on product options
+    bool isPreparationRequired = false;
+
+    if (selectedPreparation != null && widget.baseOptions.isNotEmpty) {
+      isPreparationRequired = true;
+    }
+    if (widget.baseOptions.isEmpty) {
+      isPreparationRequired = true;
+    }
+
+    if (!isPreparationRequired) {
+      _showAlertBox(context, 'Please select a preparation option');
+      return;
+    }
+
+    List<Map<String, String>> selectedOptions = [];
+
+    if (selectedPreparation != null) {
+      selectedOptions.add({widget.optionName: selectedPreparation!});
+    }
+
+    if (widget.baseOptions.isNotEmpty) {
+      if (selectedChoice != null) {
+        selectedOptions.add({"Choice of with Rice:": "Yes"});
+      } else {
+        selectedOptions.add({"Choice of with Rice:": "No"});
+      }
+    }
+
+    final String combinedOption =
+        (preparation.isNotEmpty && choice.isNotEmpty)
+            ? '$preparation + $choice'
+            : '$preparation$choice';
+
+    _addToCart(
+      context,
+      widget.productId,
+      widget.title,
+      widget.price,
+      quantity,
+      combinedOption,
+      selectedOptions,
+    );
+  },
+  style: ButtonStyle(
+    backgroundColor: WidgetStateProperty.resolveWith<Color>(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.hovered)) {
+          return const Color.fromARGB(255, 158, 0, 18);
+        }
+        return Color(0xffE2001A);
+      },
+    ),
+    foregroundColor: WidgetStateProperty.resolveWith<Color>(
+      (Set<WidgetState> states) {
+        return Colors.white;
+      },
+    ),
+    elevation: WidgetStateProperty.all<double>(0),
+    side: WidgetStateProperty.all<BorderSide>(
+      const BorderSide(color: Color(0xffE2001A), width: 0.5),
+    ),
+    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+    ),
+    padding: WidgetStateProperty.all<EdgeInsets>(
+      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    ),
+    
+  ),
+  child: Text('Add to cart',
+  style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              color: Color.fromARGB(255, 255, 251, 251),
+                            ),),
+),
+    ],
+                      ),
+                    ],
+                  ),
+                ),
+                crossFadeState: widget.isExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _showAlertBox(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing when tapping outside
+    builder: (BuildContext context) {
+      return Center(
+        child: Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 16,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.warning, color: Colors.orange, size: 40),
+                const SizedBox(height: 10),
+                Text(
+                  message, // Use the message passed in
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  // Dismiss the dialog after 1 second
+  Future.delayed(const Duration(seconds: 1), () {
+    Navigator.of(context).pop();
+  });
+}
+
+void _addToCart(
+    BuildContext context,
+    int productId,
+    String? title,
+    double price,
+    int quantity,
+    String option,
+    List<Map<String, String>> selectedoptions) {
+  // final safeProductId = productId ?? '0';
+
+  final safeTitle = title ?? 'Product';
+  // print("Product $productId Title $safeTitle Price $price Quantity $quantity");
+
+  String? optionAmount = _optionAmount(option);
+  if (optionAmount != null) {
+    // Convert the optionAmount to a double and add it to the price
+    price += double.tryParse(optionAmount) ?? 0.0;
+  }
+
+  // Add item to cart using the Cart provider
+  Provider.of<Cart>(context, listen: false).addItem(productId.toString(),
+      safeTitle, price, quantity, option, selectedoptions);
+
+  // Show a SnackBar with the message
+  _showAlertBox(context, "$safeTitle has been added to your cart!");
+}
+
+String? _optionAmount(String option) {
+  // Regex to match the amount with or without a dollar sign
+  final RegExp regExp = RegExp(r'\$?([0-9]+(?:\.[0-9]+)?)');
+
+  final match = regExp.firstMatch(option);
+
+  if (match != null) {
+    // Return the numeric value (e.g., "0.79")
+    return match.group(1);
+  }
+
+  // If no amount is found, return null
+  return null;
+}
+
+class SidebarWidget extends StatelessWidget {
+  final List<Map<String, String>> items;
+  final ValueChanged<Map<String, String>> onCategorySelected;
+  final String? selectedCategoryId; // Add this property
+
+  const SidebarWidget({
+    super.key,
+    required this.items,
+    required this.onCategorySelected,
+    required this.selectedCategoryId, // Add this to the constructor
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xffdddddd), width: 0.5),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: List.generate(items.length, (index) {
+          final category = items[index];
+          final isSelected = category['id'] == selectedCategoryId;
+
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                onCategorySelected(category);
+              },
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.grey[300] : Colors.white,
+                  border: Border(
+                    bottom: index != items.length - 1
+                        ? const BorderSide(color: Color(0xffdddddd), width: 0.5)
+                        : BorderSide.none,
+                  ),
+                ),
+                child: Text(
+                  category['name'] ?? 'Unknown',
+                  style: GoogleFonts.raleway(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.black : const Color(0xff666666),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class PaginationBar extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final ValueChanged<int> onPageSelected;
+
+  const PaginationBar({
+    super.key,
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(totalPages, (index) {
+        int page = index + 1;
+        return GestureDetector(
+          onTap: () {
+            onPageSelected(page);
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: page == currentPage
+                  ? const Color(0xffE2001A)
+                  : Colors.grey[200],
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '$page',
+              style: TextStyle(
+                color: page == currentPage ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class WooCommerceService {
+  final String baseUrl = 'https://www.indian-grill.com/wp-json/wc/v1';
+  final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
+  final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
+  final String cakeCategoryId = '60';
+  final int productsPerPage = 10;
+
+  Future<List<Map<String, dynamic>>> fetchProducts({
+    required int offset,
+    required int productsPerPage,
+    String? category,
+  }) async {
+    final String credentials =
+        base64Encode(utf8.encode('$consumerKey:$consumerSecret'));
+    final headers = {
+      'Authorization': 'Basic $credentials',
+      'Content-Type': 'application/json',
+    };
+
+    category ??= cakeCategoryId;
+
+    String url = '$baseUrl/products?per_page=$productsPerPage&offset=$offset';
+    url += '&category=$category';
+
+    try {
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        List<dynamic> products = json.decode(response.body);
+
+        return products.map((product) {
+          String imageUrl =
+              product['images'].isNotEmpty ? product['images'][0]['src'] : '';
+
+          String rawDescription =
+              product['short_description'] ?? 'No description available';
+          String cleanDescription =
+              rawDescription.replaceAll(RegExp(r'<[^>]*>'), '');
+
+          List<String> baseOptions = [];
+          List<String> comboOptions = [];
+
+          String optionName = '';
+          
+          if (product['attributes'] != null &&
+              product['attributes'].isNotEmpty) {
+            optionName = product['attributes'][0]['name'] ?? '';
+
+            List<dynamic> rawOptions =
+                product['attributes'][0]['options'] ?? [];
+
+            Set<String> extractedComboSet = {};
+
+            for (var option in rawOptions) {
+              if (option.contains('+')) {
+                final parts = option.split('+');
+                if (parts.length == 2) {
+                  extractedComboSet.add(parts[1].trim());
+                }
+              } else {
+                baseOptions.add(option);
+              }
+            }
+
+            // Convert set to list
+            if (extractedComboSet.length == 1) {
+              comboOptions = [extractedComboSet.first]; // Only one unique value
+            } else {
+              comboOptions =
+                  extractedComboSet.toList(); // Multiple distinct values
+            }
+          }
+
+          // print(comboOptions);
+
+          return {
+            'productId': product['id'],
+            'name': product['name'],
+            'price': product['price'],
+            'image': imageUrl,
+            'description': cleanDescription,
+            'baseOptions': baseOptions,
+            'comboOptions': comboOptions,
+            'optionName': optionName
+          };
+        }).toList();
+      } else {
+        print('Failed to fetch products. Status code: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Unexpected error: $e');
+      return [];
+    }
+  }
+
+  Future<int> fetchTotalProductsCount({String? category}) async {
+    final String credentials =
+        base64Encode(utf8.encode('$consumerKey:$consumerSecret'));
+    final headers = {
+      'Authorization': 'Basic $credentials',
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      String url = '$baseUrl/products?per_page=1';
+      if (category != null) {
+        url += '&category=$category';
+      }
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        int totalCount = int.parse(response.headers['x-wp-total'] ?? '0');
+        return totalCount;
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      print('Error fetching total count: $e');
+      return 0;
+    }
+  }
+}
+
+class WooCommerceCategory {
+  final String baseUrl = "https://www.indian-grill.com/wp-json/wc/v1";
+  final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
+  final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
+  final String categoryId = '60';
+
+  Future<List<dynamic>> fetchSubcategories() async {
+    final String url =
+        "$baseUrl/products/categories?parent=$categoryId&consumer_key=$consumerKey&consumer_secret=$consumerSecret";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data; // Returns list of subcategories
+      } else {
+        throw Exception(
+            'Failed to load subcategories with status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error fetching subcategories: $error');
+    }
   }
 }
