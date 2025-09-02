@@ -188,178 +188,175 @@ class _HomePageState extends State<HomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                 MouseRegion(
-                        
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: (){
-                            GoRouter.of(context).pushNamed('order-online');
-                            
-                          },
-                  child: Container(
-                      width: 262,
-                      height: 165,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              12.0), // Apply border radius from all sides
-                        ),
-                        color: Color(0xffe2001a),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.cartShopping,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              'Order Online',
-                              style: GoogleFonts.raleway(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          )
-                        ],
-                      )),),),
-                      MouseRegion(
-                        
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: (){
-                            GoRouter.of(context).pushNamed('catering-enquiry');
-
-                          },
-                  child:Container(
-                      width: 262,
-                      height: 165,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              12.0), // Apply border radius from all sides
-                        ),
-                        color: Color(0xffe2001a),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.cartShopping,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              'Catering Enquiry',
-                              style: GoogleFonts.raleway(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      ),
-                        ),
-                      ),
                   MouseRegion(
-                        
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: (){
-                            GoRouter.of(context).pushNamed('banquet');
-                          },
-                  child: Container(
-                      width: 262,
-                      height: 165,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              12.0), // Apply border radius from all sides
-                        ),
-                        color: Color(0xffe2001a),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.cartShopping,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              'Banquet',
-                              style: GoogleFonts.raleway(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        GoRouter.of(context).pushNamed('order-online');
+                      },
+                      child: Container(
+                          width: 262,
+                          height: 165,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                  12.0), // Apply border radius from all sides
                             ),
-                          )
-                        ],
-                      )),
-                        ),),
+                            color: Color(0xffe2001a),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                FontAwesomeIcons.cartShopping,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  'Order Online',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
+                  ),
                   MouseRegion(
-                        
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: (){
-                            GoRouter.of(context).pushNamed('ourcakes');
-                            
-                          },
-                  child:Container(
-                      width: 262,
-                      height: 165,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              12.0), // Apply border radius from all sides
-                        ),
-                        color: Color(0xffe2001a),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.cartShopping,
-                            color: Colors.white,
-                            size: 22,
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        GoRouter.of(context).pushNamed('category-enquiry');
+                      },
+                      child: Container(
+                        width: 262,
+                        height: 165,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                12.0), // Apply border radius from all sides
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              'Our Cakes',
-                              style: GoogleFonts.raleway(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          color: Color(0xffe2001a),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              FontAwesomeIcons.cartShopping,
+                              color: Colors.white,
+                              size: 22,
                             ),
-                          )
-                        ],
-                      )),
-                        ),),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Catering Enquiry',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        GoRouter.of(context).pushNamed('banquet');
+                      },
+                      child: Container(
+                          width: 262,
+                          height: 165,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                  12.0), // Apply border radius from all sides
+                            ),
+                            color: Color(0xffe2001a),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                FontAwesomeIcons.cartShopping,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  'Banquet',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
+                  ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        GoRouter.of(context).pushNamed('ourcakes');
+                      },
+                      child: Container(
+                          width: 262,
+                          height: 165,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                  12.0), // Apply border radius from all sides
+                            ),
+                            color: Color(0xffe2001a),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                FontAwesomeIcons.cartShopping,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  'Our Cakes',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )),
+                    ),
+                  ),
                 ],
               )
             ],
@@ -677,7 +674,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 0),
           color: Colors.white,
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Column(
@@ -688,8 +685,9 @@ class _HomePageState extends State<HomePage> {
                     icon: FontAwesomeIcons.cartShopping,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
+                    onTap: () => context.pushNamed('order-online'),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   ServiceCard(
@@ -697,8 +695,9 @@ class _HomePageState extends State<HomePage> {
                     icon: FontAwesomeIcons.cartShopping,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
+                    onTap: () => context.pushNamed('category-enquiry'),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   ServiceCard(
@@ -706,17 +705,19 @@ class _HomePageState extends State<HomePage> {
                     icon: FontAwesomeIcons.cartShopping,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
+                    onTap: () => context.pushNamed('banquet'),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   ServiceCard(
                     title: 'Our Cakes',
                     icon: FontAwesomeIcons.cartShopping,
                     width: 330, // Custom width for the first card
-                    height: 150, // Custom height for the first card
+                    height: 150, // Custom height for the first card\
+                    onTap: () => context.pushNamed('ourcakes'),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                 ],
@@ -1014,29 +1015,33 @@ class _HomePageState extends State<HomePage> {
         Container(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           color: Colors.white,
-          child: const Column(
+          child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ServiceCard(
-                    title: 'Order Online',
-                    icon: FontAwesomeIcons.cartShopping,
-                  ),
-                  ServiceCard(
-                    title: 'Order Online',
-                    icon: FontAwesomeIcons.cartShopping,
-                  ),
-                  ServiceCard(
-                    title: 'Order Online',
-                    icon: FontAwesomeIcons.cartShopping,
-                  ),
-                  ServiceCard(
-                    title: 'Order Online',
-                    icon: FontAwesomeIcons.cartShopping,
-                  ),
-                ],
-              )
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                ServiceCard(
+                  title: 'Order Online',
+                  icon: FontAwesomeIcons.cartShopping,
+                  onTap: () => context.pushNamed('order-online'),
+                ),
+                const SizedBox(height: 20),
+                ServiceCard(
+                  title: 'Catering Enquiry',
+                  icon: FontAwesomeIcons.cartShopping,
+                  onTap: () => context.pushNamed('category-enquiry'),
+                ),
+                const SizedBox(height: 20),
+                ServiceCard(
+                  title: 'Banquet',
+                  icon: FontAwesomeIcons.cartShopping,
+                  onTap: () => context.pushNamed('banquet'),
+                ),
+                const SizedBox(height: 20),
+                ServiceCard(
+                  title: 'Our Cakes',
+                  icon: FontAwesomeIcons.cartShopping,
+                  onTap: () => context.pushNamed('ourcakes'),
+                ),
+              ])
             ],
           ),
         ),
@@ -1272,50 +1277,111 @@ Widget _buildCarouselItem(
   );
 }
 
+// class ServiceCard extends StatelessWidget {
+//   final String title;
+//   final IconData icon;
+//   final double width;
+//   final double height;
+
+//   const ServiceCard({
+//     super.key,
+//     required this.title,
+//     required this.icon,
+//     this.width = 180, // default width
+//     this.height = 150, // default height
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: width,
+//       height: height,
+//       decoration: const BoxDecoration(
+//         borderRadius: BorderRadius.all(
+//           Radius.circular(8.0), // Apply border radius to all sides
+//         ),
+//         color: Color(0xffe2001a), // Red color for background
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         crossAxisAlignment: CrossAxisAlignment.center,
+//         children: [
+//           Icon(
+//             icon,
+//             color: Colors.white,
+//             size: 22,
+//           ),
+//           const SizedBox(height: 10), // Space between icon and text
+//           Text(
+//             title,
+//             style: GoogleFonts.raleway(
+//               fontSize: 16,
+//               color: Colors.white,
+//               fontWeight: FontWeight.w700,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
 class ServiceCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final double width;
   final double height;
+  final VoidCallback? onTap; // <-- new
 
   const ServiceCard({
     super.key,
     required this.title,
     required this.icon,
-    this.width = 180, // default width
-    this.height = 150, // default height
+    this.width = 180,
+    this.height = 150,
+    this.onTap, // <-- new
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8.0), // Apply border radius to all sides
-        ),
-        color: Color(0xffe2001a), // Red color for background
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 22,
-          ),
-          const SizedBox(height: 10), // Space between icon and text
-          Text(
-            title,
-            style: GoogleFonts.raleway(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap, // <-- triggers navigation
+          child: Container(
+            width: width,
+            height: height,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(8.0),
+              ),
+              color: Color(0xffe2001a),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  style: GoogleFonts.raleway(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,0 +1,2 @@
+D:/Learning/flutter/indiangrill/android/app/.cxx/Debug/cri5p3a3/x86/CMakeFiles/edit_cache.dir
+D:/Learning/flutter/indiangrill/android/app/.cxx/Debug/cri5p3a3/x86/CMakeFiles/rebuild_cache.dir

@@ -8,7 +8,7 @@ import 'providers/cart_provider.dart';
 final myAppRouter = MyAppRouter();
 
 Future<void> main() async {
-  await dotenv.load(fileName: "woocommerce.env");
+  await dotenv.load(fileName: 'assets/woocommerce.env');
   runApp(
     MultiProvider(
       providers: [
