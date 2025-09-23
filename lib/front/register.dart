@@ -193,20 +193,20 @@ class _RegisterState extends State<Register> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                if (msg != null) // Check if msg is not null
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: Text(
-                                      msg!,
-                                      style: TextStyle(
-                                        color: msg == 'Registration successful'
-                                            ? Colors.green
-                                            : Colors.red,
-                                        fontSize: 16,
-                                      ),
+                                // Check if msg is not null
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    msg!,
+                                    style: TextStyle(
+                                      color: msg == 'Registration successful'
+                                          ? Colors.green
+                                          : Colors.red,
+                                      fontSize: 16,
                                     ),
                                   ),
+                                ),
                                 LabeledTextField(
                                   labelText: '',
                                   controller: emailController,
@@ -434,18 +434,21 @@ class _RegisterState extends State<Register> {
                                               GoRouter.of(context).pushNamed(
                                                   'lost-password'); // Adjust route name if needed
                                             },
-                                            child: 
-                                              Padding(padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                            child:Text(                                              
-                                              'Lost your password?',
-                                              style: GoogleFonts.raleway(
-                                                fontSize: 12,
-                                                color: const Color(0xffe2001a),
-                                                decoration: TextDecoration
-                                                    .underline, // Optional, for link-style appearance
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      20, 0, 0, 0),
+                                              child: Text(
+                                                'Lost your password?',
+                                                style: GoogleFonts.raleway(
+                                                  fontSize: 12,
+                                                  color:
+                                                      const Color(0xffe2001a),
+                                                  decoration: TextDecoration
+                                                      .underline, // Optional, for link-style appearance
+                                                ),
                                               ),
                                             ),
-                                          ),
                                           ),
                                         ),
                                       ],

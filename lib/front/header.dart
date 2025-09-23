@@ -16,16 +16,310 @@ class Header extends StatefulWidget {
   _HeaderState createState() => _HeaderState();
 }
 
-class _HeaderState extends State<Header> {
+class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
   bool _isNavbarOpen = false;
   bool _isVisible = true;
   bool _isHovering = false;
   Timer? _timer;
-
+  final GlobalKey _headerKey = GlobalKey();
+  OverlayEntry? _overlayEntry;
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
   @override
   void initState() {
     super.initState();
+
+    // Initialize animation controller and slide animation
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1), // slide from above
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _startBlinking();
+  }
+
+  @override
+  void dispose() {
+    _stopBlinking();
+    _controller.dispose();
+    _overlayEntry?.remove();
+    super.dispose();
+  }
+
+  bool _isBanquetExpanded = false;
+  bool _isContactExpanded = false;
+
+  // Add this helper to close the navbar reliably
+  void _closeNavbar({bool immediate = false}) {
+    if (!mounted || !_isNavbarOpen) return;
+
+    if (immediate) {
+      // Remove instantly (useful when tapping a menu item before navigation)
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+
+      setState(() {
+        _isNavbarOpen = false;
+        _controller.reset();
+      });
+      return;
+    }
+
+    // Animated close (for close button)
+    _controller.reverse().whenCompleteOrCancel(() {
+      if (!mounted) return;
+
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+
+      setState(() {
+        _isNavbarOpen = false;
+        _controller.reset();
+      });
+    });
+  }
+
+  void _toggleNavbar() {
+    if (!mounted) return;
+
+    if (_isNavbarOpen) {
+      _closeNavbar();
+    } else {
+      final overlay = Overlay.of(context);
+      if (overlay == null) return;
+
+      _overlayEntry = _createOverlayEntry();
+      overlay.insert(_overlayEntry!);
+
+      _controller.forward(from: 0.0); // start clean each time
+      setState(() {
+        _isNavbarOpen = true;
+      });
+    }
+  }
+
+  String? _clickedRoute;
+  OverlayEntry _createOverlayEntry() {
+    final RenderBox renderBox =
+        _headerKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+    final double top = position.dy + renderBox.size.height;
+
+    final String currentRoute = GoRouter.of(context).location.split('/').last;
+
+    return OverlayEntry(
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setOverlayState) => Stack(
+            children: [
+              // Backdrop
+              GestureDetector(
+                onTap: _closeNavbar,
+                child: Container(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height,
+                ),
+              ),
+
+              // Navbar
+              Positioned(
+                top: top,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SizeTransition(
+                    axisAlignment: -1.0,
+                    sizeFactor: _controller,
+                    child: Material(
+                      elevation: 10,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 🔹 Home
+                          _buildNavItem(
+                            label: "Home",
+                            route: "home",
+                            currentRoute: currentRoute,
+                            onTap: () {
+                              setState(() => _clickedRoute = "home");
+                              _closeNavbar(immediate: true);
+                              GoRouter.of(context).pushNamed("home");
+                            },
+                          ),
+
+                          // 🔹 Other direct items
+                          ...[
+                            {"label": "Order Online", "route": "order-online"},
+                            {
+                              "label": "Catering Enquiry",
+                              "route": "category-enquiry"
+                            },
+                            {"label": "Gallery", "route": "gallery"},
+                            {"label": "Our Cakes", "route": "ourcakes"},
+                          ].map((item) {
+                            return _buildNavItem(
+                              label: item["label"]!,
+                              route: item["route"]!,
+                              currentRoute: currentRoute,
+                              onTap: () {
+                                setState(() => _clickedRoute = item["route"]!);
+                                _closeNavbar(immediate: true);
+                                GoRouter.of(context).pushNamed(item["route"]!);
+                              },
+                            );
+                          }),
+
+                          // 🔹 Banquet expandable
+                          _buildExpandableNav(
+                            title: "Banquet",
+                            isExpanded: _isBanquetExpanded,
+                            onToggle: () {
+                              setOverlayState(() {
+                                _isBanquetExpanded = !_isBanquetExpanded;
+                              });
+                            },
+                            items: [
+                              {"label": "Banquets", "route": "banquet"},
+                              {"label": "Menu", "route": "banquet-menu"},
+                            ],
+                            currentRoute: currentRoute,
+                          ),
+
+                          // 🔹 Contact expandable
+                          _buildExpandableNav(
+                            title: "Contact Us",
+                            isExpanded: _isContactExpanded,
+                            onToggle: () {
+                              setOverlayState(() {
+                                _isContactExpanded = !_isContactExpanded;
+                              });
+                            },
+                            items: [
+                              {"label": "Contact Us", "route": "contactus"},
+                              {"label": "About Us", "route": "about-us"},
+                              {"label": "Career", "route": "career"},
+                            ],
+                            currentRoute: currentRoute,
+                          ),
+
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// 🔹 Single item
+  Widget _buildNavItem({
+    required String label,
+    required String route,
+    required String currentRoute,
+    required VoidCallback onTap,
+  }) {
+    final bool isActive = _clickedRoute == route || currentRoute == route;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFE2001A) : Colors.white,
+          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.raleway(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isActive ? Colors.white : Colors.grey.shade800,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 🔹 Expandable group (Banquet / Contact Us)
+  Widget _buildExpandableNav({
+    required String title,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+    required List<Map<String, String>> items,
+    required String currentRoute,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: onToggle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.raleway(
+                      fontSize: 16,
+                      // fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.grey.shade800,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isExpanded)
+            ...items.map((item) {
+              final bool isActive = _clickedRoute == item["route"] ||
+                  currentRoute == item["route"];
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _clickedRoute = item["route"]!);
+                  _closeNavbar(immediate: true);
+                  GoRouter.of(context).pushNamed(item["route"]!);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  alignment: Alignment.center,
+                  color: isActive ? Colors.grey.shade300 : Colors.white,
+                  child: Text(
+                    item["label"]!,
+                    style: GoogleFonts.raleway(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isActive ? Colors.red : Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+              );
+            }),
+        ],
+      ),
+    );
   }
 
   void _startBlinking() {
@@ -42,11 +336,11 @@ class _HeaderState extends State<Header> {
     _timer?.cancel();
   }
 
-  @override
-  void dispose() {
-    _stopBlinking();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _stopBlinking();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +348,8 @@ class _HeaderState extends State<Header> {
     return Container(
         color: Colors.white,
         child: LayoutBuilder(
-          builder: (context, Constraints) {
-            double screenWidth = Constraints.maxWidth;
+          builder: (context, constraints) {
+            double screenWidth = constraints.maxWidth;
             // print("Current Width: $screenWidth");
 
             if (kIsWeb) {
@@ -407,182 +701,167 @@ class _HeaderState extends State<Header> {
   }
 
   Widget buildMobileLayout() {
-    return Stack(children: [
-      Container(
-        color: Colors.white, // Set background color to white
-        child: Column(children: [
+    return SafeArea(
+      // <-- Add this
+      child: Stack(
+        children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            key: _headerKey,
+            color: Colors.white,
+            child: Column(
               children: [
-                // Phone Icon and Number on the left
-                const Expanded(
+                // Top bar: Phone + Login
+                // Top bar: Phone + Login/Register
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        FontAwesomeIcons.phone,
-                        color: Colors.red,
-                        size: 14,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        '215-855-4900',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff666666),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Center logo
-
-                // VIP Registration, Login, and Cart on the right
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment
-                        .end, // Aligns the text and cart icon to the end of the section
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      // Phone number
+                      const Row(
                         children: [
-                          // Blinking Text using Visibility widget
-                          Visibility(
-                            visible:
-                                _isVisible, // Controls the visibility of the text
-                            child: Text(
-                              'VIP REGISTRATION',
-                              style: GoogleFonts.raleway(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                              ),
-                            ),
+                          Icon(
+                            FontAwesomeIcons.phone,
+                            color: Colors.red,
+                            size: 14,
                           ),
+                          SizedBox(width: 8),
                           Text(
-                            ' | LOGIN',
-                            style: GoogleFonts.raleway(
+                            '215-855-4900',
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xff666666),
+                              color: Color(0xff666666),
                             ),
                           ),
                         ],
                       ),
+
+                      // Login/Register logic (mobile version)
+                      userSession.isLoggedIn
+                          ? GestureDetector(
+                              onTap: () {
+                                GoRouter.of(context).pushNamed('logout');
+                              },
+                              child: Text(
+                                'Logout',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            )
+                          : Row(
+                              children: [
+                                Visibility(
+                                  visible: _isVisible,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      GoRouter.of(context).pushNamed('login',
+                                          extra: {'registration': 'yes'});
+                                    },
+                                    child: Text(
+                                      'VIP REGISTRATION',
+                                      style: GoogleFonts.raleway(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    GoRouter.of(context).pushNamed('login',
+                                        extra: {'registration': 'no'});
+                                  },
+                                  child: Text(
+                                    ' | LOGIN',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xff666666),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
+                // Second row: Logo + Hamburger
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Logo
+                      SizedBox(
+                        width: 120,
+                        height: 60,
+                        child: GestureDetector(
+                          onTap: () {
+                            GoRouter.of(context).pushNamed('home');
+                          },
+                          child: Image.asset(
+                            'assets/images/logo/Indian-Grill-Logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+
+                      // Hamburger menu
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Color(0XFFE2001A),
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: SizedBox(
+                          width: 34,
+                          height: 31,
+                          child: IconButton(
+                            icon: FaIcon(Icons.menu),
+                            onPressed: _toggleNavbar,
+                            iconSize: 18,
+                            color: const Color(0XFFE2001A),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment
-                      .spaceBetween, // Aligns elements at both ends
-                  children: [
-                    // Logo aligned to the left
-                    Expanded(
-                      flex:
-                          1, // Optional: Controls how much space the logo takes
-                      child: GestureDetector(
-                        onTap: () {
-                          GoRouter.of(context).pushNamed('home');
-                        },
-                        child: Align(
-                          alignment: Alignment
-                              .centerLeft, // Ensures logo is aligned left
-                          child: Image.asset(
-                            'assets/images/logo/indian-grill-logo.png', // Replace with the actual path of the logo
-                            height: 60, // Adjust height of the logo
-                            width: 120, // Adjust width of the logo
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Three-line icon (Hamburger Menu) aligned to the right
-
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color(0XFFE2001A), // Red border color
-                          width: 1.0, // Border width
-                        ),
-                        borderRadius: BorderRadius.circular(
-                            4), // Optional: Rounded corners for the border
-                      ),
-                      child: SizedBox(
-                        width:
-                            34, // Set a specific width for the rectangular shape
-                        height:
-                            31, // Set a specific height for the rectangular shape
-                        child: IconButton(
-                          icon: const Icon(
-                              FontAwesomeIcons.bars), // Hamburger menu icon
-                          onPressed: () {
-                            // Toggle navbar visibility
-                            setState(() {
-                              _isNavbarOpen = !_isNavbarOpen;
-                            });
-                            // Add your logic here to open the collapsible navbar
-                            print('Menu icon tapped!');
-                          },
-                          iconSize: 18, // Adjust icon size as needed
-                          color:
-                              const Color(0XFFE2001A), // Icon color set to red
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ]),
+        ],
       ),
-      if (_isNavbarOpen)
-        Positioned(
-          top:
-              100, // Adjust this based on the height of the logo and other elements
-          left: MediaQuery.of(context).size.width / 2 - 200, // Centering logic
-          child: Container(
-            width: 250, // Set the width of the navbar
-            color: const Color(0xffE2001A), // Background color of the navbar
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildNavbar(), // Call the method to build the navbar
-              ],
-            ),
-          ),
-        ),
-    ]);
+    );
   }
 
   Widget _buildNavbar() {
     return Container(
-      width: 400,
+      width: MediaQuery.of(context).size.width, // Full width
       color: const Color(0xffE2001A),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Add your navbar items here
+          // Home
           GestureDetector(
             onTap: () {
               GoRouter.of(context).pushNamed('home');
+              setState(() {
+                _isNavbarOpen = false; // close navbar after tap
+              });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
                 'Home',
                 style: GoogleFonts.raleway(
@@ -593,14 +872,19 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
+
+          // Order Online
           GestureDetector(
             onTap: () {
-              GoRouter.of(context).pushNamed('home');
+              GoRouter.of(context).pushNamed('orderOnline');
+              setState(() {
+                _isNavbarOpen = false;
+              });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
-                'Home',
+                'Order Online',
                 style: GoogleFonts.raleway(
                   fontSize: 16,
                   color: Colors.white,
@@ -609,14 +893,19 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
+
+          // Catering Enquiry
           GestureDetector(
             onTap: () {
-              GoRouter.of(context).pushNamed('home');
+              GoRouter.of(context).pushNamed('cateringEnquiry');
+              setState(() {
+                _isNavbarOpen = false;
+              });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
-                'Home',
+                'Catering Enquiry',
                 style: GoogleFonts.raleway(
                   fontSize: 16,
                   color: Colors.white,
@@ -625,14 +914,99 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
+
+          // Banquet (Expandable menu)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isBanquetExpanded = !_isBanquetExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Banquet Hello',
+                        style: GoogleFonts.raleway(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Icon(
+                        _isBanquetExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Submenu items (visible only when expanded)
+              if (_isBanquetExpanded) ...[
+                GestureDetector(
+                  onTap: () {
+                    GoRouter.of(context).pushNamed('banquetHall1');
+                    setState(() {
+                      _isNavbarOpen = false;
+                    });
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 10, bottom: 10),
+                    child: Text(
+                      'Banquet Hall 1',
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    GoRouter.of(context).pushNamed('banquetHall2');
+                    setState(() {
+                      _isNavbarOpen = false;
+                    });
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 10, bottom: 10),
+                    child: Text(
+                      'Banquet Hall 2',
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          // Gallery
           GestureDetector(
             onTap: () {
-              GoRouter.of(context).pushNamed('home');
+              GoRouter.of(context).pushNamed('gallery');
+              setState(() {
+                _isNavbarOpen = false;
+              });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
-                'Home',
+                'Gallery',
                 style: GoogleFonts.raleway(
                   fontSize: 16,
                   color: Colors.white,
@@ -641,14 +1015,19 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
+
+          // Contact Us
           GestureDetector(
             onTap: () {
-              GoRouter.of(context).pushNamed('home');
+              GoRouter.of(context).pushNamed('contactUs');
+              setState(() {
+                _isNavbarOpen = false;
+              });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
-                'Home',
+                'Contact Us',
                 style: GoogleFonts.raleway(
                   fontSize: 16,
                   color: Colors.white,
@@ -657,8 +1036,27 @@ class _HeaderState extends State<Header> {
               ),
             ),
           ),
-          // Add more items similarly...
-          // E.g., 'Order Online', 'Catering Enquiry', etc.
+
+          // Our Cakes
+          GestureDetector(
+            onTap: () {
+              GoRouter.of(context).pushNamed('ourCakes');
+              setState(() {
+                _isNavbarOpen = false;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Text(
+                'Our Cakes',
+                style: GoogleFonts.raleway(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -680,7 +1078,7 @@ class _HeaderState extends State<Header> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Icon(
-                      FontAwesomeIcons.phone,
+                      Icons.phone,
                       color: Colors.red,
                       size: 18,
                     ),
@@ -722,35 +1120,35 @@ class _HeaderState extends State<Header> {
                   children: [
                     userSession.isLoggedIn
                         ? SizedBox(
-                          child:MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            onEnter: (_) {
-                              setState(() {
-                                _isHovering = true;
-                                _isVisible = true;
-                              });
-                            },
-                            onExit: (_) {
-                              setState(() {
-                                _isHovering = false;
-                              });
-                            },
-                         child: GestureDetector(
-                                    onTap: () {
-                                      // print('Register tapped');
-                                      GoRouter.of(context).pushNamed('logout');
-                                    },
-                                    child: Text(
-                                      'Logout',
-                                      style: GoogleFonts.raleway(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                      ),
-                                    ),
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              onEnter: (_) {
+                                setState(() {
+                                  _isHovering = true;
+                                  _isVisible = true;
+                                });
+                              },
+                              onExit: (_) {
+                                setState(() {
+                                  _isHovering = false;
+                                });
+                              },
+                              child: GestureDetector(
+                                onTap: () {
+                                  // print('Register tapped');
+                                  GoRouter.of(context).pushNamed('logout');
+                                },
+                                child: Text(
+                                  'Logout',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
                                   ),
-                          ),
-                        ) // Don't show anything
+                                ),
+                              ),
+                            ),
+                          ) // Don't show anything
                         : MouseRegion(
                             cursor: SystemMouseCursors.click,
                             onEnter: (_) {
@@ -815,9 +1213,9 @@ class _HeaderState extends State<Header> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           const Icon(
-                            FontAwesomeIcons.basketShopping,
+                            Icons.shopping_cart,
                             color: Colors.red,
-                            size: 14,
+                            size: 18,
                           ),
                           const SizedBox(width: 5),
                           Text(
@@ -860,9 +1258,9 @@ class _HeaderState extends State<Header> {
                           vertical: 18, horizontal: 10),
                       color: Colors.transparent,
                       child: const Icon(
-                        FontAwesomeIcons.houseChimney,
+                        Icons.house,
                         color: Color(0xffffd602),
-                        size: 18,
+                        size: 22,
                       ),
                     ),
                   ),
@@ -978,7 +1376,7 @@ class _HeaderState extends State<Header> {
                     child: GestureDetector(
                       onTap: () {
                         GoRouter.of(context)
-                            .pushNamed('banquet'); // Main page route
+                            .pushNamed('contactus'); // Main page route
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 18),

@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/front/career.dart';
 import 'package:http/http.dart' as http;
+import 'package:indiangrill/front/datepicker/date_picker_field.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:indiangrill/captcha/math_captcha.dart';
 
 class CateringEnquiry extends StatefulWidget {
   const CateringEnquiry({super.key});
@@ -78,6 +81,8 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
   final TextEditingController occasionController = TextEditingController();
   final TextEditingController aboutController = TextEditingController();
   final TextEditingController commentController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool formSubmitted = false;
   Future<void> submitcateringForm(BuildContext context) async {
@@ -89,7 +94,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name' : nameController.text.trim(),
+          'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'mobile': mobileController.text.trim(),
           'date': dateController.text.trim(),
@@ -97,9 +102,9 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
           'cateringtype': cateringTypeController.text.trim(),
           'foodtype': foodtypeController.text.trim(),
           'guests': guestController.text.trim(),
-          'occasion' :occasionController.text.trim(),
+          'occasion': occasionController.text.trim(),
           'about': aboutController.text.trim(),
-          'comment':commentController.text.trim()
+          'comment': commentController.text.trim()
         }),
       );
 
@@ -146,7 +151,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
     selectedOccassion = occasions.first;
     selectedReferral = refferal.first;
     cateringType = "On Premises";
-    cateringTypeController.text = cateringType!;
+    cateringTypeController.text = cateringType;
     eventtimeController.text = selectedEventTime ?? '';
     occasionController.text = selectedOccassion ?? '';
     aboutController.text = selectedReferral ?? '';
@@ -335,443 +340,537 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                           color: const Color(0xff666666),
                         ),
                       ),
-                      SizedBox(
-                        width: 450,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LabeledTextField(
-                              labelText: 'Name',
-                              controller: nameController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Email',
-                              controller: emailController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Contact Number',
-                              controller: mobileController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Event Date',
-                              controller: dateController,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'Event Time',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            // Add DropdownButton for Event Time
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                value: selectedEventTime,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedEventTime = newValue;
-                                    eventtimeController.text = newValue ?? eventTime.first;
-                                  });
-                                },
-                                items: eventTime
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Column(
+                      Form(
+                        key: _formKey,
+                        child: formSubmitted
+                            ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Type of Catering:',
+                                    'Thank you!',
                                     style: GoogleFonts.raleway(
-                                      fontSize: 13,
-                                      color: const Color(0xff666666),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
                                     ),
                                   ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'On Premises',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "On Premises",
-                                          groupValue: cateringType,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              cateringType = value!;
-                                              cateringTypeController.text = cateringType;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'External Location',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "External Location",
-                                          groupValue: cateringType,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              cateringType = value!;
-                                              cateringTypeController.text = cateringType;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'Occasion :',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                value: selectedOccassion,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedOccassion = newValue;
-                                    occasionController.text = newValue ?? '';
-                                    
-                                  });
-                                },
-                                items: occasions
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                                  const SizedBox(height: 10),
                                   Text(
-                                    'Type of Food:',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 13,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'Vegetarian',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "vegetarian",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'Non Vegetarian',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "nonvegetarian",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'both',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "both",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                    ],
+                                    'Your form has been submitted. We will contact you soon.',
+                                    style: GoogleFonts.raleway(fontSize: 16),
                                   ),
                                 ],
-                              ),
-                            ),
+                              )
+                            : SizedBox(
+                                width: 400,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    LabeledTextField(
+                                      labelText: 'Name',
+                                      controller: nameController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your name';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    LabeledTextField(
+                                      labelText: 'Email',
+                                      controller: emailController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your email';
+                                        }
+                                        final emailRegex = RegExp(
+                                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+                                        if (!emailRegex.hasMatch(value)) {
+                                          return 'Please enter a valid email address';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    LabeledTextField(
+                                      labelText: 'Contact Number',
+                                      controller: mobileController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your mobile number';
+                                        }
+                                        if (!RegExp(r'^\d{10,15}$')
+                                            .hasMatch(value)) {
+                                          return 'Please enter a valid mobile number';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    // LabeledTextField(
+                                    //   labelText: 'Event Date',
+                                    //   controller: dateController,
+                                    // ),
+                                    DatePickerField(
+                                      controller: dateController,
+                                      labelText: "Event Date",
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Text(
+                                        'Event Time : ',
+                                        style: GoogleFonts.raleway(
+                                          fontSize: 13,
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded:
+                                              true, // Make dropdown full width of parent
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius:
+                                                BorderRadius.circular(0),
+                                          ),
+                                          // buttonPadding: const EdgeInsets.symmetric(
+                                          //     horizontal: 12, vertical: 12),
+                                          value: selectedEventTime,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedEventTime = newValue;
+                                              eventtimeController.text =
+                                                  newValue ?? eventTime.first;
+                                            });
+                                          },
+                                          items: eventTime
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize: 13,
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(1),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight: 200,
+                                          scrollbarAlwaysShow: true,
+                                        ),
+                                      ),
+                                    ),
 
-                            LabeledTextField(
-                              labelText: 'Estimated Number of Guests :',
-                              controller: guestController,
-                            ),
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 0),
-                              child: Text(
-                                'Comments',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            TextField(
-                              controller: commentController,
-                              maxLines:
-                                  null, // This allows the TextField to grow vertically
-                              minLines: 5, // Minimum height when empty
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Color(0xff666666), // Border color
-                                    width: 0.1, // Border width
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                      0), // Optional: adds rounded corners
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'How Did You Hear About Us :',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Type of Catering :',
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 13,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'On Premises',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "On Premises",
+                                                  groupValue: cateringType,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      cateringType = value!;
+                                                      cateringTypeController
+                                                          .text = cateringType;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'External Location',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "External Location",
+                                                  groupValue: cateringType,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      cateringType = value!;
+                                                      cateringTypeController
+                                                          .text = cateringType;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
+
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Text(
+                                        'Occasion :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize: 13,
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded:
+                                              true, // Full width of parent
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius:
+                                                BorderRadius.circular(0),
+                                          ),
+                                          value: selectedOccassion,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedOccassion = newValue;
+                                              occasionController.text =
+                                                  newValue ?? '';
+                                            });
+                                          },
+                                          items: occasions
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize: 13,
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(4),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight:
+                                              200, // Scrollable if many items
+                                          scrollbarAlwaysShow: true,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                value: selectedReferral,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedReferral = newValue;
-                                    aboutController.text = newValue ?? refferal.first;
-                                  });
-                                },
-                                items: refferal
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
+
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Type of Food :',
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 13,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'Vegetarian',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "vegetarian",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'Non Vegetarian',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "nonvegetarian",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'both',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "both",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    LabeledTextField(
+                                      labelText: 'Estimated Number of Guests',
+                                      controller: guestController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter number of guests';
+                                        }
+                                        if (!RegExp(r'^\d+$').hasMatch(value)) {
+                                          return 'Please enter a valid number';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType
+                                          .number, // Optional: show numeric keyboard
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 0),
+                                      child: Text(
+                                        'Comments :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize: 13,
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    TextFormField(
+                                      controller: commentController,
+                                      maxLines: null, // grows vertically
+                                      minLines: 5, // minimum height
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your comments';
+                                        }
+                                        return null;
+                                      },
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
                                           ),
                                         ),
                                       ),
-                                    )
-                                    .toList(),
+                                    ),
+
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Text(
+                                        'How Did You Hear About Us :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize: 13,
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded:
+                                              true, // make dropdown full width
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                                0), // match previous styling
+                                          ),
+                                          value: selectedReferral,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedReferral = newValue;
+                                              aboutController.text =
+                                                  newValue ?? refferal.first;
+                                            });
+                                          },
+                                          items: refferal
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize: 13,
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(4),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(0),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight:
+                                              200, // scrollable if list is long
+                                          scrollbarAlwaysShow: true,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                       Container(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                             onPressed: () => submitcateringForm(context),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  const Color(0xffe2001a), // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 20),
-                            ).copyWith(
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      4), // No border radius
+                        padding: const EdgeInsets.only(top: 20),
+                        child: !formSubmitted
+                            ? ElevatedButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    submitcateringForm(context);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Please fix the errors in the form')),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor:
+                                      const Color(0xffe2001a), // Text color
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  textStyle: const TextStyle(fontSize: 20),
+                                ).copyWith(
+                                  shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          4), // No border radius
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            child: const Text('Send'),
-                          )),
+                                child: const Text('Send'),
+                              )
+                            : const SizedBox(),
+                      ),
                     ],
                   ),
                 ),
@@ -942,427 +1041,486 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                 fit: BoxFit.cover,
               ),
 
-              Container(
-                padding: const EdgeInsets.only(top: 20),
-                width: 300,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LabeledTextField(
-                      labelText: 'Name',
-                      controller: nameController,
-                    ),
-                    LabeledTextField(
-                      labelText: 'Email',
-                      controller: emailController,
-                    ),
-                    LabeledTextField(
-                      labelText: 'Contact Number',
-                      controller: mobileController,
-                    ),
-                    LabeledTextField(
-                      labelText: 'Event Date',
-                      controller: dateController,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        'Event Time',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
-                        ),
-                      ),
-                    ),
-                    // Add DropdownButton for Event Time
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(0),
-                            borderSide: const BorderSide(
-                              color: Color(0xff666666),
-                              width: 0.5,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is not focused
-                              width: 0.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is focused
-                              width: 0.5,
-                            ),
-                          ),
-                        ),
-                        value: selectedEventTime,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedEventTime = newValue;
-                            eventtimeController.text = newValue ?? eventTime.first;
-                          });
-                        },
-                        items: eventTime
-                            .map<DropdownMenuItem<String>>(
-                              (String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666),
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              Form(
+                key: _formKey,
+                child: formSubmitted
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Type of Catering:',
+                            'Thank you!',
                             style: GoogleFonts.raleway(
-                              fontSize: 13,
-                              color: const Color(0xff666666),
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
                             ),
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    'On Premises',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 12,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  value: "On Premises",
-                                  groupValue: cateringType,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      cateringType = value!;
-                                      cateringTypeController.text = cateringType;
-                                    });
-                                  },
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 0), // Adjusts padding
-                                ),
-                              ),
-                              Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    'External Location',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 12,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  value: "External Location",
-                                  groupValue: cateringType,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      cateringType = value!;
-                                      cateringTypeController.text = cateringType;
-                                    });
-                                  },
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 0), // Adjusts padding
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        'Occasion :',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(0),
-                            borderSide: const BorderSide(
-                              color: Color(0xff666666),
-                              width: 0.5,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is not focused
-                              width: 0.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is focused
-                              width: 0.5,
-                            ),
-                          ),
-                        ),
-                        value: selectedOccassion,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedOccassion = newValue;
-                            occasionController.text = newValue ?? '';
-                          });
-                        },
-                        items: occasions
-                            .map<DropdownMenuItem<String>>(
-                              (String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666),
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          const SizedBox(height: 10),
                           Text(
-                            'Type of Food:',
-                            style: GoogleFonts.raleway(
-                              fontSize: 13,
-                              color: const Color(0xff666666),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    'Vegetarian',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 12,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  value: "vegetarian",
-                                  groupValue: foodtype,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      foodtype = value!;
-                                      foodtypeController.text = foodtype;
-                                    });
-                                  },
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 0), // Adjusts padding
-                                ),
-                              ),
-                              Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    'Non Vegetarian',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 12,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  value: "nonvegetarian",
-                                  groupValue: foodtype,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      foodtype = value!;
-                                      foodtypeController.text = foodtype;
-                                    });
-                                  },
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 0), // Adjusts padding
-                                ),
-                              ),
-                              Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    'both',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 12,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  value: "both",
-                                  groupValue: foodtype,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      foodtype = value!;
-                                      foodtypeController.text = foodtype;
-                                    });
-                                  },
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 0), // Adjusts padding
-                                ),
-                              ),
-                            ],
+                            'Your form has been submitted. We will contact you soon.',
+                            style: GoogleFonts.raleway(fontSize: 16),
                           ),
                         ],
-                      ),
-                    ),
-
-                    LabeledTextField(
-                      labelText: 'Estimated Number of Guests :',
-                      controller: aboutController,
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0),
-                      child: Text(
-                        'Comments',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
-                        ),
-                      ),
-                    ),
-                    TextField(
-                      controller: commentController,
-                      maxLines:
-                          null, // This allows the TextField to grow vertically
-                      minLines: 5, // Minimum height when empty
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xff666666), // Border color
-                            width: 0.1, // Border width
-                          ),
-                          borderRadius: BorderRadius.circular(
-                              0), // Optional: adds rounded corners
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        'How Did You Hear About Us :',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(0),
-                            borderSide: const BorderSide(
-                              color: Color(0xff666666),
-                              width: 0.5,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.only(top: 20),
+                        width: 350,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            LabeledTextField(
+                              labelText: 'Name',
+                              controller: nameController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your name';
+                                }
+                                return null;
+                              },
                             ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is not focused
-                              width: 0.5,
+                            LabeledTextField(
+                              labelText: 'Email',
+                              controller: emailController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                final emailRegex =
+                                    RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.emailAddress,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(0), // No rounded corners
-                            borderSide: const BorderSide(
-                              color: Colors
-                                  .grey, // Border color when text field is focused
-                              width: 0.5,
+                            LabeledTextField(
+                              labelText: 'Contact Number',
+                              controller: mobileController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your contact number';
+                                }
+                                if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
+                                  return 'Please enter a valid contact number';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.number,
                             ),
-                          ),
-                        ),
-                        value: selectedReferral,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedReferral = newValue;
-                            aboutController.text = newValue ?? refferal.first;
-                          });
-                        },
-                        items: refferal
-                            .map<DropdownMenuItem<String>>(
-                              (String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666),
+                            DatePickerField(
+                              controller: dateController,
+                              labelText: "Event Date",
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Event Time : ',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 13,
+                                  color: const Color(0xff666666),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton2<String>(
+                                  isExpanded:
+                                      true, // Make dropdown full width of parent
+                                  buttonDecoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 0.5),
+                                    borderRadius: BorderRadius.circular(0),
+                                  ),
+                                  // buttonPadding: const EdgeInsets.symmetric(
+                                  //     horizontal: 12, vertical: 12),
+                                  value: selectedEventTime,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedEventTime = newValue;
+                                      eventtimeController.text =
+                                          newValue ?? eventTime.first;
+                                    });
+                                  },
+                                  items: eventTime
+                                      .map((item) => DropdownMenuItem<String>(
+                                            value: item,
+                                            child: Text(
+                                              item,
+                                              style: GoogleFonts.raleway(
+                                                fontSize: 13,
+                                                color: const Color(0xff666666),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                  dropdownPadding: const EdgeInsets.all(1),
+                                  dropdownDecoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: Colors.white,
+                                  ),
+                                  dropdownMaxHeight: 200,
+                                  scrollbarAlwaysShow: true,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Type of Catering:',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: const Color(0xff666666),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Radio<String>(
+                                            value: "On Premises",
+                                            groupValue: cateringType,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                cateringType = value!;
+                                                cateringTypeController.text =
+                                                    cateringType;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "On Premises",
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 12,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                          width: 20), // spacing between radios
+                                      Row(
+                                        children: [
+                                          Radio<String>(
+                                            value: "External Location",
+                                            groupValue: cateringType,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                cateringType = value!;
+                                                cateringTypeController.text =
+                                                    cateringType;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "External Location",
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 12,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Occasion :',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 13,
+                                  color: const Color(0xff666666),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton2<String>(
+                                  isExpanded: true, // Full width of parent
+                                  buttonDecoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 0.5),
+                                    borderRadius: BorderRadius.circular(0),
+                                  ),
+                                  value: selectedOccassion,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedOccassion = newValue;
+                                      occasionController.text = newValue ?? '';
+                                    });
+                                  },
+                                  items: occasions
+                                      .map((item) => DropdownMenuItem<String>(
+                                            value: item,
+                                            child: Text(
+                                              item,
+                                              style: GoogleFonts.raleway(
+                                                fontSize: 13,
+                                                color: const Color(0xff666666),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                  dropdownPadding: const EdgeInsets.all(4),
+                                  dropdownDecoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: Colors.white,
+                                  ),
+                                  dropdownMaxHeight:
+                                      200, // Scrollable if many items
+                                  scrollbarAlwaysShow: true,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Type of Food:',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: const Color(0xff666666),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Radio<String>(
+                                            value: "vegetarian",
+                                            groupValue: foodtype,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                foodtype = value!;
+                                                foodtypeController.text =
+                                                    foodtype;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "Vegetarian",
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 12,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Radio<String>(
+                                            value: "nonvegetarian",
+                                            groupValue: foodtype,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                foodtype = value!;
+                                                foodtypeController.text =
+                                                    foodtype;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "Non Vegetarian",
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 12,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Radio<String>(
+                                            value: "both",
+                                            groupValue: foodtype,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                foodtype = value!;
+                                                foodtypeController.text =
+                                                    foodtype;
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            "Both",
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 12,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            LabeledTextField(
+                              labelText: 'Estimated Number of Guests',
+                              controller: guestController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter number of guests';
+                                }
+                                if (!RegExp(r'^\d+$').hasMatch(value)) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.number,
+                            ),
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 0),
+                              child: Text(
+                                'Comments :',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 13,
+                                  color: const Color(0xff666666),
+                                ),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: commentController,
+                              maxLines: null, // grows vertically
+                              minLines: 5, // minimum height
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your comments';
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Color(0xff666666),
+                                    width: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(0),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xff666666),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(0),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xff666666),
+                                    width: 0.5,
                                   ),
                                 ),
                               ),
-                            )
-                            .toList(),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'How Did You Hear About Us :',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 13,
+                                  color: const Color(0xff666666),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton2<String>(
+                                  isExpanded: true, // make dropdown full width
+                                  buttonDecoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 0.5),
+                                    borderRadius: BorderRadius.circular(
+                                        0), // match previous styling
+                                  ),
+                                  value: selectedReferral,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedReferral = newValue;
+                                      aboutController.text =
+                                          newValue ?? refferal.first;
+                                    });
+                                  },
+                                  items: refferal
+                                      .map((item) => DropdownMenuItem<String>(
+                                            value: item,
+                                            child: Text(
+                                              item,
+                                              style: GoogleFonts.raleway(
+                                                fontSize: 13,
+                                                color: const Color(0xff666666),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                  dropdownPadding: const EdgeInsets.all(4),
+                                  dropdownDecoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(0),
+                                    color: Colors.white,
+                                  ),
+                                  dropdownMaxHeight:
+                                      200, // scrollable if list is long
+                                  scrollbarAlwaysShow: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            MathCaptcha(controller: captchaController),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
               ),
               Container(
                   padding: const EdgeInsets.only(top: 20),
-                  child: ElevatedButton(
-                   onPressed: () => submitcateringForm(context),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xffe2001a), // Text color
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      textStyle: const TextStyle(fontSize: 20),
-                    ).copyWith(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(4), // No border radius
-                        ),
-                      ),
-                    ),
-                    child: const Text('Send'),
-                  )),
+                  child: !formSubmitted
+                      ? ElevatedButton(
+                          onPressed: () {
+                            // Validate the form before submitting
+                            if (_formKey.currentState!.validate()) {
+                              // All fields are valid, submit the form
+                              submitcateringForm(context);
+                            } else {
+                              // Optional: show a message if validation fails
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Please fix the errors in the form')),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color(0xffe2001a),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            textStyle: const TextStyle(fontSize: 20),
+                          ).copyWith(
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                          child: const Text('Send'),
+                        )
+                      : const SizedBox()),
             ],
           ),
         ],
@@ -1513,441 +1671,561 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                           color: const Color(0xff666666),
                         ),
                       ),
-                      SizedBox(
-                        width: 350,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LabeledTextField(
-                              labelText: 'Name',
-                              controller: nameController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Email',
-                              controller: emailController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Contact Number',
-                              controller: mobileController,
-                            ),
-                            LabeledTextField(
-                              labelText: 'Event Date',
-                              controller: dateController,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'Event Time',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            // Add DropdownButton for Event Time
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                value: selectedEventTime,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedEventTime = newValue;
-                                    eventtimeController.text = newValue ?? eventTime.first;
-                                  });
-                                },
-                                items: eventTime
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Column(
+                      Form(
+                        key: _formKey,
+                        child: formSubmitted
+                            ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Type of Catering:',
+                                    'Thank you!',
                                     style: GoogleFonts.raleway(
-                                      fontSize: 13,
-                                      color: const Color(0xff666666),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
                                     ),
                                   ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'On Premises',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "On Premises",
-                                          groupValue: cateringType,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              cateringType = value!;
-                                              cateringTypeController.text = cateringType;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'External Location',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "External Location",
-                                          groupValue: cateringType,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              cateringType = value!;
-                                              cateringTypeController.text = cateringType;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'Occasion :',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                value: selectedOccassion,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedOccassion = newValue;
-                                    occasionController.text = newValue ?? '';
-                                  });
-                                },
-                                items: occasions
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                                  const SizedBox(height: 10),
                                   Text(
-                                    'Type of Food:',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 13,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'Vegetarian',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "vegetarian",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'Non Vegetarian',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "nonvegetarian",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(
-                                            'both',
-                                            style: GoogleFonts.raleway(
-                                              fontSize: 12,
-                                              color: const Color(0xff666666),
-                                            ),
-                                          ),
-                                          value: "both",
-                                          groupValue: foodtype,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              foodtype = value!;
-                                              foodtypeController.text = foodtype;
-                                            });
-                                          },
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0,
-                                                  vertical:
-                                                      0), // Adjusts padding
-                                        ),
-                                      ),
-                                    ],
+                                    'Your form has been submitted. We will contact you soon.',
+                                    style: GoogleFonts.raleway(fontSize: 16),
                                   ),
                                 ],
-                              ),
-                            ),
-
-                            LabeledTextField(
-                              labelText: 'Estimated Number of Guests :',
-                              controller: aboutController,
-                            ),
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 0),
-                              child: Text(
-                                'Comments',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            TextField(
-                              controller: commentController,
-                              maxLines:
-                                  null, // This allows the TextField to grow vertically
-                              minLines: 5, // Minimum height when empty
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Color(0xff666666), // Border color
-                                    width: 0.1, // Border width
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                      0), // Optional: adds rounded corners
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'How Did You Hear About Us :',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: const Color(0xff666666),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xff666666),
-                                      width: 0.5,
+                              )
+                            : SizedBox(
+                                width: 350,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    LabeledTextField(
+                                      labelText: 'Name',
+                                      controller: nameController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your name';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is not focused
-                                      width: 0.5,
+                                    LabeledTextField(
+                                      labelText: 'Email',
+                                      controller: emailController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your email';
+                                        }
+                                        final emailRegex = RegExp(
+                                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+                                        if (!emailRegex.hasMatch(value)) {
+                                          return 'Please enter a valid email address';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.emailAddress,
                                     ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        0), // No rounded corners
-                                    borderSide: const BorderSide(
-                                      color: Colors
-                                          .grey, // Border color when text field is focused
-                                      width: 0.5,
+                                    LabeledTextField(
+                                      labelText: 'Contact Number',
+                                      controller: mobileController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your contact number';
+                                        }
+                                        if (!RegExp(r'^\d{10,15}$')
+                                            .hasMatch(value)) {
+                                          return 'Please enter a valid contact number';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.number,
                                     ),
-                                  ),
-                                ),
-                                value: selectedReferral,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedReferral = newValue;
-                                    aboutController.text = newValue ?? refferal.first;
-                                  });
-                                },
-                                items: refferal
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) =>
-                                          DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 13,
-                                            color: const Color(0xff666666),
+                                    DatePickerField(
+                                      controller: dateController,
+                                      labelText: "Event Date",
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top:
+                                              16), // slightly more top padding for tablet
+                                      child: Text(
+                                        'Event Time :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize:
+                                              15, // slightly larger for tablet
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical:
+                                              12), // more vertical padding
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded: true, // full width
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                                6), // smooth corners
+                                          ),
+                                          value: selectedEventTime,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedEventTime = newValue;
+                                              eventtimeController.text =
+                                                  newValue ?? eventTime.first;
+                                            });
+                                          },
+                                          items: eventTime
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize:
+                                                            15, // larger text for tablet
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(8),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight:
+                                              250, // more height for tablet
+                                          scrollbarAlwaysShow: true,
+                                          hint: Text(
+                                            'Select Event Time',
+                                            style: GoogleFonts.raleway(
+                                                fontSize: 15,
+                                                color: Colors.grey),
                                           ),
                                         ),
                                       ),
-                                    )
-                                    .toList(),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Type of Catering:',
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 13,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'On Premises',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "On Premises",
+                                                  groupValue: cateringType,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      cateringType = value!;
+                                                      cateringTypeController
+                                                          .text = cateringType;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'External Location',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "External Location",
+                                                  groupValue: cateringType,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      cateringType = value!;
+                                                      cateringTypeController
+                                                          .text = cateringType;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top:
+                                              16), // more top padding for tablet
+                                      child: Text(
+                                        'Occasion :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize:
+                                              15, // larger for tablet readability
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical:
+                                              12), // increased vertical padding
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded: true, // full width
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                                6), // smooth corners
+                                          ),
+                                          value: selectedOccassion,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedOccassion = newValue;
+                                              occasionController.text =
+                                                  newValue ?? '';
+                                            });
+                                          },
+                                          items: occasions
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize:
+                                                            15, // larger text
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(8),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight:
+                                              250, // more height for tablet
+                                          scrollbarAlwaysShow: true,
+                                          hint: Text(
+                                            'Select Occasion',
+                                            style: GoogleFonts.raleway(
+                                                fontSize: 15,
+                                                color: Colors.grey),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Type of Food:',
+                                            style: GoogleFonts.raleway(
+                                              fontSize: 13,
+                                              color: const Color(0xff666666),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'Vegetarian',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "vegetarian",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'Non Vegetarian',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "nonvegetarian",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: RadioListTile<String>(
+                                                  title: Text(
+                                                    'both',
+                                                    style: GoogleFonts.raleway(
+                                                      fontSize: 12,
+                                                      color: const Color(
+                                                          0xff666666),
+                                                    ),
+                                                  ),
+                                                  value: "both",
+                                                  groupValue: foodtype,
+                                                  onChanged: (String? value) {
+                                                    setState(() {
+                                                      foodtype = value!;
+                                                      foodtypeController.text =
+                                                          foodtype;
+                                                    });
+                                                  },
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 0,
+                                                      vertical:
+                                                          0), // Adjusts padding
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    LabeledTextField(
+                                      labelText: 'Estimated Number of Guests',
+                                      controller: guestController,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter number of guests';
+                                        }
+                                        if (!RegExp(r'^\d+$').hasMatch(value)) {
+                                          return 'Please enter a valid number';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 0),
+                                      child: Text(
+                                        'Comments :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize: 13,
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    TextFormField(
+                                      controller: commentController,
+                                      maxLines: null, // grows vertically
+                                      minLines: 5, // minimum height
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your comments';
+                                        }
+                                        return null;
+                                      },
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xff666666),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top:
+                                              16), // more top padding for tablet
+                                      child: Text(
+                                        'How Did You Hear About Us :',
+                                        style: GoogleFonts.raleway(
+                                          fontSize:
+                                              15, // larger font for tablet
+                                          color: const Color(0xff666666),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical:
+                                              12), // increased vertical padding
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2<String>(
+                                          isExpanded: true, // full width
+                                          buttonDecoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey, width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                                6), // smooth corners
+                                          ),
+                                          value: selectedReferral,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedReferral = newValue;
+                                              aboutController.text =
+                                                  newValue ?? refferal.first;
+                                            });
+                                          },
+                                          items: refferal
+                                              .map((item) =>
+                                                  DropdownMenuItem<String>(
+                                                    value: item,
+                                                    child: Text(
+                                                      item,
+                                                      style:
+                                                          GoogleFonts.raleway(
+                                                        fontSize:
+                                                            15, // larger text
+                                                        color: const Color(
+                                                            0xff666666),
+                                                      ),
+                                                    ),
+                                                  ))
+                                              .toList(),
+                                          dropdownPadding:
+                                              const EdgeInsets.all(8),
+                                          dropdownDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            color: Colors.white,
+                                          ),
+                                          dropdownMaxHeight:
+                                              250, // scrollable for tablet
+                                          scrollbarAlwaysShow: true,
+                                          hint: Text(
+                                            'Select Referral',
+                                            style: GoogleFonts.raleway(
+                                                fontSize: 15,
+                                                color: Colors.grey),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                       Container(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                          onPressed: () => submitcateringForm(context),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  const Color(0xffe2001a), // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 20),
-                            ).copyWith(
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      4), // No border radius
+                        padding: const EdgeInsets.only(top: 20),
+                        child: !formSubmitted
+                            ? ElevatedButton(
+                                onPressed: () {
+                                  // Validate the form before submitting
+                                  if (_formKey.currentState!.validate()) {
+                                    // All fields are valid, submit the form
+                                    submitcateringForm(context);
+                                  } else {
+                                    // Optional: show a message if validation fails
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Please fix the errors in the form')),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor:
+                                      const Color(0xffe2001a), // Text color
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  textStyle: const TextStyle(fontSize: 20),
+                                ).copyWith(
+                                  shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          4), // No border radius
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            child: const Text('Send'),
-                          )),
+                                child: const Text('Send'),
+                              )
+                            : const SizedBox(),
+                      ),
                     ],
                   ),
                 ),

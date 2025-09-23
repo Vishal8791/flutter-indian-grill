@@ -8,11 +8,15 @@ import 'package:http/http.dart' as http;
 class LabeledTextField extends StatelessWidget {
   final String labelText;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
+  final TextInputType keyboardType;
 
   const LabeledTextField({
     super.key,
     required this.labelText,
     required this.controller,
+    this.validator,
+    this.keyboardType = TextInputType.text, // Add this
   });
 
   @override
@@ -23,15 +27,17 @@ class LabeledTextField extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            labelText,
+            '$labelText :',
             style: GoogleFonts.raleway(
               fontSize: 13,
               color: const Color(0xff666666),
             ),
           ),
           // Space between label and text field
-          TextField(
+          TextFormField(
             controller: controller,
+            keyboardType: keyboardType,
+            validator: validator,
             decoration: InputDecoration(
               isDense: true,
               border: OutlineInputBorder(
@@ -73,7 +79,7 @@ class Career extends StatefulWidget {
 }
 
 class _CareerState extends State<Career> {
-final TextEditingController nameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController designationController = TextEditingController();
@@ -81,7 +87,7 @@ final TextEditingController nameController = TextEditingController();
 
   String? _selectedFileName;
   PlatformFile? _selectedFile;
-
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void dispose() {
     nameController.dispose();
@@ -92,58 +98,59 @@ final TextEditingController nameController = TextEditingController();
     super.dispose();
   }
 
- Future<void> _pickFile() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-  if (result != null && result.files.single.bytes != null) {
-    setState(() {
-      _selectedFile = result.files.single;
-      _selectedFileName = result.files.single.name;
-    });
-  } else {
-    setState(() {
-      _selectedFile = null;
-      _selectedFileName = null;
-    });
-  }
-}
-
-Future<void> _submitForm() async {
-  final uri = Uri.parse("https://www.indian-grill.com/wp-json/flutter/v1/careerForm");
-
-  var request = http.MultipartRequest("POST", uri);
-
-  // Add text fields
-  request.fields['name'] = nameController.text.trim();
-  request.fields['email'] = emailController.text.trim();
-  request.fields['mobile'] = mobileController.text.trim();
-  request.fields['designation'] = designationController.text.trim();
-  request.fields['about'] = aboutController.text.trim();
-
-  // Attach file as bytes (important for web)
-  if (_selectedFile != null && _selectedFile!.bytes != null) {
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'cv', // field name in PHP
-        _selectedFile!.bytes!,
-        filename: _selectedFile!.name,
-      ),
-    );
+    if (result != null && result.files.single.bytes != null) {
+      setState(() {
+        _selectedFile = result.files.single;
+        _selectedFileName = result.files.single.name;
+      });
+    } else {
+      setState(() {
+        _selectedFile = null;
+        _selectedFileName = null;
+      });
+    }
   }
 
-  var response = await request.send();
+  Future<void> _submitForm() async {
+    final uri =
+        Uri.parse("https://www.indian-grill.com/wp-json/flutter/v1/careerForm");
 
-  if (response.statusCode == 200) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Form submitted successfully!")),
-    );
-    _clearForm();
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Failed: ${response.statusCode}")),
-    );
+    var request = http.MultipartRequest("POST", uri);
+
+    // Add text fields
+    request.fields['name'] = nameController.text.trim();
+    request.fields['email'] = emailController.text.trim();
+    request.fields['mobile'] = mobileController.text.trim();
+    request.fields['designation'] = designationController.text.trim();
+    request.fields['about'] = aboutController.text.trim();
+
+    // Attach file as bytes (important for web)
+    if (_selectedFile != null && _selectedFile!.bytes != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'cv', // field name in PHP
+          _selectedFile!.bytes!,
+          filename: _selectedFile!.name,
+        ),
+      );
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Form submitted successfully!")),
+      );
+      _clearForm();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed: ${response.statusCode}")),
+      );
+    }
   }
-}
 
   void _clearForm() {
     nameController.clear();
@@ -156,6 +163,7 @@ Future<void> _submitForm() async {
       _selectedFileName = null;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(child: LayoutBuilder(
@@ -214,96 +222,145 @@ Future<void> _submitForm() async {
           Container(
             width: 550,
             padding: const EdgeInsets.only(left: 30),
-            child: Column(
-              children: [
-                LabeledTextField(
-                  labelText: 'Your Name (required)',
-                  controller: nameController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Email (required)',
-                  controller: emailController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Mobile Number (required)',
-                  controller: mobileController,
-                ),
-                LabeledTextField(
-                  labelText: 'Designation',
-                  controller: designationController,
-                ),
-                LabeledTextField(
-                  labelText: 'Tell Us Something Interesting About Yourself',
-                  controller: aboutController,
-                ),
-                const SizedBox(height: 20),
-                // File Picker Section
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Please Share Your CV',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
+            child: Form(
+              key: _formKey, // Add Form key
+              child: Column(
+                children: [
+                  LabeledTextField(
+                    labelText: 'Your Name (required)',
+                    controller: nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Email (required)',
+                    controller: emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      final emailRegex =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Mobile Number (required)',
+                    controller: mobileController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your mobile number';
+                      }
+                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
+                        return 'Please enter a valid mobile number';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Designation',
+                    controller: designationController,
+                    // No validation (optional field)
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Tell Us Something Interesting About Yourself',
+                    controller: aboutController,
+                    // No validation (optional field)
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // File Picker Section
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Please Share Your CV',
+                          style: GoogleFonts.raleway(
+                            fontSize: 13,
+                            color: const Color(0xff666666),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
                             border: Border.all(
-                          color: const Color(0xff666666),
-                          width: 0.5,
-                        )),
-                        child: Row(
-                          children: [
-                            TextButton(
-                              onPressed: _pickFile,
-                              child: const Text('Choose File'),
+                              color: const Color(0xff666666),
+                              width: 0.5,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _selectedFileName != null
-                                    ? _selectedFileName!
-                                    : 'No file chosen',
-                                style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666)),
-                                overflow: TextOverflow.ellipsis,
+                          ),
+                          child: Row(
+                            children: [
+                              TextButton(
+                                onPressed: _pickFile,
+                                child: const Text('Choose File'),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                            onPressed:  _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  const Color(0xffe2001a), // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 20),
-                            ).copyWith(
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      4), // No border radius
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _selectedFileName != null
+                                      ? _selectedFileName!
+                                      : 'No file chosen',
+                                  style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: const Color(0xff666666)),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                            child: const Text('Send'),
-                          )),
-                    ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  Container(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          if (_selectedFileName == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please upload your CV.'),
+                              ),
+                            );
+                            return;
+                          }
+                          _submitForm();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xffe2001a),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        textStyle: const TextStyle(fontSize: 20),
+                      ).copyWith(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      child: const Text('Send'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -333,96 +390,146 @@ Future<void> _submitForm() async {
           Container(
             width: 300,
             padding: const EdgeInsets.only(left: 30),
-            child: Column(
-              children: [
-                LabeledTextField(
-                  labelText: 'Your Name (required)',
-                  controller: nameController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Email (required)',
-                  controller: emailController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Mobile Number (required)',
-                  controller: mobileController,
-                ),
-                LabeledTextField(
-                  labelText: 'Designation',
-                  controller: designationController,
-                ),
-                LabeledTextField(
-                  labelText: 'Tell Us Something Interesting About Yourself',
-                  controller: aboutController,
-                ),
-                const SizedBox(height: 20),
-                // File Picker Section
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Please Share Your CV',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
+            child: Form(
+              key: _formKey, // Add the form key here
+              child: Column(
+                children: [
+                  LabeledTextField(
+                    labelText: 'Your Name (required)',
+                    controller: nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Email (required)',
+                    controller: emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      final emailRegex =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Mobile Number (required)',
+                    controller: mobileController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your mobile number';
+                      }
+                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
+                        return 'Please enter a valid mobile number';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Designation',
+                    controller: designationController,
+                    // No validation (optional)
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Tell Us Something Interesting About Yourself',
+                    controller: aboutController,
+                    // No validation (optional)
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // File Picker Section
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Please Share Your CV',
+                          style: GoogleFonts.raleway(
+                            fontSize: 13,
+                            color: const Color(0xff666666),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
                             border: Border.all(
-                          color: const Color(0xff666666),
-                          width: 0.5,
-                        )),
-                        child: Row(
-                          children: [
-                            TextButton(
-                              onPressed: _pickFile,
-                              child: const Text('Choose File'),
+                              color: const Color(0xff666666),
+                              width: 0.5,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _selectedFileName != null
-                                    ? _selectedFileName!
-                                    : 'No file chosen',
-                                style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666)),
-                                overflow: TextOverflow.ellipsis,
+                          ),
+                          child: Row(
+                            children: [
+                              TextButton(
+                                onPressed: _pickFile,
+                                child: const Text('Choose File'),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                            onPressed: _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  const Color(0xffe2001a), // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 20),
-                            ).copyWith(
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      4), // No border radius
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _selectedFileName != null
+                                      ? _selectedFileName!
+                                      : 'No file chosen',
+                                  style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: const Color(0xff666666)),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                            child: const Text('Send'),
-                          )),
-                    ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  Container(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          if (_selectedFileName == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please upload your CV.'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          _submitForm();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xffe2001a),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        textStyle: const TextStyle(fontSize: 20),
+                      ).copyWith(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      child: const Text('Send'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -449,98 +556,148 @@ Future<void> _submitForm() async {
             ),
           ),
           SizedBox(
-            width: 200,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                LabeledTextField(
-                  labelText: 'Your Name (required)',
-                  controller: nameController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Email (required)',
-                  controller: emailController,
-                ),
-                LabeledTextField(
-                  labelText: 'Your Mobile Number (required)',
-                  controller: mobileController,
-                ),
-                LabeledTextField(
-                  labelText: 'Designation',
-                  controller: designationController,
-                ),
-                LabeledTextField(
-                  labelText: 'Tell Us Something Interesting About Yourself',
-                  controller: aboutController,
-                ),
-                const SizedBox(height: 20),
-                // File Picker Section
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Please Share Your CV',
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: const Color(0xff666666),
+            width: 300,
+            child: Form(
+              key: _formKey, // Add the form key
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  LabeledTextField(
+                    labelText: 'Your Name (required)',
+                    controller: nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Email (required)',
+                    controller: emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      final emailRegex =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Your Mobile Number (required)',
+                    controller: mobileController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your mobile number';
+                      }
+                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
+                        return 'Please enter a valid mobile number';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Designation',
+                    controller: designationController,
+                    // Optional field → No validator
+                  ),
+
+                  LabeledTextField(
+                    labelText: 'Tell Us Something Interesting About Yourself',
+                    controller: aboutController,
+                    // Optional field → No validator
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // File Picker Section
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Please Share Your CV',
+                          style: GoogleFonts.raleway(
+                            fontSize: 13,
+                            color: const Color(0xff666666),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
                             border: Border.all(
-                          color: const Color(0xff666666),
-                          width: 0.5,
-                        )),
-                        child: Row(
-                          children: [
-                            TextButton(
-                              onPressed: _pickFile,
-                              child: const Text('Choose File'),
+                              color: const Color(0xff666666),
+                              width: 0.5,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _selectedFileName != null
-                                    ? _selectedFileName!
-                                    : 'No file chosen',
-                                style: GoogleFonts.raleway(
-                                    fontSize: 13,
-                                    color: const Color(0xff666666)),
-                                overflow: TextOverflow.ellipsis,
+                          ),
+                          child: Row(
+                            children: [
+                              TextButton(
+                                onPressed: _pickFile,
+                                child: const Text('Choose File'),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                            onPressed: _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  const Color(0xffe2001a), // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 20),
-                            ).copyWith(
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      4), // No border radius
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _selectedFileName != null
+                                      ? _selectedFileName!
+                                      : 'No file chosen',
+                                  style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: const Color(0xff666666)),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                            child: const Text('Send'),
-                          )),
-                    ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  Container(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          if (_selectedFileName == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please upload your CV.'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          _submitForm();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xffe2001a),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        textStyle: const TextStyle(fontSize: 20),
+                      ).copyWith(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      child: const Text('Send'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

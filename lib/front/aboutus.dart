@@ -291,8 +291,8 @@ class Aboutus extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment
                               .center, // Align icon and text centrally
                           children: [
-                            const Icon(
-                              FontAwesomeIcons.quoteRight,
+                            FaIcon(
+                              Icons.format_quote,
                               color: Colors.red,
                               size: 40,
                             ),
@@ -323,8 +323,8 @@ class Aboutus extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Icon(
-                              FontAwesomeIcons.quoteRight,
+                            FaIcon(
+                              Icons.format_quote,
                               color: Colors.red,
                               size: 40,
                             ),
@@ -355,8 +355,8 @@ class Aboutus extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Icon(
-                              FontAwesomeIcons.quoteRight,
+                            FaIcon(
+                              Icons.format_quote,
                               color: Colors.red,
                               size: 40,
                             ),
@@ -650,8 +650,8 @@ class Aboutus extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment
                           .center, // Align icon and text centrally
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),
@@ -682,8 +682,8 @@ class Aboutus extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),
@@ -714,8 +714,8 @@ class Aboutus extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),
@@ -1010,8 +1010,8 @@ class Aboutus extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment
                           .center, // Align icon and text centrally
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),
@@ -1042,8 +1042,8 @@ class Aboutus extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),
@@ -1074,8 +1074,8 @@ class Aboutus extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
-                          FontAwesomeIcons.quoteRight,
+                        FaIcon(
+                          Icons.format_quote,
                           color: Colors.red,
                           size: 40,
                         ),

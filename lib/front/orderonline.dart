@@ -29,7 +29,10 @@ class _OrderOnlineState extends State<OrderOnline> {
   int totalPages = 1;
   String? selectedCategoryId = '60';
   final ScrollController _scrollController = ScrollController();
-
+  final List<String> notes = [
+    "Allow extra 15 minutes for preparation time on Friday and Saturday than average waiting time.",
+    "Payment by Credit Card the order amount must be at least \$15, in order to pay by Paypal/Credit Card"
+  ];
   int? expandedIndex; // Track expanded index
 
   @override
@@ -117,79 +120,259 @@ class _OrderOnlineState extends State<OrderOnline> {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return _buildMobileLayout();
+        } else if (constraints.maxWidth < 1024) {
+          return _buildTabletLayout();
+        } else {
+          return _buildDesktopLayout();
+        }
+      },
+    );
+  }
+
+  Widget _buildMobileLayout() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(190, 40, 190, 40),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: SidebarWidget(
-                  items: categories,
-                  onCategorySelected: onCategorySelected,
-                  selectedCategoryId: selectedCategoryId,
-                ),
+          _buildProductList(),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
               ),
-              Expanded(
-                flex: 7,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : Column(
-                              children: [
-                                ...products.asMap().entries.map((entry) {
-                                  int index = entry.key;
-                                  var product = entry.value;
-                                  // print(product);
-                                  return MenuItemCard(
-                                    key: ValueKey(
-                                        index), // Force rebuild when index changes
-                                    title: product['name'],
-                                    productId: product['productId'],
-                                    optionName: product['optionName'],
-                                    description: product['description'] ??
-                                        'No description available',
-                                    price: double.tryParse(product['price']) ??
-                                        0.0,
-                                    isExpanded: expandedIndex == index,
-                                    onExpand: () {
-                                      setState(() {
-                                        expandedIndex = (expandedIndex == index)
-                                            ? null
-                                            : index;
-                                      });
-                                    },
-                                    baseOptions: List<String>.from(
-                                        product['baseOptions'] ?? []),
-                                    comboOptions: List<String>.from(
-                                        product['comboOptions'] ?? []),
-                                  );
-                                }),
-                                const SizedBox(height: 20),
-                                if (totalProducts > productsPerPage)
-                                  PaginationBar(
-                                    currentPage: currentPage,
-                                    totalPages: totalPages,
-                                    onPageSelected: onPageSelected,
-                                  ),
-                              ],
-                            ),
-                    ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Special Notes",
+                    style: GoogleFonts.raleway(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  ...notes.map((note) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("•  ",
+                                style: GoogleFonts.raleway(
+                                  fontSize: 12,
+                                )),
+                            Expanded(
+                              child: Text(
+                                note,
+                                style: GoogleFonts.raleway(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                ],
               ),
-            ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SidebarWidget(
+            items: categories,
+            onCategorySelected: onCategorySelected,
+            selectedCategoryId: null,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: SidebarWidget(
+              items: categories,
+              onCategorySelected: onCategorySelected,
+              selectedCategoryId: null,
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            flex: 5,
+            child: _buildProductList(),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Special Notes",
+                      style: GoogleFonts.raleway(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...notes.map((note) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("•  ",
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 14,
+                                  )),
+                              Expanded(
+                                child: Text(
+                                  note,
+                                  style: GoogleFonts.raleway(fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(190, 40, 190, 40),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: SidebarWidget(
+              items: categories,
+              onCategorySelected: onCategorySelected,
+              selectedCategoryId: null,
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            flex: 5,
+            child: _buildProductList(),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Special Notes",
+                      style: GoogleFonts.raleway(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...notes.map((note) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("•  ",
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 14,
+                                  )),
+                              Expanded(
+                                child: Text(
+                                  note,
+                                  style: GoogleFonts.raleway(fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductList() {
+    return Column(
+      children: [
+        if (isLoading)
+          const Center(child: CircularProgressIndicator())
+        else
+          Column(
+            children: [
+              ...products.asMap().entries.map((entry) {
+                int index = entry.key;
+                var product = entry.value;
+                return MenuItemCard(
+                  key: ValueKey(index),
+                  title: product['name'],
+                  productId: product['productId'],
+                  optionName: product['optionName'],
+                  description:
+                      product['description'] ?? 'No description available',
+                  price: double.tryParse(product['price']) ?? 0.0,
+                  isExpanded: expandedIndex == index,
+                  onExpand: () {
+                    setState(() {
+                      expandedIndex = (expandedIndex == index) ? null : index;
+                    });
+                  },
+                  baseOptions: List<String>.from(product['baseOptions'] ?? []),
+                  comboOptions:
+                      List<String>.from(product['comboOptions'] ?? []),
+                );
+              }),
+              const SizedBox(height: 20),
+              if (totalProducts > productsPerPage)
+                PaginationBar(
+                  currentPage: currentPage,
+                  totalPages: totalPages,
+                  onPageSelected: onPageSelected,
+                ),
+            ],
+          ),
+      ],
     );
   }
 }
@@ -253,19 +436,19 @@ class _MenuItemCardState extends State<MenuItemCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      // const Icon(Icons.verified, color: Colors.green),
-                      //   const SizedBox(width: 8),
-                      Text(
-                        widget.title,
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                  Expanded(
+                    // <-- Constrain title so it wraps
+                    child: Text(
+                      widget.title,
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                    ],
+                      maxLines: 2, // allow wrapping or cut with ...
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
                   ),
                   Text(
                     "\$${widget.price.toStringAsFixed(2)}",
@@ -277,6 +460,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                   ),
                 ],
               ),
+
               Text(
                 widget.description,
                 style: GoogleFonts.raleway(fontSize: 13, color: Colors.black),
@@ -442,88 +626,102 @@ class _MenuItemCardState extends State<MenuItemCard> {
                               ),
                             ],
                           ),
-  ElevatedButton(
-  onPressed: () {
-    final String preparation = selectedPreparation ?? '';
-    final String choice = selectedChoice ?? '';
+                          ElevatedButton(
+                            onPressed: () {
+                              final String preparation =
+                                  selectedPreparation ?? '';
+                              final String choice = selectedChoice ?? '';
 
-    // Check if preparation is required based on product options
-    bool isPreparationRequired = false;
+                              // Check if preparation is required based on product options
+                              bool isPreparationRequired = false;
 
-    if (selectedPreparation != null && widget.baseOptions.isNotEmpty) {
-      isPreparationRequired = true;
-    }
-    if (widget.baseOptions.isEmpty) {
-      isPreparationRequired = true;
-    }
+                              if (selectedPreparation != null &&
+                                  widget.baseOptions.isNotEmpty) {
+                                isPreparationRequired = true;
+                              }
+                              if (widget.baseOptions.isEmpty) {
+                                isPreparationRequired = true;
+                              }
 
-    if (!isPreparationRequired) {
-      _showAlertBox(context, 'Please select a preparation option');
-      return;
-    }
+                              if (!isPreparationRequired) {
+                                _showAlertBox(context,
+                                    'Please select a preparation option');
+                                return;
+                              }
 
-    List<Map<String, String>> selectedOptions = [];
+                              List<Map<String, String>> selectedOptions = [];
 
-    if (selectedPreparation != null) {
-      selectedOptions.add({widget.optionName: selectedPreparation!});
-    }
+                              if (selectedPreparation != null) {
+                                selectedOptions.add(
+                                    {widget.optionName: selectedPreparation!});
+                              }
 
-    if (widget.baseOptions.isNotEmpty) {
-      if (selectedChoice != null) {
-        selectedOptions.add({"Choice of with Rice:": "Yes"});
-      } else {
-        selectedOptions.add({"Choice of with Rice:": "No"});
-      }
-    }
+                              if (widget.baseOptions.isNotEmpty) {
+                                if (selectedChoice != null) {
+                                  selectedOptions
+                                      .add({"Choice of with Rice:": "Yes"});
+                                } else {
+                                  selectedOptions
+                                      .add({"Choice of with Rice:": "No"});
+                                }
+                              }
 
-    final String combinedOption =
-        (preparation.isNotEmpty && choice.isNotEmpty)
-            ? '$preparation + $choice'
-            : '$preparation$choice';
+                              final String combinedOption =
+                                  (preparation.isNotEmpty && choice.isNotEmpty)
+                                      ? '$preparation + $choice'
+                                      : '$preparation$choice';
 
-    _addToCart(
-      context,
-      widget.productId,
-      widget.title,
-      widget.price,
-      quantity,
-      combinedOption,
-      selectedOptions,
-    );
-  },
-  style: ButtonStyle(
-    backgroundColor: WidgetStateProperty.resolveWith<Color>(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.hovered)) {
-          return const Color.fromARGB(255, 158, 0, 18);
-        }
-        return Color(0xffE2001A);
-      },
-    ),
-    foregroundColor: WidgetStateProperty.resolveWith<Color>(
-      (Set<WidgetState> states) {
-        return Colors.white;
-      },
-    ),
-    elevation: WidgetStateProperty.all<double>(0),
-    side: WidgetStateProperty.all<BorderSide>(
-      const BorderSide(color: Color(0xffE2001A), width: 0.5),
-    ),
-    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-      const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-    ),
-    padding: WidgetStateProperty.all<EdgeInsets>(
-      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-    ),
-    
-  ),
-  child: Text('Add to cart',
-  style: GoogleFonts.raleway(
-                              fontSize: 14,
-                              color: Color.fromARGB(255, 255, 251, 251),
-                            ),),
-),
-    ],
+                              _addToCart(
+                                context,
+                                widget.productId,
+                                widget.title,
+                                widget.price,
+                                quantity,
+                                combinedOption,
+                                selectedOptions,
+                              );
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStateProperty.resolveWith<Color>(
+                                (Set<WidgetState> states) {
+                                  if (states.contains(WidgetState.hovered)) {
+                                    return const Color.fromARGB(
+                                        255, 158, 0, 18);
+                                  }
+                                  return const Color(0xffE2001A);
+                                },
+                              ),
+                              foregroundColor:
+                                  WidgetStateProperty.resolveWith<Color>(
+                                (Set<WidgetState> states) {
+                                  return Colors.white;
+                                },
+                              ),
+                              elevation: WidgetStateProperty.all<double>(0),
+                              side: WidgetStateProperty.all<BorderSide>(
+                                const BorderSide(
+                                    color: Color(0xffE2001A), width: 0.5),
+                              ),
+                              shape: WidgetStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero),
+                              ),
+                              padding: WidgetStateProperty.all<EdgeInsets>(
+                                const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                              ),
+                            ),
+                            child: Text(
+                              'Add to cart',
+                              style: GoogleFonts.raleway(
+                                fontSize: 14,
+                                color: const Color.fromARGB(255, 255, 251, 251),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -695,32 +893,36 @@ class PaginationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(totalPages, (index) {
-        int page = index + 1;
-        return GestureDetector(
-          onTap: () {
-            onPageSelected(page);
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: page == currentPage
-                  ? const Color(0xffE2001A)
-                  : Colors.grey[200],
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '$page',
-              style: TextStyle(
-                color: page == currentPage ? Colors.white : Colors.black,
+    return SingleChildScrollView(
+      scrollDirection:
+          Axis.horizontal, // allows horizontal scroll on small screens
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(totalPages, (index) {
+          int page = index + 1;
+          return GestureDetector(
+            onTap: () {
+              onPageSelected(page);
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: page == currentPage
+                    ? const Color(0xffE2001A)
+                    : Colors.grey[200],
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                '$page',
+                style: TextStyle(
+                  color: page == currentPage ? Colors.white : Colors.black,
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -768,7 +970,7 @@ class WooCommerceService {
           List<String> comboOptions = [];
 
           String optionName = '';
-          
+
           if (product['attributes'] != null &&
               product['attributes'].isNotEmpty) {
             optionName = product['attributes'][0]['name'] ?? '';

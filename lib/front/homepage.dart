@@ -211,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
-                                FontAwesomeIcons.cartShopping,
+                                Icons.shopping_cart,
                                 color: Colors.white,
                                 size: 22,
                               ),
@@ -253,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const Icon(
-                              FontAwesomeIcons.cartShopping,
+                              Icons.restaurant,
                               color: Colors.white,
                               size: 22,
                             ),
@@ -296,7 +296,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
-                                FontAwesomeIcons.cartShopping,
+                                Icons.restaurant_menu,
                                 color: Colors.white,
                                 size: 22,
                               ),
@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
-                                FontAwesomeIcons.cartShopping,
+                                Icons.cake,
                                 color: Colors.white,
                                 size: 22,
                               ),
@@ -481,21 +481,21 @@ class _HomePageState extends State<HomePage> {
                                       items: [
                                         // First Carousel Item
                                         _buildCarouselItem(
-                                          icon: FontAwesomeIcons.quoteRight,
+                                          icon: Icons.format_quote,
                                           middleText:
                                               'The only limit to our realization of tomorrow is our doubts of today.',
                                           bottomText: 'Franklin D. Roosevelt',
                                         ),
                                         // Second Carousel Item
                                         _buildCarouselItem(
-                                          icon: FontAwesomeIcons.quoteRight,
+                                          icon: Icons.format_quote,
                                           middleText:
                                               'Life is 10% what happens to us and 90% how we react to it.',
                                           bottomText: 'Charles R. Swindoll',
                                         ),
                                         // Third Carousel Item
                                         _buildCarouselItem(
-                                          icon: FontAwesomeIcons.quoteRight,
+                                          icon: Icons.format_quote,
                                           middleText:
                                               'The purpose of our lives is to be happy.',
                                           bottomText: 'Dalai Lama',
@@ -682,7 +682,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   ServiceCard(
                     title: 'Order Online',
-                    icon: FontAwesomeIcons.cartShopping,
+                    icon: Icons.shopping_cart,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
                     onTap: () => context.pushNamed('order-online'),
@@ -692,7 +692,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ServiceCard(
                     title: 'Catering Enquiry',
-                    icon: FontAwesomeIcons.cartShopping,
+                    icon: Icons.restaurant,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
                     onTap: () => context.pushNamed('category-enquiry'),
@@ -702,7 +702,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ServiceCard(
                     title: 'Banquet',
-                    icon: FontAwesomeIcons.cartShopping,
+                    icon: Icons.local_dining,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
                     onTap: () => context.pushNamed('banquet'),
@@ -712,7 +712,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ServiceCard(
                     title: 'Our Cakes',
-                    icon: FontAwesomeIcons.cartShopping,
+                    icon: Icons.cake,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card\
                     onTap: () => context.pushNamed('ourcakes'),
@@ -826,21 +826,21 @@ class _HomePageState extends State<HomePage> {
                                   items: [
                                     // First Carousel Item
                                     _buildCarouselItem(
-                                      icon: FontAwesomeIcons.quoteRight,
+                                      icon: Icons.format_quote,
                                       middleText:
                                           'The only limit to our realization of tomorrow is our doubts of today.',
                                       bottomText: 'Franklin D. Roosevelt',
                                     ),
                                     // Second Carousel Item
                                     _buildCarouselItem(
-                                      icon: FontAwesomeIcons.quoteRight,
+                                      icon: Icons.format_quote,
                                       middleText:
                                           'Life is 10% what happens to us and 90% how we react to it.',
                                       bottomText: 'Charles R. Swindoll',
                                     ),
                                     // Third Carousel Item
                                     _buildCarouselItem(
-                                      icon: FontAwesomeIcons.quoteRight,
+                                      icon: Icons.format_quote,
                                       middleText:
                                           'The purpose of our lives is to be happy.',
                                       bottomText: 'Dalai Lama',
@@ -1026,19 +1026,19 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 20),
                 ServiceCard(
                   title: 'Catering Enquiry',
-                  icon: FontAwesomeIcons.cartShopping,
+                  icon: FontAwesomeIcons.spoon,
                   onTap: () => context.pushNamed('category-enquiry'),
                 ),
                 const SizedBox(height: 20),
                 ServiceCard(
                   title: 'Banquet',
-                  icon: FontAwesomeIcons.cartShopping,
+                  icon: FontAwesomeIcons.utensils,
                   onTap: () => context.pushNamed('banquet'),
                 ),
                 const SizedBox(height: 20),
                 ServiceCard(
                   title: 'Our Cakes',
-                  icon: FontAwesomeIcons.cartShopping,
+                  icon: FontAwesomeIcons.cakeCandles,
                   onTap: () => context.pushNamed('ourcakes'),
                 ),
               ])

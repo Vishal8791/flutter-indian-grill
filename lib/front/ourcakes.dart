@@ -120,6 +120,18 @@ class _OurCakesState extends State<OurCakes> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (screenWidth >= 1024) {
+      return buildDesktopLayout();
+    } else if (screenWidth >= 600) {
+      return buildTabletLayout();
+    } else {
+      return buildMobileLayout();
+    }
+  }
+
+  Widget buildDesktopLayout() {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(190, 40, 190, 40),
@@ -133,8 +145,7 @@ class _OurCakesState extends State<OurCakes> {
                 child: SidebarWidget(
                   items: categories,
                   onCategorySelected: onCategorySelected,
-                  selectedCategoryId:
-                      selectedCategoryId, // Pass the selected category ID here
+                  selectedCategoryId: selectedCategoryId,
                 ),
               ),
               Expanded(
@@ -153,7 +164,6 @@ class _OurCakesState extends State<OurCakes> {
                                     products: products,
                                     controller: _scrollController),
                                 const SizedBox(height: 20),
-                                // Check if pagination is needed
                                 if (totalProducts > productsPerPage)
                                   PaginationBar(
                                     currentPage: currentPage,
@@ -170,6 +180,82 @@ class _OurCakesState extends State<OurCakes> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildTabletLayout() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: SidebarWidget(
+              items: categories,
+              onCategorySelected: onCategorySelected,
+              selectedCategoryId: selectedCategoryId,
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: buildProductsArea(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildMobileLayout() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+      child: SingleChildScrollView(
+        // Add scroll support
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildProductsArea(),
+            const SizedBox(height: 20),
+            SidebarWidget(
+              items: categories,
+              onCategorySelected: onCategorySelected,
+              selectedCategoryId: selectedCategoryId,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildProductsArea() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  ProductGrid(
+                    products: products,
+                    controller: _scrollController,
+                    isMobile: true,
+                  ),
+                  const SizedBox(height: 20),
+                  if (totalProducts > productsPerPage)
+                    PaginationBar(
+                      currentPage: currentPage,
+                      totalPages: totalPages,
+                      onPageSelected: onPageSelected,
+                    ),
+                ],
+              ),
+      ],
     );
   }
 }
@@ -237,26 +323,28 @@ class SidebarWidget extends StatelessWidget {
 
 class ProductGrid extends StatelessWidget {
   final List<dynamic> products;
-  final ScrollController controller;
+  final ScrollController? controller;
+  final bool isMobile;
 
   const ProductGrid({
     super.key,
     required this.products,
-    required this.controller, // Accept the controller here
+    this.controller,
+    this.isMobile = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      controller: controller, // Use the controller here
+      controller: controller,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isMobile ? 2 : 3,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 30.0,
-        childAspectRatio: 0.75,
+        childAspectRatio: isMobile ? 0.65 : 0.75,
       ),
       itemBuilder: (context, index) {
         var product = products[index];
@@ -267,55 +355,44 @@ class ProductGrid extends StatelessWidget {
             border: Border.all(color: const Color(0xffdddddd), width: 0.5),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Image at top
               Image.network(
                 imageUrl,
-                height: 200,
-                width: 200,
+                height: isMobile ? 120 : 200,
+                width: double.infinity,
                 fit: BoxFit.contain,
-                loadingBuilder: (BuildContext context, Widget child,
-                    ImageChunkEvent? loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    double progress = loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            (loadingProgress.expectedTotalBytes ?? 1)
-                        : 0.0;
-                    return Center(
-                      child: CircularProgressIndicator(value: progress),
-                    );
-                  }
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                      child: Icon(Icons.error, color: Colors.red));
-                },
               ),
               const SizedBox(height: 10),
-              Text(
-                product['name'] ?? 'Unnamed Product',
-                style: GoogleFonts.raleway(
-                    fontSize: 15, color: const Color(0xff666666)),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffE2001A),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
+              // Product name wrapped in Expanded to fill space
+              Expanded(
+                child: Text(
+                  product['name'] ?? 'Unnamed Product',
+                  style: GoogleFonts.raleway(
+                      fontSize: isMobile ? 13 : 15,
+                      color: const Color(0xff666666)),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+              ),
+              const SizedBox(height: 10),
+              // Button at bottom
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffE2001A),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
                   child: Text(
                     "Order Now",
-                    style:
-                        GoogleFonts.raleway(fontSize: 13, color: Colors.white),
+                    style: GoogleFonts.raleway(
+                        fontSize: isMobile ? 11 : 13, color: Colors.white),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -468,7 +545,7 @@ class WooCommerceCategory {
       if (response.statusCode == 200) {
         // Decode the JSON response
         List<dynamic> data = json.decode(response.body);
-        print(data);
+        // print(data);
         return data; // Returns list of subcategories
       } else {
         throw Exception(

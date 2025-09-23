@@ -414,44 +414,47 @@ class LabeledList extends StatefulWidget {
 }
 
 class _LabeledListState extends State<LabeledList> {
-  final bool _isExpanded = false; // Track expansion state
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    padding: const EdgeInsets.fromLTRB(190,0, 190, 0), 
+    // 🔹 Use large padding for desktop, small padding for mobile
+    final horizontalPadding = screenWidth > 800 ? 190.0 : 6.0;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 4),
       child: Theme(
         data: Theme.of(context).copyWith(
-          dividerColor: Colors
-              .transparent, // Remove the divider between ExpansionTile items
+          dividerColor: Colors.transparent,
         ),
         child: ExpansionTile(
-          tilePadding: EdgeInsets.zero, // Remove default padding
+          tilePadding: EdgeInsets.zero,
+          onExpansionChanged: (expanded) {
+            setState(() => _isExpanded = expanded);
+          },
           title: Container(
             width: double.infinity,
-            color: const Color(0xffe2001a), // Background color for the title
-            padding: const EdgeInsets.symmetric(
-                vertical: 0, horizontal: 16), // Adjust padding
+            color: const Color(0xffe2001a),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.start, // Align items to start
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  '+ ', // Add + sign
+                  _isExpanded ? '– ' : '+ ',
                   style: GoogleFonts.raleway(
                     fontSize: 28,
-                    color: Colors.white, // Text color
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Expanded(
-                  // Ensures the title takes the remaining space
                   child: Text(
                     widget.title,
                     style: GoogleFonts.raleway(
                       fontSize: 15,
-                      color: Colors.white, // Text color
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -459,37 +462,32 @@ class _LabeledListState extends State<LabeledList> {
               ],
             ),
           ),
-          trailing:
-              const SizedBox.shrink(), // Remove the trailing arrow completely
-          childrenPadding: EdgeInsets.zero, // Remove padding for children items
+          trailing: const SizedBox.shrink(),
+          childrenPadding: EdgeInsets.zero,
 
+          // 🔹 Child items
           children: widget.items.map((item) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 0),
-              child: Container(
-                padding: const EdgeInsets.only(
-                    left: 20,
-                    bottom: 5), // Padding around the text, no top padding
-                child: Row(
-                  children: [
-                    const Text(
-                      '• ',
-                      style: TextStyle(
-                        fontSize: 16, // Bullet size
-                        color: Color(0xff666666),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+              child: Row(
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xff666666),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        color: const Color(0xff666666),
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        item,
-                        style: GoogleFonts.raleway(
-                          fontSize: 14, // Text size
-                          color: const Color(0xff666666),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           }).toList(),

@@ -87,10 +87,9 @@ class _CartScreenState extends State<CartScreen> {
                                 Text(
                                   item.title,
                                   style: GoogleFonts.raleway(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                      ),
-                                   
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 ...item.selectedoptions.map((opt) {
@@ -105,7 +104,7 @@ class _CartScreenState extends State<CartScreen> {
                                   } else {
                                     return const SizedBox();
                                   }
-                                }).toList(),
+                                }),
                               ],
                             ),
                           ),
@@ -162,272 +161,218 @@ class _CartScreenState extends State<CartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Your Cart is empty!',
-                      style: GoogleFonts.raleway(
-                        fontSize:16,
-                        color:const Color(0xffE2001A) 
-                      ),),
+                      Text(
+                        'Your Cart is empty!',
+                        style: GoogleFonts.raleway(
+                            fontSize: 16, color: const Color(0xffE2001A)),
+                      ),
                       const SizedBox(height: 20),
-                      ElevatedButton(onPressed: (){
-                        GoRouter.of(context).pushNamed('order-online');
-                        
-                      }, 
-                       style: ButtonStyle(
-                          backgroundColor:
-                              WidgetStateProperty.resolveWith<Color>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.hovered)) {
-                                return const Color(0xffE2001A);
-                              }
-                              return Colors.transparent;
-                            },
-                          ),
-                          foregroundColor:
-                              WidgetStateProperty.resolveWith<Color>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.hovered)) {
-                                return Colors.white;
-                              }
-                              return const Color(0xffE2001A);
-                            },
-                          ),
-                          elevation: WidgetStateProperty.all<double>(0),
-                          side: WidgetStateProperty.all<BorderSide>(
-                            const BorderSide(
-                                color: Color(0xffE2001A), width: 0.5),
-                          ),
-                          shape:
-                              WidgetStateProperty.all<RoundedRectangleBorder>(
-                            const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
+                      ElevatedButton(
+                          onPressed: () {
+                            GoRouter.of(context).pushNamed('order-online');
+                          },
+                          style: ButtonStyle(
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return const Color(0xffE2001A);
+                                }
+                                return Colors.transparent;
+                              },
                             ),
-                          ),
-                        ),
-                       
-                      child: Text(
-                      'Return to Shop',
-                      style: GoogleFonts.raleway(
-                        fontSize:14,
-                      ),
-                      ))
-                    ],
-                  )
-                  
-                ),
-          cart.itemCount > 0
-              ? Container( 
-              padding: const EdgeInsets.only(top: 20),
-              child:Row(
-                 
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 20),
-                    SizedBox(
-                      width: 200,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          GoRouter.of(context).pushNamed('order-online');
-                        },
-                        style: ButtonStyle(
-                          backgroundColor:
-                              WidgetStateProperty.resolveWith<Color>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.hovered)) {
+                            foregroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return Colors.white;
+                                }
                                 return const Color(0xffE2001A);
-                              }
-                              return Colors.transparent;
-                            },
-                          ),
-                          foregroundColor:
-                              WidgetStateProperty.resolveWith<Color>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.hovered)) {
-                                return Colors.white;
-                              }
-                              return const Color(0xffE2001A);
-                            },
-                          ),
-                          elevation: WidgetStateProperty.all<double>(0),
-                          side: WidgetStateProperty.all<BorderSide>(
-                            const BorderSide(
-                                color: Color(0xffE2001A), width: 0.5),
-                          ),
-                          shape:
-                              WidgetStateProperty.all<RoundedRectangleBorder>(
-                            const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
+                              },
                             ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 6),
-                          child: Text(
-                            "Continue Shopping",
-                            style: GoogleFonts.raleway(fontSize: 13),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      flex: 2,
-                      child: SizedBox(
-                        height: 42,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                style: GoogleFonts.raleway( // <-- Text style applied here
-                                  fontSize: 14,
-                                  color: const Color(0xffE2001A),
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: "ADD COUPON",
-                                  hintStyle: GoogleFonts.raleway(
-                                      fontSize: 14,
-                                      color: const Color(0xffE2001A)),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 0),
-                                  enabledBorder: const OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
-                                    borderSide: BorderSide(
-                                        color: Color(0xffE2001A), width: 0.4),
-                                  ),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
-                                    borderSide: BorderSide(
-                                        color: Color(0xffE2001A), width: 0.4),
-                                  ),
-                                ),
+                            elevation: WidgetStateProperty.all<double>(0),
+                            side: WidgetStateProperty.all<BorderSide>(
+                              const BorderSide(
+                                  color: Color(0xffE2001A), width: 0.5),
+                            ),
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                              const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
                               ),
                             ),
-                            const VerticalDivider(
-                              color: Colors.grey,
-                              width: 1,
-                              thickness: 0.5,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add,
-                                  color: Color(0xffE2001A)),
-                              onPressed: () {
-                                print("Apply Coupon button clicked");
-                              },
-                              padding: EdgeInsets.zero,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 150),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Want to add a Tip',
+                          ),
+                          child: Text(
+                            'Return to Shop',
                             style: GoogleFonts.raleway(
                               fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xffE2001A),
+                            ),
+                          ))
+                    ],
+                  )),
+          cart.itemCount > 0
+              ? Container(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: 20),
+                      SizedBox(
+                        width: 200,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            GoRouter.of(context).pushNamed('order-online');
+                          },
+                          style: ButtonStyle(
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return const Color(0xffE2001A);
+                                }
+                                return Colors.transparent;
+                              },
+                            ),
+                            foregroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return Colors.white;
+                                }
+                                return const Color(0xffE2001A);
+                              },
+                            ),
+                            elevation: WidgetStateProperty.all<double>(0),
+                            side: WidgetStateProperty.all<BorderSide>(
+                              const BorderSide(
+                                  color: Color(0xffE2001A), width: 0.5),
+                            ),
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                              const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
                             ),
                           ),
-                          Row(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 6),
+                            child: Text(
+                              "Continue Shopping",
+                              style: GoogleFonts.raleway(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: 42,
+                          child: Row(
                             children: [
-                              SizedBox(
-                                height: 32,
-                                width: 150,
+                              Expanded(
                                 child: TextField(
-                                  controller: _tipController,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                          decimal: true),
-                                  style: GoogleFonts.raleway( // <-- Text style applied here
-                                    fontSize: 12,
-                                    color: Colors.black,
+                                  style: GoogleFonts.raleway(
+                                    // <-- Text style applied here
+                                    fontSize: 14,
+                                    color: const Color(0xffE2001A),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: "0",
+                                    hintText: "ADD COUPON",
                                     hintStyle: GoogleFonts.raleway(
-                                        fontSize: 12,
-                                        color: Colors.black),
+                                        fontSize: 14,
+                                        color: const Color(0xffE2001A)),
                                     contentPadding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 0),
                                     enabledBorder: const OutlineInputBorder(
                                       borderRadius: BorderRadius.zero,
                                       borderSide: BorderSide(
-                                          color: Color.fromARGB(
-                                              255, 196, 196, 196),
-                                          width: 0.4),
+                                          color: Color(0xffE2001A), width: 0.4),
                                     ),
                                     focusedBorder: const OutlineInputBorder(
                                       borderRadius: BorderRadius.zero,
                                       borderSide: BorderSide(
-                                          color: Color.fromARGB(
-                                              255, 196, 196, 196),
-                                          width: 0.4),
+                                          color: Color(0xffE2001A), width: 0.4),
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 20),
-                              SizedBox(
-                                width: 75,
-                                child: ElevatedButton(
-                                  onPressed: _applyTip,
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.hovered)) {
-                                          return const Color(0xffE2001A);
-                                        }
-                                        return Colors.transparent;
-                                      },
+                              const VerticalDivider(
+                                color: Colors.grey,
+                                width: 1,
+                                thickness: 0.5,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add,
+                                    color: Color(0xffE2001A)),
+                                onPressed: () {
+                                  print("Apply Coupon button clicked");
+                                },
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 150),
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Want to add a Tip',
+                              style: GoogleFonts.raleway(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xffE2001A),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  height: 32,
+                                  width: 150,
+                                  child: TextField(
+                                    controller: _tipController,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: GoogleFonts.raleway(
+                                      // <-- Text style applied here
+                                      fontSize: 12,
+                                      color: Colors.black,
                                     ),
-                                    foregroundColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.hovered)) {
-                                          return Colors.white;
-                                        }
-                                        return const Color(0xffE2001A);
-                                      },
-                                    ),
-                                    elevation:
-                                        WidgetStateProperty.all<double>(0),
-                                    side: WidgetStateProperty.all<BorderSide>(
-                                      const BorderSide(
-                                          color: Color(0xffE2001A), width: 0.5),
-                                    ),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      const RoundedRectangleBorder(
+                                    decoration: InputDecoration(
+                                      hintText: "0",
+                                      hintStyle: GoogleFonts.raleway(
+                                          fontSize: 12, color: Colors.black),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 0),
+                                      enabledBorder: const OutlineInputBorder(
                                         borderRadius: BorderRadius.zero,
+                                        borderSide: BorderSide(
+                                            color: Color.fromARGB(
+                                                255, 196, 196, 196),
+                                            width: 0.4),
+                                      ),
+                                      focusedBorder: const OutlineInputBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        borderSide: BorderSide(
+                                            color: Color.fromARGB(
+                                                255, 196, 196, 196),
+                                            width: 0.4),
                                       ),
                                     ),
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 6, horizontal: 0),
-                                    child: Text(
-                                      "Add",
-                                      style: GoogleFonts.raleway(fontSize: 14),
-                                    ),
-                                  ),
                                 ),
-                              ),
-                              if (_tipAmount > 0) ...[
-                                const SizedBox(
-                                  width: 20,
-                                ),
+                                const SizedBox(width: 20),
                                 SizedBox(
-                                  width: 120,
+                                  width: 75,
                                   child: ElevatedButton(
-                                    onPressed: _removeTip,
+                                    onPressed: _applyTip,
                                     style: ButtonStyle(
                                       backgroundColor: WidgetStateProperty
                                           .resolveWith<Color>(
@@ -467,80 +412,132 @@ class _CartScreenState extends State<CartScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 6, horizontal: 0),
                                       child: Text(
-                                        "Remove",
+                                        "Add",
                                         style:
                                             GoogleFonts.raleway(fontSize: 14),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _buildAmountRow("Sub Total:", subTotal),
-                          _buildAmountRow("Tip:", _tipAmount),
-                          const Divider(),
-                          _buildAmountRow("Grand Total:", grandTotal, isTotal: true),
-                          const SizedBox(
-                            height: 20,
-                            ),
-                              SizedBox(
-                                  
-                                  width: 120,
-                                  child: ElevatedButton(
-                                    onPressed: (){
-                                     GoRouter.of(context).pushNamed('checkout');
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty
-                                          .resolveWith<Color>(
-                                        (Set<WidgetState> states) {
-                                          if (states
-                                              .contains(WidgetState.hovered)) {
-                                            return const Color.fromARGB(255, 138, 0, 16);
-                                          }
-                                          return Color(0xffe2001a);
-                                        },
+                                if (_tipAmount > 0) ...[
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  SizedBox(
+                                    width: 120,
+                                    child: ElevatedButton(
+                                      onPressed: _removeTip,
+                                      style: ButtonStyle(
+                                        backgroundColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            if (states.contains(
+                                                WidgetState.hovered)) {
+                                              return const Color(0xffE2001A);
+                                            }
+                                            return Colors.transparent;
+                                          },
+                                        ),
+                                        foregroundColor: WidgetStateProperty
+                                            .resolveWith<Color>(
+                                          (Set<WidgetState> states) {
+                                            if (states.contains(
+                                                WidgetState.hovered)) {
+                                              return Colors.white;
+                                            }
+                                            return const Color(0xffE2001A);
+                                          },
+                                        ),
+                                        elevation:
+                                            WidgetStateProperty.all<double>(0),
+                                        side:
+                                            WidgetStateProperty.all<BorderSide>(
+                                          const BorderSide(
+                                              color: Color(0xffE2001A),
+                                              width: 0.5),
+                                        ),
+                                        shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ),
                                       ),
-                                      foregroundColor: WidgetStateProperty
-                                          .resolveWith<Color>(
-                                        (Set<WidgetState> states) {
-                                           return Colors.white;
-                                         },
-                                      ),
-                                      elevation:
-                                          WidgetStateProperty.all<double>(0),
-                                      side: WidgetStateProperty.all<BorderSide>(
-                                        const BorderSide(
-                                            color: Color(0xffE2001A),
-                                            width: 0.5),
-                                      ),
-                                      shape: WidgetStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.zero,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 6, horizontal: 0),
+                                        child: Text(
+                                          "Remove",
+                                          style:
+                                              GoogleFonts.raleway(fontSize: 14),
                                         ),
                                       ),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 0),
-                                      child: Text(
-                                        "Checkout",
-                                        style:
-                                            GoogleFonts.raleway(fontSize: 14),
-                                      ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _buildAmountRow("Sub Total:", subTotal),
+                            _buildAmountRow("Tip:", _tipAmount),
+                            const Divider(),
+                            _buildAmountRow("Grand Total:", grandTotal,
+                                isTotal: true),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            SizedBox(
+                              width: 120,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  GoRouter.of(context).pushNamed('checkout');
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
+                                      if (states
+                                          .contains(WidgetState.hovered)) {
+                                        return const Color.fromARGB(
+                                            255, 138, 0, 16);
+                                      }
+                                      return const Color(0xffe2001a);
+                                    },
+                                  ),
+                                  foregroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
+                                      return Colors.white;
+                                    },
+                                  ),
+                                  elevation: WidgetStateProperty.all<double>(0),
+                                  side: WidgetStateProperty.all<BorderSide>(
+                                    const BorderSide(
+                                        color: Color(0xffE2001A), width: 0.5),
+                                  ),
+                                  shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
                                     ),
                                   ),
                                 ),
-                             
-                        ],
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 0),
+                                  child: Text(
+                                    "Checkout",
+                                    style: GoogleFonts.raleway(fontSize: 14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              )
+                    ],
+                  ),
+                )
               : const Text(''),
         ],
       ),
@@ -564,7 +561,7 @@ class _CartScreenState extends State<CartScreen> {
           style: GoogleFonts.raleway(
             fontSize: isTotal ? 16 : 14,
             fontWeight: FontWeight.bold,
-            color: isTotal ? Color(0xffE2001A) : Colors.black,
+            color: isTotal ? const Color(0xffE2001A) : Colors.black,
           ),
         ),
       ],

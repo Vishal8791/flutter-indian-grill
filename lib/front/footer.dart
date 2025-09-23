@@ -1,44 +1,61 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class Footer extends StatelessWidget {
+class Footer extends StatefulWidget {
   const Footer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(child: LayoutBuilder(builder: (context, Constraints) {
-      double screenWidth = Constraints.maxWidth;
+  State<Footer> createState() => _FooterState();
+}
 
-      if (kIsWeb) {
-        if (screenWidth > 1024) {
-          // print("Web/Desktop layout is being used");
-          return buildDesktopLayout(context); // Desktop layout for web
-        } else if (screenWidth > 600) {
-          // print("Web/Tablet layout is being used");
-          return buildTabletLayout(context); // Tablet layout for web
-        } else {
-          // print("Web/Mobile layout is being used");
-          return buildMobileLayout(context); // Mobile layout for web
-        }
-      } else {
-        if (screenWidth > 1024) {
-          // print("Web/Desktop layout is being used");
-          return buildDesktopLayout(context); // Desktop layout for web
-        } else if (screenWidth > 600) {
-          // print("Web/Tablet layout is being used");
-          return buildTabletLayout(context); // Tablet layout for web
-        } else {
-          // print("Web/Mobile layout is being used");
-          return buildMobileLayout(context); // Mobile layout for web
-        }
-      }
-    }));
+class _FooterState extends State<Footer> {
+  bool _addressClicked = false;
+  bool _isHovering = false;
+  void openMap(String address) async {
+    final query = Uri.encodeComponent(address);
+    final googleMapsUrl =
+        "https://www.google.com/maps/search/?api=1&query=$query";
+
+    final uri = Uri.parse(googleMapsUrl);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      setState(() {
+        _addressClicked = true; // mark as clicked
+      });
+    } else {
+      throw 'Could not open the map for $address';
+    }
   }
 
-  Widget buildDesktopLayout(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 1024;
+    final addressColor = _addressClicked
+        ? Colors.red
+        : (_isHovering && isDesktop ? Colors.red : const Color(0xff444444));
+
+    return Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
+
+          if (screenWidth > 1024) {
+            return buildDesktopLayout(context, addressColor);
+          } else if (screenWidth > 600) {
+            return buildTabletLayout(context, addressColor);
+          } else {
+            return buildMobileLayout(context, addressColor);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildDesktopLayout(BuildContext context, Color addressColor) {
     return Container(
       color: const Color(0xfff1f1f1),
       child: Column(
@@ -66,43 +83,69 @@ class Footer extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        'Indian Grill',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
-                        ),
-                      ),
-                      Text(
-                        'HotBreads Cake & Curries',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
-                        ),
-                      ),
-                      Text(
-                        '969 Bethleham Pike',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
-                        ),
-                      ),
-                      Text(
-                        'Montgomeryville PA 18936',
-                        style: GoogleFonts.raleway(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
+                      MouseRegion(
+                        onEnter: (_) {
+                          setState(() {
+                            _isHovering = true;
+                          });
+                        },
+                        onExit: (_) {
+                          setState(() {
+                            _isHovering = false;
+                          });
+                        },
+                        child: GestureDetector(
+                          onTap: () {
+                            openMap(
+                                'Indian Grill, HotBreads Cake & Curries, 969 Bethleham Pike, Montgomeryville PA 18936');
+                            setState(() {
+                              _addressClicked = true;
+                            });
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Indian Grill',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: addressColor,
+                                ),
+                              ),
+                              Text(
+                                'HotBreads Cake & Curries',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: addressColor,
+                                ),
+                              ),
+                              Text(
+                                '969 Bethleham Pike',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: addressColor,
+                                ),
+                              ),
+                              Text(
+                                'Montgomeryville PA 18936',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: addressColor,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
                       const Row(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.phone,
+                          FaIcon(
+                            Icons.phone,
                             size: 18,
                             color: Color(0xff444444),
                           ),
@@ -118,8 +161,8 @@ class Footer extends StatelessWidget {
                       ),
                       const Row(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.envelope,
+                          FaIcon(
+                            Icons.email,
                             size: 18,
                             color: Color(0xff444444),
                           ),
@@ -323,7 +366,7 @@ class Footer extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    ' © 2016-2024 ',
+                    ' © 2016-2025 ',
                     style: GoogleFonts.raleway(
                       fontSize: 12,
                       color: const Color(0xff888888),
@@ -336,7 +379,7 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget buildTabletLayout(BuildContext context) {
+  Widget buildTabletLayout(BuildContext context, Color addressColor) {
     return Container(
       color: const Color(0XFFF1F1F1),
       child: Column(
@@ -364,43 +407,60 @@ class Footer extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        'Indian Grill',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
+                      GestureDetector(
+                        onTap: () => openMap(
+                          'Indian Grill, HotBreads Cake & Curries, 969 Bethleham Pike, Montgomeryville PA 18936',
                         ),
-                      ),
-                      Text(
-                        'HotBreads Cake & Curries',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
-                        ),
-                      ),
-                      Text(
-                        '969 Bethleham Pike',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
-                        ),
-                      ),
-                      Text(
-                        'Montgomeryville PA 18936',
-                        style: GoogleFonts.raleway(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff444444),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Indian Grill',
+                              style: GoogleFonts.raleway(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _addressClicked
+                                    ? Colors.red
+                                    : const Color(0xff444444),
+                              ),
+                            ),
+                            Text(
+                              'HotBreads Cake & Curries',
+                              style: GoogleFonts.raleway(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _addressClicked
+                                    ? Colors.red
+                                    : const Color(0xff444444),
+                              ),
+                            ),
+                            Text(
+                              '969 Bethleham Pike',
+                              style: GoogleFonts.raleway(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _addressClicked
+                                    ? Colors.red
+                                    : const Color(0xff444444),
+                              ),
+                            ),
+                            Text(
+                              'Montgomeryville PA 18936',
+                              style: GoogleFonts.raleway(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _addressClicked
+                                    ? Colors.red
+                                    : const Color(0xff444444),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 10),
                       const Row(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.phone,
+                          FaIcon(
+                            Icons.phone,
                             size: 18,
                             color: Color(0xff444444),
                           ),
@@ -416,8 +476,8 @@ class Footer extends StatelessWidget {
                       ),
                       const Row(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.envelope,
+                          FaIcon(
+                            Icons.email,
                             size: 18,
                             color: Color(0xff444444),
                           ),
@@ -559,12 +619,17 @@ class Footer extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 5),
-                        child: Text(
-                          'Career',
-                          style: GoogleFonts.raleway(
-                            fontSize: 14,
-                            color: const Color(0xff444444),
-                            fontWeight: FontWeight.w700,
+                        child: GestureDetector(
+                          onTap: () {
+                            GoRouter.of(context).pushNamed('career');
+                          },
+                          child: Text(
+                            'Career',
+                            style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              color: const Color(0xff444444),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
@@ -618,7 +683,7 @@ class Footer extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    ' © 2016-2024 ',
+                    ' © 2016-2025 ',
                     style: GoogleFonts.raleway(
                       fontSize: 12,
                       color: const Color(0xff888888),
@@ -631,7 +696,7 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget buildMobileLayout(BuildContext context) {
+  Widget buildMobileLayout(BuildContext context, Color addressColor) {
     return Container(
       color: const Color(0XFFF1F1F1),
       child: Column(
@@ -657,44 +722,61 @@ class Footer extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      '\nIndian Grill',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff444444),
+                    GestureDetector(
+                      onTap: () => openMap(
+                        'Indian Grill, HotBreads Cake & Curries, 969 Bethleham Pike, Montgomeryville PA 18936',
                       ),
-                    ),
-                    Text(
-                      'HotBreads Cake & Curries',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff444444),
-                      ),
-                    ),
-                    Text(
-                      '969 Bethleham Pike',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff444444),
-                      ),
-                    ),
-                    Text(
-                      'Montgomeryville PA 18936',
-                      style: GoogleFonts.raleway(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff444444),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Indian Grill',
+                            style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: _addressClicked
+                                  ? Colors.red
+                                  : const Color(0xff444444),
+                            ),
+                          ),
+                          Text(
+                            'HotBreads Cake & Curries',
+                            style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: _addressClicked
+                                  ? Colors.red
+                                  : const Color(0xff444444),
+                            ),
+                          ),
+                          Text(
+                            '969 Bethleham Pike',
+                            style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: _addressClicked
+                                  ? Colors.red
+                                  : const Color(0xff444444),
+                            ),
+                          ),
+                          Text(
+                            'Montgomeryville PA 18936',
+                            style: GoogleFonts.raleway(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: _addressClicked
+                                  ? Colors.red
+                                  : const Color(0xff444444),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 30),
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          FontAwesomeIcons.phone,
+                        FaIcon(
+                          Icons.phone,
                           size: 18,
                           color: Color(0xff444444),
                         ),
@@ -711,8 +793,8 @@ class Footer extends StatelessWidget {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          FontAwesomeIcons.envelope,
+                        FaIcon(
+                          Icons.email,
                           size: 18,
                           color: Color(0xff444444),
                         ),
@@ -848,12 +930,17 @@ class Footer extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 5, bottom: 5),
-                      child: Text(
-                        'Career',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          color: const Color(0xff444444),
-                          fontWeight: FontWeight.w700,
+                      child: GestureDetector(
+                        onTap: () {
+                          GoRouter.of(context).pushNamed('career');
+                        },
+                        child: Text(
+                          'Career',
+                          style: GoogleFonts.raleway(
+                            fontSize: 14,
+                            color: const Color(0xff444444),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -913,7 +1000,7 @@ class Footer extends StatelessWidget {
                 ),
                 const SizedBox(height: 4), // Optional space between lines
                 Text(
-                  ' © 2016-2024 ',
+                  ' © 2016-2025 ',
                   style: GoogleFonts.raleway(
                     fontSize: 12,
                     color: const Color(0xff888888),

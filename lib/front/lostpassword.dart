@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LostPassword extends StatefulWidget {
-  const LostPassword({Key? key}) : super(key: key);
+  const LostPassword({super.key});
 
   @override
   State<LostPassword> createState() => _LostPasswordPageState();
@@ -15,34 +15,33 @@ class _LostPasswordPageState extends State<LostPassword> {
 
   /* ───────────────────── Password‑reset stub ───────────────────── */
 
-Future<void> _resetPassword() async {
-  // final email = emailController.text.trim();
-  // if (email.isEmpty) {
-  //   setState(() => msg = 'Please enter your email or username.');
-  //   return;
-  // }
+  Future<void> _resetPassword() async {
+    // final email = emailController.text.trim();
+    // if (email.isEmpty) {
+    //   setState(() => msg = 'Please enter your email or username.');
+    //   return;
+    // }
 
-  // final url = Uri.parse('https://yourdomain.com/wp-json/custom/v1/lost-password'); // Replace with your endpoint
+    // final url = Uri.parse('https://yourdomain.com/wp-json/custom/v1/lost-password'); // Replace with your endpoint
 
-  // try {
-  //   final response = await http.post(
-  //     url,
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode({'email': email}),r
-  //   );
+    // try {
+    //   final response = await http.post(
+    //     url,
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: jsonEncode({'email': email}),r
+    //   );
 
-  //   if (response.statusCode == 200) {
-  //     final res = jsonDecode(response.body);
-  //     setState(() => msg = res['message'] ?? 'Reset link sent successfully.');
-  //   } else {
-  //     final res = jsonDecode(response.body);
-  //     setState(() => msg = res['message'] ?? 'Something went wrong.');
-  //   }
-  // } catch (e) {
-  //   setState(() => msg = 'Error: ${e.toString()}');
-  // }
-}
-
+    //   if (response.statusCode == 200) {
+    //     final res = jsonDecode(response.body);
+    //     setState(() => msg = res['message'] ?? 'Reset link sent successfully.');
+    //   } else {
+    //     final res = jsonDecode(response.body);
+    //     setState(() => msg = res['message'] ?? 'Something went wrong.');
+    //   }
+    // } catch (e) {
+    //   setState(() => msg = 'Error: ${e.toString()}');
+    // }
+  }
 
   /* ───────────────────── Shared form widget ───────────────────── */
   Widget _buildForm(double maxWidth) {
@@ -108,7 +107,8 @@ Future<void> _resetPassword() async {
   /* ───────────────────── 3 distinct layouts ───────────────────── */
   Widget buildMobileLayout() {
     // Single‑column, centered form
-    return Center(child: Padding(
+    return Center(
+        child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: _buildForm(330),
     ));
@@ -116,7 +116,8 @@ Future<void> _resetPassword() async {
 
   Widget buildTabletLayout() {
     // Slightly wider form with more side padding
-    return Center(child: Padding(
+    return Center(
+        child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48),
       child: _buildForm(500),
     ));
@@ -126,12 +127,12 @@ Future<void> _resetPassword() async {
     // Two‑column feel: empty left space, form on right
     return Row(
       children: [
-        Expanded(child: Container()),                        // left spacer
+        Expanded(child: Container()), // left spacer
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
           child: _buildForm(400),
         ),
-        Expanded(child: Container()),                        // right spacer
+        Expanded(child: Container()), // right spacer
       ],
     );
   }

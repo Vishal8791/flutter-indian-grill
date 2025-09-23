@@ -17,16 +17,24 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  date_field: 6.0.3+1
+  date_picker_timeline: ^1.1.4
+  table_calendar: ^3.1.2
+  dropdown_button2:
+    path: packages/dropdown_button2
+  url_launcher: ^6.1.10
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   shared_preferences: ^2.0.15
-  font_awesome_flutter: ^10.0.0
+  font_awesome_flutter: ^10.4.0
   google_fonts: ^5.0.0
   flutter_lints: ^4.0.0
   google_maps_flutter: ^2.5.0
-
+  flutter_launcher_icons: ^0.13.1
+  intl: ^0.20.2
 flutter:
   uses-material-design: true
   assets:
@@ -41,3 +49,9 @@ flutter:
     - assets/images/uploads/
     - assets/images/uploads/head-chef-2.jpg
     - assets/woocommerce.env
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo/Indian-Grill-Logo.png"
+  min_sdk_android: 21

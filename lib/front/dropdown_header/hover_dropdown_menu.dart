@@ -6,11 +6,11 @@ class HoverDropdownMenu extends StatefulWidget {
   final double width;
 
   const HoverDropdownMenu({
-    Key? key,
+    super.key,
     required this.child,
     required this.items,
     this.width = 180,
-  }) : super(key: key);
+  });
 
   @override
   State<HoverDropdownMenu> createState() => _HoverDropdownMenuState();
@@ -33,7 +33,7 @@ class _HoverDropdownMenuState extends State<HoverDropdownMenu> {
 
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
     final overlay = Overlay.of(context);
-    if (renderBox == null || overlay == null) return;
+    if (renderBox == null) return;
 
     final position = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
@@ -75,12 +75,14 @@ class _HoverDropdownMenuState extends State<HoverDropdownMenu> {
                     },
                     hoverColor: Colors.grey[200],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         border: isLast
                             ? null
                             : const Border(
-                                bottom: BorderSide(color: Colors.grey, width: 0.5),
+                                bottom:
+                                    BorderSide(color: Colors.grey, width: 0.5),
                               ),
                       ),
                       child: Text(

@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Users\\visha\\OneDrive\\Desktop\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "D:\\Learning\\flutter\\indian_grill_git\\Indian-Grill-Flutter\\android\\app\\.cxx\\Debug\\6j2x2y6d\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "D:\\Learning\\flutter\\indian_grill_git\\Indian-Grill-Flutter\\android\\app\\.cxx\\Debug\\6j2x2y6d\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

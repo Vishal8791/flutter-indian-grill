@@ -33,7 +33,8 @@ class MyAppRouter {
         GoRoute(
           name: 'banquet-contact-page',
           path: '/banquet-contact-page',
-          builder: (context, state) => MainLayout(child: BanquetContactPage()),
+          builder: (context, state) =>
+              const MainLayout(child: BanquetContactPage()),
         ),
         GoRoute(
           name: 'my-account',
@@ -76,7 +77,7 @@ class MyAppRouter {
         GoRoute(
           name: 'contactus',
           path: '/contactus',
-          builder: (context, state) => MainLayout(child: Contactus()),
+          builder: (context, state) => const MainLayout(child: Contactus()),
         ),
         GoRoute(
           name: 'ourcakes',

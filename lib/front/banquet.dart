@@ -297,6 +297,9 @@ class Banquet extends StatelessWidget {
   }
 
   Widget buildMobileLayout(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageWidth = screenWidth * 0.9;
+    final imageHeight = imageWidth * 0.7;
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -353,8 +356,8 @@ class Banquet extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
-            child: const Column(
+            padding: const EdgeInsets.fromLTRB(5, 20, 5, 20),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Column(
@@ -362,39 +365,44 @@ class Banquet extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Use the ImageWithTextOverlay widget here
-                    ImageWithTextOverlay(
-                      imagePath:
-                          'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
-                      overlayText: 'Birthday Party',
+                    buildImageTile(
+                      context,
+                      'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
+                      'Birthday Party',
+                      imageWidth,
+                      imageHeight,
                     ),
-                    SizedBox(
-                      height: 20,
+                    const SizedBox(height: 20),
+                    buildImageTile(
+                      context,
+                      'assets/images/uploads/2019/03/image1.jpeg',
+                      'Wedding',
+                      imageWidth,
+                      imageHeight,
                     ),
-                    ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image1.jpeg',
-                      overlayText: 'Wedding',
+                    const SizedBox(height: 20),
+                    buildImageTile(
+                      context,
+                      'assets/images/uploads/2019/03/image6.jpeg',
+                      'Anniversary',
+                      imageWidth,
+                      imageHeight,
                     ),
-                    SizedBox(
-                      height: 20,
+                    const SizedBox(height: 20),
+                    buildImageTile(
+                      context,
+                      'assets/images/uploads/2019/03/image3.jpeg',
+                      'Engagement',
+                      imageWidth,
+                      imageHeight,
                     ),
-
-                    ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image6.jpeg',
-                      overlayText: 'Anniversary',
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image3.jpeg',
-                      overlayText: 'Engagement',
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/baby.jpeg',
-                      overlayText: 'Baby Shower',
+                    const SizedBox(height: 20),
+                    buildImageTile(
+                      context,
+                      'assets/images/uploads/2019/03/baby.jpeg',
+                      'Baby Shower',
+                      imageWidth,
+                      imageHeight,
                     ),
                   ],
                 ),
@@ -455,6 +463,10 @@ class Banquet extends StatelessWidget {
   }
 
   Widget buildTabletLayout(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
+
+    final imageSize = isTablet ? 200.0 : 130.0;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       color: Colors.white,
@@ -512,7 +524,7 @@ class Banquet extends StatelessWidget {
 
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Row(
@@ -524,32 +536,32 @@ class Banquet extends StatelessWidget {
                       imagePath:
                           'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
                       overlayText: 'Birthday Party',
-                      width: 130, // Custom width
-                      height: 130,
+                      width: imageSize,
+                      height: imageSize,
                     ),
                     ImageWithTextOverlay(
                       imagePath: 'assets/images/uploads/2019/03/image1.jpeg',
                       overlayText: 'Wedding',
-                      width: 130, // Custom width
-                      height: 130,
+                      width: imageSize,
+                      height: imageSize,
                     ),
                     ImageWithTextOverlay(
                       imagePath: 'assets/images/uploads/2019/03/image6.jpeg',
                       overlayText: 'Anniversary',
-                      width: 130, // Custom width
-                      height: 130,
+                      width: imageSize,
+                      height: imageSize,
                     ),
                     ImageWithTextOverlay(
                       imagePath: 'assets/images/uploads/2019/03/image3.jpeg',
                       overlayText: 'Engagement',
-                      width: 130, // Custom width
-                      height: 130,
+                      width: imageSize,
+                      height: imageSize,
                     ),
                     ImageWithTextOverlay(
                       imagePath: 'assets/images/uploads/2019/03/baby.jpeg',
                       overlayText: 'Baby Shower',
-                      width: 130, // Custom width
-                      height: 130,
+                      width: imageSize,
+                      height: imageSize,
                     ),
                   ],
                 ),
@@ -608,4 +620,31 @@ class Banquet extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget buildImageTile(BuildContext context, String imagePath,
+    String overlayText, double width, double height) {
+  return GestureDetector(
+    onTap: () {
+      showDialog(
+        context: context,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          insetPadding: EdgeInsets.zero,
+          child: InteractiveViewer(
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      );
+    },
+    child: ImageWithTextOverlay(
+      imagePath: imagePath,
+      overlayText: overlayText,
+      width: width,
+      height: height,
+    ),
+  );
 }

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:indiangrill/front/career.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:indiangrill/front/datepicker/date_picker_field.dart';
 
 // BanquetContactPage converted to StatefulWidget
 class BanquetContactPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
   final TextEditingController timeController = TextEditingController();
 
   bool formSubmitted = false;
+  final _formKey = GlobalKey<FormState>();
 
   Future<void> submitbanquetForm(BuildContext context) async {
     final url = Uri.parse(
@@ -100,68 +102,24 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
           Container(
             alignment: Alignment.centerLeft,
             width: 400,
-            child: formSubmitted
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Thank you!',
-                        style: GoogleFonts.raleway(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Your form has been submitted. We will contact you soon.',
-                        style: GoogleFonts.raleway(fontSize: 16),
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LabeledTextField(
-                          labelText: 'Expected No. of guest:',
-                          controller: guestController),
-                      LabeledTextField(
-                          labelText: 'Date:', controller: dateController),
-                      LabeledTextField(
-                          labelText: 'Time:', controller: timeController),
-                      LabeledTextField(
-                          labelText: 'Name:', controller: nameController),
-                      LabeledTextField(
-                          labelText: 'Email Address:',
-                          controller: emailController),
-                      LabeledTextField(
-                          labelText: 'Phone Number:',
-                          controller: mobileController),
-                      LabeledTextField(
-                          labelText: 'Message:', controller: messageController),
-                      Container(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: ElevatedButton(
-                          onPressed: () => submitbanquetForm(context),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: const Color(0xffe2001a),
-                            textStyle: const TextStyle(fontSize: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          child: Text(
-                            'Send',
-                            style: GoogleFonts.raleway(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+            child: buildFormContent(),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildTabletLayout() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+      child: Column(
+        children: [
+          const Text('Check Banquet Availability'),
+          Container(
+            alignment: Alignment.centerLeft,
+            width: 600, // wider than mobile but smaller than desktop
+            child: buildFormContent(),
           )
         ],
       ),
@@ -169,10 +127,158 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
   }
 
   Widget buildMobileLayout() {
-    return buildDesktopLayout();
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Check Banquet Availability',
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xffdd3333)),
+          ),
+          const SizedBox(height: 20),
+          buildFormContent(fullWidth: true), // mobile-friendly version
+        ],
+      ),
+    );
   }
 
-  Widget buildTabletLayout() {
-    return buildDesktopLayout();
+  /// Extracted form content so all layouts reuse the same logic
+  Widget buildFormContent({bool fullWidth = false}) {
+    return formSubmitted
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Thank you!',
+                style: GoogleFonts.raleway(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Your form has been submitted. We will contact you soon.',
+                style: GoogleFonts.raleway(fontSize: 16),
+              ),
+            ],
+          )
+        : Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LabeledTextField(
+                  labelText: 'Expected No. of guest:',
+                  controller: guestController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter number of guests';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+                DatePickerField(
+                  controller: dateController,
+                  labelText: "Date",
+                ),
+                LabeledTextField(
+                  labelText: 'Time:',
+                  controller: timeController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter time';
+                    }
+                    return null;
+                  },
+                ),
+                LabeledTextField(
+                  labelText: 'Name:',
+                  controller: nameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+                LabeledTextField(
+                  labelText: 'Email Address:',
+                  controller: emailController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    final emailRegex =
+                        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                LabeledTextField(
+                  labelText: 'Phone Number:',
+                  controller: mobileController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
+                      return 'Please enter a valid phone number';
+                    }
+                    return null;
+                  },
+                ),
+                LabeledTextField(
+                  labelText: 'Message:',
+                  controller: messageController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a message';
+                    }
+                    return null;
+                  },
+                ),
+                Container(
+                  width: fullWidth ? double.infinity : null,
+                  padding: const EdgeInsets.only(top: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        submitbanquetForm(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xffe2001a),
+                      textStyle: const TextStyle(fontSize: 18),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: Text(
+                      'Send',
+                      style: GoogleFonts.raleway(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }
