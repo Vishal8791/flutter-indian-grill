@@ -27,10 +27,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-/ios/Pods/
-/ios/Runner.xcworkspace/
-/ios/Flutter/Flutter.framework
-/ios/Flutter/Flutter.podspec
+/ios
 /pubspec.lock
 
 # Symbolication / Obfuscation
@@ -38,8 +35,8 @@ app.*.symbols
 app.*.map.json
 
 # Android build folders
-/android/.gradle/
-/android/app/build/
-/android/app/debug/
-/android/app/profile/
-/android/app/release/
+/android
+
+/linux
+/macos
+/windows
