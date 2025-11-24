@@ -85,9 +85,11 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool formSubmitted = false;
+  bool isLoading = false;
+
   Future<void> submitcateringForm(BuildContext context) async {
     final url = Uri.parse(
-        'https://www.indian-grill.com/wp-json/flutter/v1/cateringForm');
+        'https://www.dev.indian-grill.com/wp-json/flutter/v1/cateringForm');
 
     try {
       final response = await http.post(
@@ -371,11 +373,21 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                       labelText: 'Name',
                                       controller: nameController,
                                       validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter your name';
-                                        }
-                                        return null;
-                                      },
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
+
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
+                    return null;
+                  },
                                     ),
                                     LabeledTextField(
                                       labelText: 'Email',
@@ -832,6 +844,9 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(height: 20),
+                            MathCaptcha(controller: captchaController),
+                            const SizedBox(height: 20),
                                   ],
                                 ),
                               ),
@@ -840,17 +855,19 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                         padding: const EdgeInsets.only(top: 20),
                         child: !formSubmitted
                             ? ElevatedButton(
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    submitcateringForm(context);
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Please fix the errors in the form')),
-                                    );
-                                  }
-                                },
+                               onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await submitcateringForm(context);
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   backgroundColor:
@@ -867,7 +884,22 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                     ),
                                   ),
                                 ),
-                                child: const Text('Send'),
+                                 child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                               )
                             : const SizedBox(),
                       ),
@@ -1073,12 +1105,23 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                               labelText: 'Name',
                               controller: nameController,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your name';
-                                }
-                                return null;
-                              },
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
+
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
+                    return null;
+                  },
                             ),
+
                             LabeledTextField(
                               labelText: 'Email',
                               controller: emailController,
@@ -1086,8 +1129,9 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your email';
                                 }
-                                final emailRegex =
-                                    RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+                                final emailRegex = RegExp(
+                                    r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                                  );
                                 if (!emailRegex.hasMatch(value)) {
                                   return 'Please enter a valid email address';
                                 }
@@ -1109,12 +1153,15 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                               },
                               keyboardType: TextInputType.number,
                             ),
+                            const SizedBox(
+                              height: 20,
+                            ),
                             DatePickerField(
                               controller: dateController,
                               labelText: "Event Date",
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: const EdgeInsets.only(top: 20),
                               child: Text(
                                 'Event Time : ',
                                 style: GoogleFonts.raleway(
@@ -1428,7 +1475,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: const EdgeInsets.only(top: 20),
                               child: Text(
                                 'How Did You Hear About Us :',
                                 style: GoogleFonts.raleway(
@@ -1490,20 +1537,19 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                   padding: const EdgeInsets.only(top: 20),
                   child: !formSubmitted
                       ? ElevatedButton(
-                          onPressed: () {
-                            // Validate the form before submitting
-                            if (_formKey.currentState!.validate()) {
-                              // All fields are valid, submit the form
-                              submitcateringForm(context);
-                            } else {
-                              // Optional: show a message if validation fails
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Please fix the errors in the form')),
-                              );
-                            }
-                          },
+                              onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await submitcateringForm(context);
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
                             backgroundColor: const Color(0xffe2001a),
@@ -1518,7 +1564,22 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                               ),
                             ),
                           ),
-                          child: const Text('Send'),
+                           child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                         )
                       : const SizedBox()),
             ],
@@ -1701,12 +1762,22 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                     LabeledTextField(
                                       labelText: 'Name',
                                       controller: nameController,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter your name';
-                                        }
-                                        return null;
-                                      },
+                                     validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
+
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
+                    return null;
+                  },
                                     ),
                                     LabeledTextField(
                                       labelText: 'Email',
@@ -2184,6 +2255,9 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(height: 20),
+                            MathCaptcha(controller: captchaController),
+                            const SizedBox(height: 20),
                                   ],
                                 ),
                               ),
@@ -2192,20 +2266,19 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                         padding: const EdgeInsets.only(top: 20),
                         child: !formSubmitted
                             ? ElevatedButton(
-                                onPressed: () {
-                                  // Validate the form before submitting
-                                  if (_formKey.currentState!.validate()) {
-                                    // All fields are valid, submit the form
-                                    submitcateringForm(context);
-                                  } else {
-                                    // Optional: show a message if validation fails
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Please fix the errors in the form')),
-                                    );
-                                  }
-                                },
+                                    onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await submitcateringForm(context);
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   backgroundColor:
@@ -2222,7 +2295,22 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                                     ),
                                   ),
                                 ),
-                                child: const Text('Send'),
+                                 child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                               )
                             : const SizedBox(),
                       ),

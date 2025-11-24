@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 // Assuming the Product class is defined here
 
 class WooCommerceService {
-  final String baseUrl = 'https://www.indian-grill.com/wp-json/wc/v1/products';
+  final String baseUrl = 'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
   final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
   final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
 
@@ -12,7 +12,7 @@ class WooCommerceService {
       Uri.parse(
           '$baseUrl/wp-json/wc/v3/products?consumer_key=$consumerKey&consumer_secret=$consumerSecret'),
     );
-
+ // print('📦 Response Status: ${response.statusCode}');
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       List<Product> products = [];
@@ -54,6 +54,45 @@ class WooCommerceService {
       throw Exception('Failed to load custom fields');
     }
   }
+
+    // 🔹 Fetch Orders by Email (Customer)
+  Future<List<dynamic>> fetchOrdersByEmail(String email) async {
+
+    final response = await http.get(
+      Uri.parse(
+        'https://www.dev.indian-grill.com/wp-json/custom/v1/orders?email=$email',
+      ),
+    );
+  // print(response);
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch orders for $email');
+    }
+  }
+
+  Future<List<dynamic>> fetchPaymentGateways() async {
+  final String url = "$baseUrl/wp-json/wc/v3/payment_gateways"
+      "?consumer_key=$consumerKey"
+      "&consumer_secret=$consumerSecret";
+
+  print("🔍 Fetching payment gateways from: $url");
+
+  final response = await http.get(Uri.parse(url));
+
+  print("🔍 Status Code: ${response.statusCode}");
+  print("🔍 Body: ${response.body}");
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception(
+      "Failed to fetch payment gateways: ${response.statusCode} - ${response.body}",
+    );
+  }
+}
+
+
 }
 
 class Product {

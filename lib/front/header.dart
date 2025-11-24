@@ -51,6 +51,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  bool _isCartHovering = false;
   bool _isBanquetExpanded = false;
   bool _isContactExpanded = false;
 
@@ -721,8 +722,8 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                       // Phone number
                       const Row(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.phone,
+                          FaIcon(
+                            Icons.phone,
                             color: Colors.red,
                             size: 14,
                           ),
@@ -740,19 +741,65 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
 
                       // Login/Register logic (mobile version)
                       userSession.isLoggedIn
-                          ? GestureDetector(
-                              onTap: () {
-                                GoRouter.of(context).pushNamed('logout');
-                              },
-                              child: Text(
-                                'Logout',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
+                          ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 🔹 "My Account" clickable text
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                onEnter: (_) =>
+                                    setState(() => _isHovering = true),
+                                onExit: (_) =>
+                                    setState(() => _isHovering = false),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    GoRouter.of(context)
+                                        .pushNamed('my-account');
+                                  },
+                                  child: Text(
+                                    'My Account',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: _isHovering
+                                          ? Color(0xffe2001A)
+                                          : Colors.black,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            )
+
+                              // 🔹 Vertical separator "|"
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  '|',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+
+                              // 🔹 "Logout" clickable text
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    GoRouter.of(context).pushNamed('logout');
+                                  },
+                                  child: Text(
+                                    'Logout',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
                           : Row(
                               children: [
                                 Visibility(
@@ -863,7 +910,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 18),
               child: Text(
-                'Home',
+                'Home123',
                 style: GoogleFonts.raleway(
                   fontSize: 16,
                   color: Colors.white,
@@ -1104,7 +1151,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                   child: Center(
                     // Ensures the logo is centered in its section
                     child: Image.asset(
-                      'assets/images/logo/indian-grill-logo.png', // Replace with the actual path of the logo
+                      'assets/images/logo/Indian-Grill-Logo.png', // Replace with the actual path of the logo
                       height: 90,
                       width: 150, // Adjust logo size
                     ),
@@ -1119,36 +1166,66 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                       .end, // Aligns the text and cart icon to the end of the section
                   children: [
                     userSession.isLoggedIn
-                        ? SizedBox(
-                            child: MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              onEnter: (_) {
-                                setState(() {
-                                  _isHovering = true;
-                                  _isVisible = true;
-                                });
-                              },
-                              onExit: (_) {
-                                setState(() {
-                                  _isHovering = false;
-                                });
-                              },
-                              child: GestureDetector(
-                                onTap: () {
-                                  // print('Register tapped');
-                                  GoRouter.of(context).pushNamed('logout');
-                                },
-                                child: Text(
-                                  'Logout',
-                                  style: GoogleFonts.raleway(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red,
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 🔹 "My Account" clickable text
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                onEnter: (_) =>
+                                    setState(() => _isHovering = true),
+                                onExit: (_) =>
+                                    setState(() => _isHovering = false),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    GoRouter.of(context)
+                                        .pushNamed('my-account');
+                                  },
+                                  child: Text(
+                                    'My Account',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: _isHovering
+                                          ? Color(0xffe2001A)
+                                          : Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ) // Don't show anything
+
+                              // 🔹 Vertical separator "|"
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  '|',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+
+                              // 🔹 "Logout" clickable text
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    GoRouter.of(context).pushNamed('logout');
+                                  },
+                                  child: Text(
+                                    'Logout',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        // Don't show anything
                         : MouseRegion(
                             cursor: SystemMouseCursors.click,
                             onEnter: (_) {
@@ -1205,28 +1282,35 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                           ),
                     const SizedBox(
                         height: 10), // Space between the text and cart row
-                    GestureDetector(
-                      onTap: () {
-                        GoRouter.of(context).pushNamed('cart');
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Icon(
-                            Icons.shopping_cart,
-                            color: Colors.red,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '$cartItemCount Items',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff444444),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) => setState(() => _isCartHovering = true),
+                      onExit: (_) => setState(() => _isCartHovering = false),
+                      child: GestureDetector(
+                        onTap: () {
+                          GoRouter.of(context).pushNamed('cart');
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(
+                              Icons.shopping_cart,
+                              color: Color(0xffe2001a), // hover color
+                              size: 18,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 5),
+                            Text(
+                              '$cartItemCount Items',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _isCartHovering
+                                    ? Color(0xffe2001a) // hover color
+                                    : const Color(0xff444444),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

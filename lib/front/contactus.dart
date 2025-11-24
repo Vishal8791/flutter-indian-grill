@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:indiangrill/front/career.dart';
-
+import 'package:indiangrill/captcha/math_captcha.dart';
 class Contactus extends StatefulWidget {
   const Contactus({super.key});
   @override
@@ -19,11 +19,16 @@ class _ContactusState extends State<Contactus> {
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController designationController = TextEditingController();
   final TextEditingController commentController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
+  final _formKey = GlobalKey<FormState>();
   bool formSubmitted = false;
+  bool isLoading = false;
+
   Future<void> submitContactForm(BuildContext context) async {
     final url =
-        Uri.parse('https://www.indian-grill.com/wp-json/flutter/v1/contact');
+        Uri.parse('https://www.dev.indian-grill.com/wp-json/flutter/v1/contact');
 
     try {
       final response = await http.post(
@@ -46,6 +51,16 @@ class _ContactusState extends State<Contactus> {
           mobileController.clear();
           commentController.clear();
         });
+
+         Future.delayed(const Duration(milliseconds: 100), () {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOut,
+      );
+    }
+  });
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(content: Text(data['message'] ?? 'Submitted successfully!')),
         // );
@@ -59,7 +74,9 @@ class _ContactusState extends State<Contactus> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
+      controller: _scrollController,
+     child:Container(
         color: Colors.white,
         child: LayoutBuilder(builder: (context, Constraints) {
           double screenWidth = Constraints.maxWidth;
@@ -86,7 +103,7 @@ class _ContactusState extends State<Contactus> {
               return buildMobileLayout(); // Mobile layout for web
             }
           }
-        }));
+        })));
   }
 
   Widget buildDesktopLayout() {
@@ -130,58 +147,137 @@ class _ContactusState extends State<Contactus> {
                                   ],
                                 )
                               : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                      Text(
-                                        'Contact Us',
-                                        style: GoogleFonts.raleway(
-                                          fontSize: 20,
-                                          color: const Color(0xffE2001A),
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      LabeledTextField(
-                                          labelText: 'Name',
-                                          controller: nameController),
-                                      LabeledTextField(
-                                          labelText: 'Email',
-                                          controller: emailController),
-                                      LabeledTextField(
-                                          labelText: 'Telephone',
-                                          controller: mobileController),
-                                      LabeledTextField(
-                                          labelText: 'Comment',
-                                          controller: commentController),
-                                      Container(
-                                        padding: const EdgeInsets.only(top: 20),
-                                        child: Builder(
-                                          builder: (BuildContext context) {
-                                            return ElevatedButton(
-                                              onPressed: () =>
-                                                  submitContactForm(context),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor: Colors.white,
-                                                backgroundColor:
-                                                    const Color(0xffe2001a),
-                                                textStyle: const TextStyle(
-                                                    fontSize: 20),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                'Send',
-                                                style: GoogleFonts.raleway(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ]),
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text(
+      'Contact Us',
+      style: GoogleFonts.raleway(
+        fontSize: 20,
+        color: const Color(0xffE2001A),
+        fontWeight: FontWeight.w800,
+      ),
+    ),
+
+    Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LabeledTextField(
+            labelText: 'Name',
+            controller: nameController,
+            validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
+
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
+                    return null;
+                  },
+          ),
+
+          LabeledTextField(
+            labelText: 'Email',
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!regex.hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+
+          LabeledTextField(
+            labelText: 'Telephone',
+            controller: mobileController,
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your phone number';
+              }
+              if (value.length < 10) {
+                return 'Phone number must be at least 10 digits';
+              }
+              return null;
+            },
+          ),
+
+          LabeledTextField(
+            labelText: 'Comment',
+            controller: commentController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a comment';
+              }
+              return null;
+            },
+          ),
+
+          Container(child: MathCaptcha(controller: captchaController)),
+
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            child: ElevatedButton(
+              onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await submitContactForm(context);
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
+
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xffe2001a),
+                textStyle: const TextStyle(fontSize: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+             child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+
+            ),
+          ),
+        ],
+      ),
+    ),
+  ],
+)
+
                         ),
                       ],
                     ),
@@ -261,7 +357,8 @@ class _ContactusState extends State<Contactus> {
                                 ),
                                 LabeledTextField(
                                     labelText: 'Name',
-                                    controller: nameController),
+                                    controller: nameController
+                                    ),
                                 LabeledTextField(
                                     labelText: 'Email',
                                     controller: emailController),
@@ -271,13 +368,26 @@ class _ContactusState extends State<Contactus> {
                                 LabeledTextField(
                                     labelText: 'Comment',
                                     controller: commentController),
+                                Container(child:MathCaptcha(controller: captchaController)),
                                 Container(
                                   padding: const EdgeInsets.only(top: 20),
                                   child: Builder(
                                     builder: (BuildContext context) {
                                       return ElevatedButton(
-                                        onPressed: () =>
-                                            submitContactForm(context),
+                                        onPressed: () async {
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true;
+    });
+
+    await submitContactForm(context);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+},
+
                                         style: ElevatedButton.styleFrom(
                                           foregroundColor: Colors.white,
                                           backgroundColor:
@@ -289,13 +399,23 @@ class _ContactusState extends State<Contactus> {
                                                 BorderRadius.circular(4),
                                           ),
                                         ),
-                                        child: Text(
-                                          'Send',
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
+                                      child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+
                                       );
                                     },
                                   ),
@@ -350,76 +470,156 @@ class _ContactusState extends State<Contactus> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      child:  formSubmitted
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Thank you!',
+                                      style: GoogleFonts.raleway(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Your form has been submitted. We will contact you soon.',
+                                      style: GoogleFonts.raleway(fontSize: 16),
+                                    ),
+                                  ],
+                                )
+                              :Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text(
+      'Contact Us',
+      style: GoogleFonts.raleway(
+        fontSize: 20,
+        color: const Color(0xffE2001A),
+        fontWeight: FontWeight.w800,
+      ),
+    ),
+
+    Form(
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Contact Us Heading
-          Text(
-            'Contact Us',
-            style: GoogleFonts.raleway(
-              fontSize: 20,
-              color: const Color(0xffE2001A),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Contact Form
-          LabeledTextField(labelText: 'Name', controller: nameController),
-          const SizedBox(height: 12),
-          LabeledTextField(labelText: 'Email', controller: emailController),
-          const SizedBox(height: 12),
           LabeledTextField(
-              labelText: 'Telephone', controller: mobileController),
-          const SizedBox(height: 12),
-          LabeledTextField(labelText: 'Comment', controller: commentController),
+            labelText: 'Name',
+            controller: nameController,
+            validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
 
-          const SizedBox(height: 20),
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
 
-          ElevatedButton(
-            onPressed: () {
-              print('Send button pressed!');
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
+                    return null;
+                  },
+          ),
+
+          LabeledTextField(
+            labelText: 'Email',
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!regex.hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
             },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color(0xffe2001a),
-              textStyle: const TextStyle(fontSize: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(
-              'Send',
-              style: GoogleFonts.raleway(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
           ),
 
-          const SizedBox(height: 30),
-
-          // Address + Image
-          Image.asset('assets/images/uploads/2020/04/IMG_0118.jpg'),
-          const SizedBox(height: 30),
-          Text(
-            'Indian Grill\nHotBreads Cakes & Curries\n969 Bethlehem Pike\nMontgomeryville PA 18936\n',
-            style: GoogleFonts.raleway(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xff666666),
-            ),
+          LabeledTextField(
+            labelText: 'Telephone',
+            controller: mobileController,
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your phone number';
+              }
+              if (value.length < 10) {
+                return 'Phone number must be at least 10 digits';
+              }
+              return null;
+            },
           ),
-          Text(
-            'Phone: 215-855-4900 \n\nE-mail: contact@indian-grill.com\n\nWebsite: indian-grill.com',
-            style: GoogleFonts.raleway(
-              fontSize: 13,
-              color: const Color(0xff666666),
+
+          LabeledTextField(
+            labelText: 'Comment',
+            controller: commentController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a comment';
+              }
+              return null;
+            },
+          ),
+
+          Container(child: MathCaptcha(controller: captchaController)),
+
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            child: ElevatedButton(
+              onPressed: () async {
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true;
+    });
+
+    await submitContactForm(context);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+},
+
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xffe2001a),
+                textStyle: const TextStyle(fontSize: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+
             ),
           ),
         ],
       ),
+    ),
+  ],
+),
     );
   }
 }

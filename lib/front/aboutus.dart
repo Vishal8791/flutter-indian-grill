@@ -1,14 +1,25 @@
 // aboutus.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:google_fonts/google_fonts.dart';
+// ignore: depend_on_referenced_packages
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class Aboutus extends StatelessWidget {
+
+class Aboutus extends StatefulWidget {
   const Aboutus({super.key});
 
   @override
+  State<Aboutus> createState() => _AboutusState();
+}
+
+class _AboutusState  extends State<Aboutus> {
+ 
+  @override
   Widget build(BuildContext context) {
+  
+
     return Container(
       child: LayoutBuilder(builder: (context, Constraints) {
         double screenWidth = Constraints.maxWidth;
@@ -404,6 +415,9 @@ class Aboutus extends StatelessWidget {
   }
 
   Widget buildMobileLayout() {
+    int currentIndex = 0;
+    final PageController _pageController = PageController(viewportFraction: 0.85);
+   
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -636,121 +650,179 @@ class Aboutus extends StatelessWidget {
                 ],
               ),
             ),
+            // Define this state variable somewhere in your widget (e.g., inside a StatefulWidget)
+
+// --- Testimonials Section ---
             Container(
               padding: const EdgeInsets.only(top: 50),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment:
-                    CrossAxisAlignment.start, // Ensure alignment from the start
+              child: Column(
                 children: [
-                  // First Testimonial
+                  // Scrollable Testimonials
                   SizedBox(
-                    width: 100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .center, // Align icon and text centrally
+                    height: 230,
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          currentIndex = index;
+                        });
+                      },
                       children: [
-                        FaIcon(
-                          Icons.format_quote,
-                          color: Colors.red,
-                          size: 40,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Great food! come here regularly and have yet to have a bad experience!",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.raleway(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                        // First Testimonial
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          width: 250,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.format_quote,
+                                  color: Colors.red, size: 40),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Great food! come here regularly and have yet to have a bad experience!",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Pat Gehman",
+                                style: GoogleFonts.raleway(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Pat Gehman",
-                          style: GoogleFonts.raleway(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.grey[800],
+
+                        // Second Testimonial
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          width: 250,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.format_quote,
+                                  color: Colors.red, size: 40),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Spent New Years in Goa, and their chicken chettinad brought back some brilliant memories!",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Ryan Mills",
+                                style: GoogleFonts.raleway(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Third Testimonial
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          width: 250,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.format_quote,
+                                  color: Colors.red, size: 40),
+                              const SizedBox(height: 10),
+                              Text(
+                                "A favorite restaurant for my son, my boyfriend & I! We love the chicken makhani, pav baji, & chicken chettinad!",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.raleway(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Stephanie Wilson",
+                                style: GoogleFonts.raleway(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                  // Second Testimonial
-                  SizedBox(
-                    width: 100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        FaIcon(
-                          Icons.format_quote,
-                          color: Colors.red,
-                          size: 40,
+
+                  // Active Dots
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (index) {
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: currentIndex == index ? 12 : 8,
+                        height: currentIndex == index ? 12 : 8,
+                        decoration: BoxDecoration(
+                          color: currentIndex == index
+                              ? Colors.red
+                              : Colors.grey[400],
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Spent New Years in Goa, and their chicken chettinad brought back some brilliant memories!",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.raleway(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Ryan Mills",
-                          style: GoogleFonts.raleway(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Third Testimonial
-                  SizedBox(
-                    width: 100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        FaIcon(
-                          Icons.format_quote,
-                          color: Colors.red,
-                          size: 40,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "A favorite restaurant for my son, my boyfriend & I! We love the chicken makhani, pav baji, & chicken chettinad!",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.raleway(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Stephanie Wilson",
-                          style: GoogleFonts.raleway(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    }),
                   ),
                 ],
-              ),
-            ),
-            // Red bullet below the testimonials
-            const SizedBox(height: 20), // Space between container and bullet
-            Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
               ),
             ),
           ],

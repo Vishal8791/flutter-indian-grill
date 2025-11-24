@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class LostPassword extends StatefulWidget {
   const LostPassword({super.key});
@@ -16,32 +19,45 @@ class _LostPasswordPageState extends State<LostPassword> {
   /* ───────────────────── Password‑reset stub ───────────────────── */
 
   Future<void> _resetPassword() async {
-    // final email = emailController.text.trim();
-    // if (email.isEmpty) {
-    //   setState(() => msg = 'Please enter your email or username.');
-    //   return;
-    // }
+  final email = emailController.text.trim();
 
-    // final url = Uri.parse('https://yourdomain.com/wp-json/custom/v1/lost-password'); // Replace with your endpoint
-
-    // try {
-    //   final response = await http.post(
-    //     url,
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: jsonEncode({'email': email}),r
-    //   );
-
-    //   if (response.statusCode == 200) {
-    //     final res = jsonDecode(response.body);
-    //     setState(() => msg = res['message'] ?? 'Reset link sent successfully.');
-    //   } else {
-    //     final res = jsonDecode(response.body);
-    //     setState(() => msg = res['message'] ?? 'Something went wrong.');
-    //   }
-    // } catch (e) {
-    //   setState(() => msg = 'Error: ${e.toString()}');
-    // }
+  if (email.isEmpty) {
+    setState(() => msg = 'Please enter your email or username.');
+    return;
   }
+
+  final url = Uri.parse(
+    'https://dev.indian-grill.com/wp-json/custom/v1/lost-password',
+  );
+
+  try {
+    final response = await http.post(
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json", // REQUIRED
+          },
+          body: jsonEncode({
+            "email": email,
+          }),
+        );
+
+
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      setState(() => msg = data['message']);
+    } else {
+      setState(() => msg = data['message'] ?? 'Something went wrong.');
+    }
+  } catch (e) {
+    setState(() => msg = 'Error: ${e.toString()}');
+  }
+}
+
 
   /* ───────────────────── Shared form widget ───────────────────── */
   Widget _buildForm(double maxWidth) {

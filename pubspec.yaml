@@ -49,6 +49,8 @@ flutter:
     - assets/images/uploads/
     - assets/images/uploads/head-chef-2.jpg
     - assets/woocommerce.env
+    - assets/images/veg.png
+    - assets/images/spicy.jpg
 
 flutter_launcher_icons:
   android: "launcher_icon"

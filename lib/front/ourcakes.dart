@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:go_router/go_router.dart';
 
 class OurCakes extends StatefulWidget {
   const OurCakes({super.key});
@@ -18,7 +19,7 @@ class _OurCakesState extends State<OurCakes> {
   bool isLoading = false;
   int currentPage = 1;
   int totalProducts = 0;
-  int productsPerPage = 10;
+  int productsPerPage = 21;
   int totalPages = 1;
   String? selectedCategoryId = '73'; // Default category ID
   final ScrollController _scrollController = ScrollController();
@@ -348,7 +349,14 @@ class ProductGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         var product = products[index];
+
         String imageUrl = product['image'] ?? 'https://via.placeholder.com/200';
+        final String safeImageUrl =
+            'https://images.weserv.nl/?url=${Uri.encodeComponent(imageUrl)}';
+
+        // Example target URLs (replace with your real links or navigation logic)
+        final String productLink = product['link'] ?? '#';
+        final String orderLink = product['orderLink'] ?? '#';
 
         return Container(
           decoration: BoxDecoration(
@@ -356,32 +364,51 @@ class ProductGrid extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Image at top
-              Image.network(
-                imageUrl,
-                height: isMobile ? 120 : 200,
-                width: double.infinity,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 10),
-              // Product name wrapped in Expanded to fill space
-              Expanded(
-                child: Text(
-                  product['name'] ?? 'Unnamed Product',
-                  style: GoogleFonts.raleway(
-                      fontSize: isMobile ? 13 : 15,
-                      color: const Color(0xff666666)),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    GoRouter.of(context)
+                        .pushNamed('cakeDetails', extra: product);
+                  },
+                  child: Image.network(
+                    safeImageUrl,
+                    height: isMobile ? 120 : 200,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
+
               const SizedBox(height: 10),
-              // Button at bottom
+
+              // Product name
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    product['name'] ?? 'Unnamed Product',
+                    style: GoogleFonts.raleway(
+                      fontSize: isMobile ? 13 : 15,
+                      color: const Color(0xff666666),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // 👇 Separate "Order Now" button (clickable independently)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                   GoRouter.of(context)
+                        .pushNamed('orderCake', extra: product);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xffE2001A),
                     shape: const RoundedRectangleBorder(
@@ -391,11 +418,14 @@ class ProductGrid extends StatelessWidget {
                   child: Text(
                     "Order Now",
                     style: GoogleFonts.raleway(
-                        fontSize: isMobile ? 11 : 13, color: Colors.white),
+                      fontSize: isMobile ? 11 : 13,
+                      color: Colors.white,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
+
               const SizedBox(height: 10),
             ],
           ),
@@ -450,7 +480,7 @@ class PaginationBar extends StatelessWidget {
 }
 
 class WooCommerceService {
-  final String baseUrl = 'https://www.indian-grill.com/wp-json/wc/v1/products';
+  final String baseUrl = 'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
   final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
   final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
   final String cakeCategoryId = '73';
@@ -530,7 +560,7 @@ class WooCommerceService {
 }
 
 class WooCommerceCategory {
-  final String baseUrl = "https://www.indian-grill.com";
+  final String baseUrl = "https://www.dev.indian-grill.com";
   final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
   final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
   final String categoryId = '73';

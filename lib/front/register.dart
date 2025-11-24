@@ -25,11 +25,11 @@ class _RegisterState extends State<Register> {
   late String displayText;
   bool _isVisible = true;
   bool _isHovering = false;
-
+  
   String msg = ''; // Declare a message variable
   Future<void> registerUser() async {
     const String registerapiUrl =
-        'https://indian-grill.com/wp-json/custom/v1/register'; // Replace with your API URL
+        'https://dev.indian-grill.com/wp-json/custom/v1/register-user'; // Replace with your API URL
 
     try {
       final response = await http.post(
@@ -41,11 +41,12 @@ class _RegisterState extends State<Register> {
           'role': 'customer',
         }),
       );
-
+      print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
       if (response.statusCode == 200) {
         // Handle success
         setState(() {
-          userSession.logIn(); // Set session to logged in after registration
+          userSession.logIn(email: emailController.text.trim()); // Set session to logged in after registration
         });
         // Optionally, navigate to another page or display a success message
       } else {
@@ -64,7 +65,7 @@ class _RegisterState extends State<Register> {
 
   Future<void> loginUser() async {
     const String loginApiUrl =
-        'https://indian-grill.com/wp-json/custom/v1/login'; // Your API endpoint
+        'https://dev.indian-grill.com/wp-json/custom/v1/login'; // Your API endpoint
 
     try {
       final response = await http.post(
@@ -75,16 +76,20 @@ class _RegisterState extends State<Register> {
           'password': passwordController.text,
         }),
       );
-
+      print(response);
       if (response.statusCode == 200) {
-        print('login done');
+     //   print('login done');
         // Assuming success if status code is 200
-        setState(() {
-          userSession.logIn(); // Set session to logged in after registration
-        }); // Mark user as logged in
+      //  print(userSession.isLoggedIn);
+        await userSession.logIn(email: emailController.text.trim());
+ // Mark user as logged in
+        setState((){}); // force UI update
+        if (context.mounted) {
+          context.go('/my-account');
+        }
         // Navigate to next screen or update UI accordingly
       } else {
-        // print(response.message);
+         print(response);
         // Decode error message if the API provides one
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         setState(() {
@@ -119,7 +124,6 @@ class _RegisterState extends State<Register> {
     emailController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -158,13 +162,15 @@ class _RegisterState extends State<Register> {
   }
 
   Widget buildDesktopLayout() {
-    return Container(
+     return Container(
       color: Colors.white,
       height: 700,
-      padding: const EdgeInsets.fromLTRB(400, 50, 200, 50),
       child: userSession.isLoggedIn
-          ? const MyAccount()
-          : Row(
+          ? MyAccount()
+          : Padding( 
+      padding: const EdgeInsets.fromLTRB(400, 50, 200, 30),
+
+          child:Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Flexible(
@@ -216,6 +222,7 @@ class _RegisterState extends State<Register> {
                                   labelText: '',
                                   controller: passwordController,
                                   hintText: 'Password',
+                                  obscureText: true,
                                 ),
                                 Container(
                                     alignment: Alignment.centerLeft,
@@ -304,7 +311,8 @@ class _RegisterState extends State<Register> {
                                 _buildSocialButton(
                                   color: const Color(0xff3b5998),
                                   icon: Icons.facebook,
-                                  label: 'Like on facebook',
+                                  label: 'Like on ',
+                                  boldLabel: 'facebook',
                                   onTap: () {
                                     print('Facebook tapped');
                                   },
@@ -318,7 +326,8 @@ class _RegisterState extends State<Register> {
                                   color: const Color(0xffdb4a39),
                                   icon: Icons
                                       .g_mobiledata, // Example icon, customize as needed
-                                  label: 'Like on google+',
+                                  label: 'Like on ',
+                                  boldLabel: 'google+',
                                   onTap: () {
                                     print('Google+ tapped');
                                   },
@@ -332,7 +341,8 @@ class _RegisterState extends State<Register> {
                                   color: const Color(0xff1DA1F2),
                                   icon: Icons
                                       .alternate_email, // Example icon, customize as needed
-                                  label: 'Like on twitter',
+                                  label: 'Like on ',
+                                  boldLabel: 'twitter',
                                   onTap: () {
                                     print('Twitter tapped');
                                   },
@@ -372,6 +382,7 @@ class _RegisterState extends State<Register> {
                                   labelText: '',
                                   controller: passwordController,
                                   hintText: 'Password',
+                                  obscureText: true,
                                 ),
                                 if (msg.isNotEmpty)
                                   Padding(
@@ -497,7 +508,8 @@ class _RegisterState extends State<Register> {
                                 _buildSocialButton(
                                   color: const Color(0xff3b5998),
                                   icon: Icons.facebook,
-                                  label: 'Like on facebook',
+                                  label: 'Like on ',
+                                  boldLabel: 'facebook',
                                   onTap: () {
                                     print('Facebook tapped');
                                   },
@@ -511,7 +523,8 @@ class _RegisterState extends State<Register> {
                                   color: const Color(0xffdb4a39),
                                   icon: Icons
                                       .g_mobiledata, // Example icon, customize as needed
-                                  label: 'Like on google+',
+                                  label: 'Like on ',
+                                  boldLabel: 'google+',
                                   onTap: () {
                                     print('Google+ tapped');
                                   },
@@ -525,7 +538,8 @@ class _RegisterState extends State<Register> {
                                   color: const Color(0xff1DA1F2),
                                   icon: Icons
                                       .alternate_email, // Example icon, customize as needed
-                                  label: 'Like on twitter',
+                                  label: 'Like on ',
+                                  boldLabel: 'twitter',
                                   onTap: () {
                                     print('Twitter tapped');
                                   },
@@ -539,6 +553,7 @@ class _RegisterState extends State<Register> {
                   )
               ],
             ),
+    ),
     );
   }
 
@@ -546,6 +561,7 @@ class _RegisterState extends State<Register> {
     required Color color,
     required IconData icon,
     required String label,
+    required String boldLabel,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -554,16 +570,31 @@ class _RegisterState extends State<Register> {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         decoration: BoxDecoration(
           color: color,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
             Icon(icon, color: Colors.white),
             const SizedBox(width: 10),
-            Text(
-              label,
-              style: GoogleFonts.raleway(
-                color: Colors.white,
-                fontSize: 16,
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: label,
+                    style: GoogleFonts.raleway(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  TextSpan(
+                    text: boldLabel,
+                    style: GoogleFonts.raleway(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -616,6 +647,7 @@ class _RegisterState extends State<Register> {
                             labelText: '',
                             controller: passwordController,
                             hintText: 'Password',
+                            obscureText: true,
                           ),
                           Container(
                               alignment: Alignment.centerLeft,
@@ -703,7 +735,8 @@ class _RegisterState extends State<Register> {
                           _buildSocialButton(
                             color: const Color(0xff3b5998),
                             icon: Icons.facebook,
-                            label: 'Like on facebook',
+                            label: 'Like on ',
+                            boldLabel: 'facebook',
                             onTap: () {
                               print('Facebook tapped');
                             },
@@ -716,7 +749,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xffdb4a39),
                             icon: Icons
                                 .g_mobiledata, // Example icon, customize as needed
-                            label: 'Like on google+',
+                            label: 'Like on ',
+                            boldLabel: 'google+',
                             onTap: () {
                               print('Google+ tapped');
                             },
@@ -729,7 +763,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xff1DA1F2),
                             icon: Icons
                                 .alternate_email, // Example icon, customize as needed
-                            label: 'Like on twitter',
+                            label: 'Like on ',
+                            boldLabel: 'twitter',
                             onTap: () {
                               print('Twitter tapped');
                             },
@@ -769,6 +804,7 @@ class _RegisterState extends State<Register> {
                             labelText: '',
                             controller: passwordController,
                             hintText: 'Password',
+                            obscureText: true,
                           ),
                           Container(
                               alignment: Alignment.centerLeft,
@@ -857,7 +893,8 @@ class _RegisterState extends State<Register> {
                           _buildSocialButton(
                             color: const Color(0xff3b5998),
                             icon: Icons.facebook,
-                            label: 'Like on facebook',
+                            label: 'Like on ',
+                            boldLabel: 'facebook',
                             onTap: () {
                               print('Facebook tapped');
                             },
@@ -870,7 +907,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xffdb4a39),
                             icon: Icons
                                 .g_mobiledata, // Example icon, customize as needed
-                            label: 'Like on google+',
+                            label: 'Like on ',
+                            boldLabel: 'google+',
                             onTap: () {
                               print('Google+ tapped');
                             },
@@ -883,7 +921,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xff1DA1F2),
                             icon: Icons
                                 .alternate_email, // Example icon, customize as needed
-                            label: 'Like on twitter',
+                            label: 'Like on ',
+                            boldLabel: 'twitter',
                             onTap: () {
                               print('Twitter tapped');
                             },
@@ -994,7 +1033,7 @@ class _RegisterState extends State<Register> {
                                       0xff666666)), // Default style for the text
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: 'Sign In',
+                                  text: 'SIGN IN',
                                   style: GoogleFonts.raleway(
                                     color: const Color(
                                         0xffe2001a), // Set color to red for "SIGN IN"
@@ -1024,7 +1063,8 @@ class _RegisterState extends State<Register> {
                           _buildSocialButton(
                             color: const Color(0xff3b5998),
                             icon: Icons.facebook,
-                            label: 'Like on facebook',
+                            label: 'Like on ',
+                            boldLabel: 'facebook',
                             onTap: () {
                               print('Facebook tapped');
                             },
@@ -1037,7 +1077,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xffdb4a39),
                             icon: Icons
                                 .g_mobiledata, // Example icon, customize as needed
-                            label: 'Like on google+',
+                            label: 'Like on ',
+                            boldLabel: 'google+',
                             onTap: () {
                               print('Google+ tapped');
                             },
@@ -1050,7 +1091,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xff1DA1F2),
                             icon: Icons
                                 .alternate_email, // Example icon, customize as needed
-                            label: 'Like on twitter',
+                            label: 'Like on ',
+                            boldLabel: 'twitter',
                             onTap: () {
                               print('Twitter tapped');
                             },
@@ -1092,6 +1134,18 @@ class _RegisterState extends State<Register> {
                             hintText: 'Password',
                             obscureText: true,
                           ),
+                          if (msg.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text(
+                                      msg,
+                                      style: GoogleFonts.raleway(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
                           Container(
                               alignment: Alignment.centerLeft,
                               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -1099,8 +1153,7 @@ class _RegisterState extends State<Register> {
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      // Add your onPressed code here!
-                                      print('Login button pressed!');
+                                      loginUser();
                                     },
                                     style: ElevatedButton.styleFrom(
                                       foregroundColor: Colors.white,
@@ -1148,7 +1201,7 @@ class _RegisterState extends State<Register> {
                                       0xff666666)), // Default style for the text
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: 'Sign Up',
+                                  text: 'SIGN UP',
                                   style: GoogleFonts.raleway(
                                     color: const Color(
                                         0xffe2001a), // Set color to red for "SIGN IN"
@@ -1179,7 +1232,8 @@ class _RegisterState extends State<Register> {
                           _buildSocialButton(
                             color: const Color(0xff3b5998),
                             icon: Icons.facebook,
-                            label: 'Like on facebook',
+                            label: 'Like on ',
+                            boldLabel: 'Facebook',
                             onTap: () {
                               print('Facebook tapped');
                             },
@@ -1192,7 +1246,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xffdb4a39),
                             icon: Icons
                                 .g_mobiledata, // Example icon, customize as needed
-                            label: 'Like on google+',
+                            label: 'Like on ',
+                            boldLabel: ' google+',
                             onTap: () {
                               print('Google+ tapped');
                             },
@@ -1205,7 +1260,8 @@ class _RegisterState extends State<Register> {
                             color: const Color(0xff1DA1F2),
                             icon: Icons
                                 .alternate_email, // Example icon, customize as needed
-                            label: 'Like on twitter',
+                            label: 'Like on ',
+                            boldLabel: ' twitter',
                             onTap: () {
                               print('Twitter tapped');
                             },

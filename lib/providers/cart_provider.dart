@@ -7,16 +7,20 @@ class CartItem {
   final String title;
   final int quantity;
   final double price;
+  final int tip;
   final String option;
   final List<Map<String, String>> selectedoptions;
+  final String? specialInstruction; 
 
   CartItem({
     required this.id,
     required this.title,
     required this.quantity,
     required this.price,
+    required this.tip,
     required this.option,
     required this.selectedoptions,
+    this.specialInstruction,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,8 +29,10 @@ class CartItem {
       'title': title,
       'quantity': quantity,
       'price': price,
+      'tip': tip,
       'option': option,
       'selectedoptions': selectedoptions,
+      'specialInstruction': specialInstruction,
     };
   }
 
@@ -35,33 +41,41 @@ class CartItem {
       id: map['id'],
       title: map['title'],
       quantity: map['quantity'],
-      price: map['price'],
+      price: map['price'].toDouble(),
+      tip: map['tip'] ?? 0,
       option: map['option'],
       selectedoptions: List<Map<String, String>>.from(
         (map['selectedoptions'] ?? [])
             .map((item) => Map<String, String>.from(item)),
       ),
+      specialInstruction: map['specialInstruction'],
     );
   }
 }
 
 class Cart with ChangeNotifier {
   Map<String, CartItem> _items = {};
+  double _tipAmount = 0.0; // ✅ Separate tip field for the cart total
 
-  Map<String, CartItem> get items {
-    return {..._items};
-  }
+  Map<String, CartItem> get items => {..._items};
 
-  int get itemCount {
-    return _items.length;
-  }
+  int get itemCount => _items.length;
 
   double get totalAmount {
     double total = 0.0;
     _items.forEach((key, cartItem) {
       total += cartItem.price * cartItem.quantity;
     });
-    return total;
+    return total + _tipAmount; // ✅ include tip
+  }
+
+  double get tipAmount => _tipAmount;
+
+  // ✅ Add or update tip
+  void setTip(double tip) {
+    _tipAmount = tip;
+    _saveCartToPreferences();
+    notifyListeners();
   }
 
   void addItem(
@@ -71,6 +85,8 @@ class Cart with ChangeNotifier {
     int quantity,
     String option,
     List<Map<String, String>> selectedoptions,
+    String? specialInstruction,
+   
   ) {
     if (_items.containsKey(productId)) {
       _items.update(
@@ -80,8 +96,10 @@ class Cart with ChangeNotifier {
           title: existingCartItem.title,
           quantity: existingCartItem.quantity + quantity,
           price: existingCartItem.price,
+          tip: existingCartItem.tip,
           option: existingCartItem.option,
           selectedoptions: existingCartItem.selectedoptions,
+          specialInstruction: specialInstruction ?? existingCartItem.specialInstruction,
         ),
       );
     } else {
@@ -92,8 +110,10 @@ class Cart with ChangeNotifier {
           title: title,
           quantity: quantity,
           price: price,
+          tip: 0, // ✅ individual tip (if ever needed)
           option: option,
           selectedoptions: selectedoptions,
+          specialInstruction: specialInstruction,
         ),
       );
     }
@@ -109,6 +129,7 @@ class Cart with ChangeNotifier {
 
   void clear() {
     _items = {};
+    _tipAmount = 0.0; // ✅ reset tip when clearing
     _saveCartToPreferences();
     notifyListeners();
   }
@@ -122,8 +143,10 @@ class Cart with ChangeNotifier {
           title: existingItem.title,
           quantity: existingItem.quantity + 1,
           price: existingItem.price,
+          tip: existingItem.tip,
           option: existingItem.option,
           selectedoptions: existingItem.selectedoptions,
+          specialInstruction: existingItem.specialInstruction,
         ),
       );
       _saveCartToPreferences();
@@ -141,8 +164,10 @@ class Cart with ChangeNotifier {
             title: existingItem.title,
             quantity: existingItem.quantity - 1,
             price: existingItem.price,
+            tip: existingItem.tip,
             option: existingItem.option,
             selectedoptions: existingItem.selectedoptions,
+            specialInstruction: existingItem.specialInstruction,
           ),
         );
       } else {
@@ -153,19 +178,22 @@ class Cart with ChangeNotifier {
     }
   }
 
-  // Save the cart to SharedPreferences
+  // ✅ Save cart + tip to SharedPreferences
   Future<void> _saveCartToPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<Map<String, dynamic>> cartList =
         _items.values.map((e) => e.toMap()).toList();
     String cartJson = json.encode(cartList);
     await prefs.setString('cart', cartJson);
+    await prefs.setDouble('tipAmount', _tipAmount); // ✅ save tip separately
   }
 
-  // Load the cart from SharedPreferences
+  // ✅ Load cart + tip from SharedPreferences
   Future<void> _loadCartFromPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cartJson = prefs.getString('cart');
+    _tipAmount = prefs.getDouble('tipAmount') ?? 0.0; // ✅ load tip
+
     if (cartJson != null) {
       List<dynamic> decodedList = json.decode(cartJson);
       _items = {
@@ -180,4 +208,29 @@ class Cart with ChangeNotifier {
     await _loadCartFromPreferences();
     notifyListeners();
   }
+  // Subtotal (without tip)
+double get subtotal {
+  double sum = 0.0;
+  _items.forEach((key, cartItem) {
+    sum += cartItem.price * cartItem.quantity;
+  });
+  return sum;
 }
+
+// You can change tax logic if needed
+double get tax {
+  return subtotal * 0.00; // No tax? Change here
+}
+
+// Shipping (optional)
+double get shipping {
+  return 0.0; // Add delivery charges if required
+}
+
+// Total (subtotal + tip)
+double get total {
+  return subtotal + _tipAmount;
+}
+
+}
+

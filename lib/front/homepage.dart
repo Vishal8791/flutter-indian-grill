@@ -692,7 +692,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ServiceCard(
                     title: 'Catering Enquiry',
-                    icon: Icons.restaurant,
+                    icon: Icons.local_dining,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
                     onTap: () => context.pushNamed('category-enquiry'),
@@ -702,7 +702,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ServiceCard(
                     title: 'Banquet',
-                    icon: Icons.local_dining,
+                    icon: Icons.restaurant,
                     width: 330, // Custom width for the first card
                     height: 150, // Custom height for the first card
                     onTap: () => context.pushNamed('banquet'),
@@ -717,9 +717,9 @@ class _HomePageState extends State<HomePage> {
                     height: 150, // Custom height for the first card\
                     onTap: () => context.pushNamed('ourcakes'),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  // const SizedBox(
+                  //   height: 20,
+                  // ),
                 ],
               )
             ],
@@ -727,8 +727,7 @@ class _HomePageState extends State<HomePage> {
         ),
         Container(
           color: Colors.white,
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 40), // Padding for spacing
+          padding: const EdgeInsets.fromLTRB(16, 40, 16, 60),
           child: Center(
             child: Row(
               mainAxisAlignment:
@@ -1026,13 +1025,13 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 20),
                 ServiceCard(
                   title: 'Catering Enquiry',
-                  icon: FontAwesomeIcons.spoon,
+                  icon: Icons.local_dining,
                   onTap: () => context.pushNamed('category-enquiry'),
                 ),
                 const SizedBox(height: 20),
                 ServiceCard(
                   title: 'Banquet',
-                  icon: FontAwesomeIcons.utensils,
+                  icon: Icons.restaurant_menu,
                   onTap: () => context.pushNamed('banquet'),
                 ),
                 const SizedBox(height: 20),

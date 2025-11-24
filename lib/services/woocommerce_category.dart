@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WooCommerceCategory {
-  final String baseUrl = "https://www.indian-grill.com";
+  final String baseUrl = "https://www.dev.indian-grill.com";
   final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
   final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
   final String categoryId = '73';

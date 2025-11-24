@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:indiangrill/captcha/math_captcha.dart';
 
 // Custom widget for Label with TextField
 class LabeledTextField extends StatelessWidget {
@@ -84,10 +85,14 @@ class _CareerState extends State<Career> {
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController designationController = TextEditingController();
   final TextEditingController aboutController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
 
   String? _selectedFileName;
   PlatformFile? _selectedFile;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool formSubmitted = false;
+  bool isLoading = false;
+
   @override
   void dispose() {
     nameController.dispose();
@@ -99,24 +104,62 @@ class _CareerState extends State<Career> {
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+  try {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'pdf',
+        'doc',
+        'docx',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif'
+      ], // allow documents + images
+    );
 
-    if (result != null && result.files.single.bytes != null) {
+    if (result != null && result.files.isNotEmpty) {
+      PlatformFile file = result.files.first;
+
       setState(() {
-        _selectedFile = result.files.single;
-        _selectedFileName = result.files.single.name;
+        _selectedFile = file;
+        _selectedFileName = file.name;
       });
+
+     if (kIsWeb) {
+        if (file.bytes != null) {
+          print("WEB: Received file bytes = ${file.bytes!.length}");
+        } else {
+          print("WEB: No bytes received!");
+        }
+      }
+
+      // --- Mobile / Desktop Handling ---
+      else {
+        if (file.path != null) {
+          print("MOBILE/DESKTOP: File path = ${file.path}");
+        } else {
+          print("MOBILE/DESKTOP: No file path available");
+        }
+      }
+
     } else {
+      // User canceled
       setState(() {
         _selectedFile = null;
         _selectedFileName = null;
       });
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error picking file: $e')),
+    );
   }
+}
 
   Future<void> _submitForm() async {
     final uri =
-        Uri.parse("https://www.indian-grill.com/wp-json/flutter/v1/careerForm");
+        Uri.parse("https://www.dev.indian-grill.com/wp-json/flutter/v1/careerForm");
 
     var request = http.MultipartRequest("POST", uri);
 
@@ -141,9 +184,9 @@ class _CareerState extends State<Career> {
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Form submitted successfully!")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Form submitted successfully!")),
+      // );
       _clearForm();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -153,6 +196,7 @@ class _CareerState extends State<Career> {
   }
 
   void _clearForm() {
+    formSubmitted = true;
     nameController.clear();
     emailController.clear();
     mobileController.clear();
@@ -204,7 +248,26 @@ class _CareerState extends State<Career> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(320, 50, 190, 100),
-      child: Column(
+      child:formSubmitted
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Thank you!',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Your form has been submitted. We will contact you soon.',
+                                    style: GoogleFonts.raleway(fontSize: 16),
+                                  ),
+                                ],
+                              )
+                            : Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -230,9 +293,20 @@ class _CareerState extends State<Career> {
                     labelText: 'Your Name (required)',
                     controller: nameController,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your name';
                       }
+
+                      // Allow only letters, spaces, apostrophes, and hyphens
+                      final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                      if (!nameRegex.hasMatch(value.trim())) {
+                        return 'Name should contain only letters';
+                      }
+
+                      if (value.trim().length < 2) {
+                        return 'Name must be at least 2 characters';
+                      }
+
                       return null;
                     },
                   ),
@@ -241,14 +315,18 @@ class _CareerState extends State<Career> {
                     labelText: 'Your Email (required)',
                     controller: emailController,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      final emailRegex =
-                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(value)) {
+
+                      // RFC-safe email validation
+                      final emailRegex = RegExp(
+                        r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                      );
+                      if (!emailRegex.hasMatch(value.trim())) {
                         return 'Please enter a valid email address';
                       }
+
                       return null;
                     },
                   ),
@@ -257,12 +335,16 @@ class _CareerState extends State<Career> {
                     labelText: 'Your Mobile Number (required)',
                     controller: mobileController,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your mobile number';
                       }
-                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
-                        return 'Please enter a valid mobile number';
+
+                      // Allows +country code and 10–15 digits
+                      final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid mobile number (10–15 digits)';
                       }
+
                       return null;
                     },
                   ),
@@ -270,12 +352,34 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Designation',
                     controller: designationController,
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        // Optional but must be alphabetic if filled
+                        final designationRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                        if (!designationRegex.hasMatch(value.trim())) {
+                          return 'Designation should contain only letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                     // No validation (optional field)
                   ),
 
                   LabeledTextField(
                     labelText: 'Tell Us Something Interesting About Yourself',
                     controller: aboutController,
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        if (value.trim().length < 10) {
+                          return 'Please write at least 10 characters';
+                        }
+                        // Should contain at least one letter
+                        if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+                          return 'Message must include some letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                     // No validation (optional field)
                   ),
 
@@ -327,12 +431,26 @@ class _CareerState extends State<Career> {
                     ),
                   ),
 
+                  Container(child: MathCaptcha(controller: captchaController)),
                   Container(
                     padding: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_selectedFileName == null) {
+                      // onPressed: () {
+                      //   if (_formKey.currentState!.validate()) {
+                      //     if (_selectedFileName == null) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(
+                      //           content: Text('Please upload your CV.'),
+                      //         ),
+                      //       );
+                      //       return;
+                      //     }
+                      //     _submitForm();
+                      //   }
+                      // },
+                         onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    if (_selectedFileName == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please upload your CV.'),
@@ -340,9 +458,18 @@ class _CareerState extends State<Career> {
                             );
                             return;
                           }
-                          _submitForm();
-                        }
-                      },
+
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await _submitForm();
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color(0xffe2001a),
@@ -356,7 +483,22 @@ class _CareerState extends State<Career> {
                           ),
                         ),
                       ),
-                      child: const Text('Send'),
+                      child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                     ),
                   ),
                 ],
@@ -372,7 +514,26 @@ class _CareerState extends State<Career> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(80, 50, 0, 50),
-      child: Column(
+      child: formSubmitted
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Thank you!',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Your form has been submitted. We will contact you soon.',
+                                    style: GoogleFonts.raleway(fontSize: 16),
+                                  ),
+                                ],
+                              )
+                            :Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -398,9 +559,20 @@ class _CareerState extends State<Career> {
                     labelText: 'Your Name (required)',
                     controller: nameController,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your name';
                       }
+
+                      // Allow only letters, spaces, apostrophes, and hyphens
+                      final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                      if (!nameRegex.hasMatch(value.trim())) {
+                        return 'Name should contain only letters';
+                      }
+
+                      if (value.trim().length < 2) {
+                        return 'Name must be at least 2 characters';
+                      }
+
                       return null;
                     },
                   ),
@@ -408,15 +580,20 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Your Email (required)',
                     controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      final emailRegex =
-                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(value)) {
+
+                      // RFC-safe email validation
+                      final emailRegex = RegExp(
+                        r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                      );
+                      if (!emailRegex.hasMatch(value.trim())) {
                         return 'Please enter a valid email address';
                       }
+
                       return null;
                     },
                   ),
@@ -424,13 +601,18 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Your Mobile Number (required)',
                     controller: mobileController,
+                    keyboardType: const TextInputType.numberWithOptions(),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your mobile number';
                       }
-                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
-                        return 'Please enter a valid mobile number';
+
+                      // Allows +country code and 10–15 digits
+                      final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid mobile number (10–15 digits)';
                       }
+
                       return null;
                     },
                   ),
@@ -438,13 +620,33 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Designation',
                     controller: designationController,
-                    // No validation (optional)
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        // Optional but must be alphabetic if filled
+                        final designationRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                        if (!designationRegex.hasMatch(value.trim())) {
+                          return 'Designation should contain only letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                   ),
 
                   LabeledTextField(
                     labelText: 'Tell Us Something Interesting About Yourself',
                     controller: aboutController,
-                    // No validation (optional)
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        if (value.trim().length < 10) {
+                          return 'Please write at least 10 characters';
+                        }
+                        // Should contain at least one letter
+                        if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+                          return 'Message must include some letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                   ),
 
                   const SizedBox(height: 20),
@@ -494,13 +696,28 @@ class _CareerState extends State<Career> {
                       ],
                     ),
                   ),
+                  Container(child: MathCaptcha(controller: captchaController)),
 
                   Container(
                     padding: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_selectedFileName == null) {
+                      // onPressed: () {
+                      //   if (_formKey.currentState!.validate()) {
+                      //     if (_selectedFileName == null) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(
+                      //           content: Text('Please upload your CV.'),
+                      //         ),
+                      //       );
+                      //       return;
+                      //     }
+
+                      //     _submitForm();
+                      //   }
+                      // },
+                      onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    if (_selectedFileName == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please upload your CV.'),
@@ -509,9 +726,17 @@ class _CareerState extends State<Career> {
                             return;
                           }
 
-                          _submitForm();
-                        }
-                      },
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await _submitForm();
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color(0xffe2001a),
@@ -525,7 +750,22 @@ class _CareerState extends State<Career> {
                           ),
                         ),
                       ),
-                      child: const Text('Send'),
+                       child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                     ),
                   ),
                 ],
@@ -541,7 +781,26 @@ class _CareerState extends State<Career> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 50, 20, 50),
-      child: Column(
+      child: formSubmitted
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Thank you!',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Your form has been submitted. We will contact you soon.',
+                                    style: GoogleFonts.raleway(fontSize: 16),
+                                  ),
+                                ],
+                              )
+                            :Column(
         children: [
           Align(
             alignment: Alignment.center,
@@ -566,9 +825,20 @@ class _CareerState extends State<Career> {
                     labelText: 'Your Name (required)',
                     controller: nameController,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your name';
                       }
+
+                      // Allow only letters, spaces, apostrophes, and hyphens
+                      final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                      if (!nameRegex.hasMatch(value.trim())) {
+                        return 'Name should contain only letters';
+                      }
+
+                      if (value.trim().length < 2) {
+                        return 'Name must be at least 2 characters';
+                      }
+
                       return null;
                     },
                   ),
@@ -576,15 +846,20 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Your Email (required)',
                     controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      final emailRegex =
-                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(value)) {
+
+                      // RFC-safe email validation
+                      final emailRegex = RegExp(
+                        r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                      );
+                      if (!emailRegex.hasMatch(value.trim())) {
                         return 'Please enter a valid email address';
                       }
+
                       return null;
                     },
                   ),
@@ -592,13 +867,18 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Your Mobile Number (required)',
                     controller: mobileController,
+                    keyboardType: const TextInputType.numberWithOptions(),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
+                      if (value == null || value.trim().isEmpty) {
                         return 'Please enter your mobile number';
                       }
-                      if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
-                        return 'Please enter a valid mobile number';
+
+                      // Allows +country code and 10–15 digits
+                      final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid mobile number (10–15 digits)';
                       }
+
                       return null;
                     },
                   ),
@@ -606,13 +886,33 @@ class _CareerState extends State<Career> {
                   LabeledTextField(
                     labelText: 'Designation',
                     controller: designationController,
-                    // Optional field → No validator
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        // Optional but must be alphabetic if filled
+                        final designationRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                        if (!designationRegex.hasMatch(value.trim())) {
+                          return 'Designation should contain only letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                   ),
 
                   LabeledTextField(
                     labelText: 'Tell Us Something Interesting About Yourself',
                     controller: aboutController,
-                    // Optional field → No validator
+                    validator: (value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        if (value.trim().length < 10) {
+                          return 'Please write at least 10 characters';
+                        }
+                        // Should contain at least one letter
+                        if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+                          return 'Message must include some letters';
+                        }
+                      }
+                      return null; // Optional field
+                    },
                   ),
 
                   const SizedBox(height: 20),
@@ -662,13 +962,28 @@ class _CareerState extends State<Career> {
                       ],
                     ),
                   ),
+                  Container(child: MathCaptcha(controller: captchaController)),
 
                   Container(
                     padding: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_selectedFileName == null) {
+                      // onPressed: () {
+                      //   if (_formKey.currentState!.validate()) {
+                      //     if (_selectedFileName == null) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(
+                      //           content: Text('Please upload your CV.'),
+                      //         ),
+                      //       );
+                      //       return;
+                      //     }
+
+                      //     _submitForm();
+                      //   }
+                      // },
+                         onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    if (_selectedFileName == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please upload your CV.'),
@@ -677,9 +992,17 @@ class _CareerState extends State<Career> {
                             return;
                           }
 
-                          _submitForm();
-                        }
-                      },
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await _submitForm();
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color(0xffe2001a),
@@ -693,7 +1016,22 @@ class _CareerState extends State<Career> {
                           ),
                         ),
                       ),
-                      child: const Text('Send'),
+                      child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Text(
+        'Send',
+        style: GoogleFonts.raleway(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
                     ),
                   ),
                 ],

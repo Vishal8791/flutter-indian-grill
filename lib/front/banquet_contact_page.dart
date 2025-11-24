@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:indiangrill/front/career.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/front/datepicker/date_picker_field.dart';
+import 'package:indiangrill/captcha/math_captcha.dart';
 
 // BanquetContactPage converted to StatefulWidget
 class BanquetContactPage extends StatefulWidget {
@@ -22,13 +23,15 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
   final TextEditingController messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
 
   bool formSubmitted = false;
+  bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
 
   Future<void> submitbanquetForm(BuildContext context) async {
     final url = Uri.parse(
-        'https://www.indian-grill.com/wp-json/flutter/v1/banquetform');
+        'https://www.dev.indian-grill.com/wp-json/flutter/v1/banquetform');
 
     try {
       final response = await http.post(
@@ -174,16 +177,24 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 LabeledTextField(
-                  labelText: 'Expected No. of guest:',
+                  labelText: 'Expected Number of Guests',
                   controller: guestController,
                   keyboardType: const TextInputType.numberWithOptions(),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter number of guests';
                     }
-                    if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
+
+                    final guests = int.tryParse(value.trim());
+                    if (guests == null || guests <= 0) {
+                      return 'Please enter a valid number of guests';
                     }
+
+                    if (guests > 1000) {
+                      // optional limit
+                      return 'Guest count seems too high';
+                    }
+
                     return null;
                   },
                 ),
@@ -192,73 +203,120 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                   labelText: "Date",
                 ),
                 LabeledTextField(
-                  labelText: 'Time:',
+                  labelText: 'Time',
                   controller: timeController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter time';
                     }
+
+                    // Allow formats like "10:30 AM" or "22:00"
+                    final timeRegex = RegExp(
+                        r'^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM|am|pm)$|^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
+
+                    if (!timeRegex.hasMatch(value.trim())) {
+                      return 'Enter time in HH:MM or HH:MM AM/PM format';
+                    }
+
                     return null;
                   },
                 ),
                 LabeledTextField(
-                  labelText: 'Name:',
+                  labelText: 'Name',
                   controller: nameController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter your name';
                     }
+
+                    final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                    if (!nameRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid name (letters only)';
+                    }
+
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+
                     return null;
                   },
                 ),
                 LabeledTextField(
-                  labelText: 'Email Address:',
+                  labelText: 'Email Address',
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter your email';
                     }
-                    final emailRegex =
-                        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                    if (!emailRegex.hasMatch(value)) {
-                      return 'Please enter a valid email';
+
+                    final emailRegex = RegExp(
+                      r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                    );
+
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid email address';
                     }
+
                     return null;
                   },
                 ),
                 LabeledTextField(
-                  labelText: 'Phone Number:',
+                  labelText: 'Phone Number',
                   controller: mobileController,
                   keyboardType: const TextInputType.numberWithOptions(),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter your phone number';
                     }
-                    if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
-                      return 'Please enter a valid phone number';
+
+                    // ✅ Supports 10 to 15 digits, optionally with +country code
+                    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+                    if (!phoneRegex.hasMatch(value.trim())) {
+                      return 'Please enter a valid phone number (10–15 digits)';
                     }
+
                     return null;
                   },
                 ),
                 LabeledTextField(
-                  labelText: 'Message:',
+                  labelText: 'Message',
                   controller: messageController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter a message';
                     }
+
+                    if (value.trim().length < 5) {
+                      return 'Message must be at least 5 characters long';
+                    }
+
+                    // Prevent only special characters or numbers
+                    if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+                      return 'Message must contain some letters';
+                    }
+
                     return null;
                   },
                 ),
+                Container(child: MathCaptcha(controller: captchaController)),
                 Container(
                   width: fullWidth ? double.infinity : null,
                   padding: const EdgeInsets.only(top: 20),
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        submitbanquetForm(context);
-                      }
-                    },
+                    onPressed: () async {
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true;
+    });
+
+    await submitbanquetForm(context);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+},
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: const Color(0xffe2001a),
@@ -268,16 +326,31 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    child: Text(
-                      'Send',
-                      style: GoogleFonts.raleway(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                     child: isLoading
+    ? const SizedBox(
+        height: 22,
+        width: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+    : Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+  child: Text(
+    'Submit',
+    style: GoogleFonts.raleway(
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+    ),
+  ),
+)
+
                   ),
                 ),
-              ],
+              ]
+                  .expand((widget) => [widget, const SizedBox(height: 8)])
+                  .toList(),
             ),
           );
   }

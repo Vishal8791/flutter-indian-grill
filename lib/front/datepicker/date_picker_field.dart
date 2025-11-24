@@ -26,7 +26,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
     super.initState();
     _selectedDay = DateTime.now();
     widget.controller.text =
-        "${_selectedDay!.day}-${_selectedDay!.month}-${_selectedDay!.year}";
+        "${_selectedDay!.month}-${_selectedDay!.day}-${_selectedDay!.year}";
   }
 
   @override
@@ -114,7 +114,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
             ),
             child: TableCalendar(
               focusedDay: _focusedDay,
-              firstDay: DateTime(1900),
+              firstDay: DateTime.now(), // ⛔ No past dates
               lastDay: DateTime(2100),
               rowHeight: rowHeight,
               daysOfWeekHeight: daysOfWeekHeight,
@@ -123,15 +123,31 @@ class _DatePickerFieldState extends State<DatePickerField> {
                 weekendStyle: TextStyle(fontSize: fontSize),
               ),
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+
+              // ✅ Prevent selecting past dates
               onDaySelected: (selectedDay, focusedDay) {
+                final today = DateTime.now();
+                final selected = DateTime(
+                  selectedDay.year,
+                  selectedDay.month,
+                  selectedDay.day,
+                );
+
+                if (selected
+                    .isBefore(DateTime(today.year, today.month, today.day))) {
+                  // Ignore past dates
+                  return;
+                }
+
                 setState(() {
-                  _selectedDay = selectedDay;
+                  _selectedDay = selected;
                   _focusedDay = focusedDay;
-                  _showCalendar = false; // close after picking
+                  _showCalendar = false;
                   widget.controller.text =
-                      "${selectedDay.day}-${selectedDay.month}-${selectedDay.year}";
+                      "${selected.month}-${selected.day}-${selected.year}";
                 });
               },
+
               calendarStyle: CalendarStyle(
                 defaultTextStyle: TextStyle(fontSize: fontSize),
                 weekendTextStyle: TextStyle(fontSize: fontSize),
@@ -143,7 +159,18 @@ class _DatePickerFieldState extends State<DatePickerField> {
                   color: Colors.blue.shade200,
                   shape: BoxShape.circle,
                 ),
+                // 🔒 Optional: visually gray out past dates
+                disabledTextStyle: const TextStyle(color: Colors.grey),
               ),
+
+              enabledDayPredicate: (day) {
+                // 🔒 Disable past days
+                return !day.isBefore(
+                  DateTime(DateTime.now().year, DateTime.now().month,
+                      DateTime.now().day),
+                );
+              },
+
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,

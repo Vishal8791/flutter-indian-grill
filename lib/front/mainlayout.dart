@@ -26,66 +26,68 @@ class _MainLayoutState extends State<MainLayout> {
     final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const Header(),
-                widget.child,
-                const Footer(),
-              ],
-            ),
-          ),
-
-          // Cart Icon only on mobile
-          // Outer cart icon
-          if (isMobile && !_isCartOpen)
-            Positioned(
-              right: 0,
-              top: MediaQuery.of(context).size.height * 0.5,
-              child: GestureDetector(
-                onTap: () => _openCartModal(context),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE2001A),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: const Icon(Icons.shopping_cart,
-                          color: Colors.white, size: 26),
-                    ),
-                    Positioned(
-                      left: -4,
-                      top: -4,
-                      child: Consumer<Cart>(
-                        builder: (context, cart, child) {
-                          return Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '${cart.itemCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Header(),
+                  widget.child,
+                  const Footer(),
+                ],
               ),
             ),
-        ],
+
+            // Cart Icon only on mobile
+            // Outer cart icon
+            if (isMobile && !_isCartOpen)
+              Positioned(
+                right: 0,
+                top: MediaQuery.of(context).size.height * 0.5,
+                child: GestureDetector(
+                  onTap: () => _openCartModal(context),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE2001A),
+                          shape: BoxShape.rectangle,
+                        ),
+                        child: const Icon(Icons.shopping_cart,
+                            color: Colors.white, size: 26),
+                      ),
+                      Positioned(
+                        left: -4,
+                        top: -4,
+                        child: Consumer<Cart>(
+                          builder: (context, cart, child) {
+                            return Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${cart.itemCount}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -234,13 +236,32 @@ class _MainLayoutState extends State<MainLayout> {
                                                               FontWeight.w700,
                                                         ),
                                                       ),
-                                                      Text(
-                                                        "\$${item.price.toStringAsFixed(2)}",
-                                                        style:
-                                                            GoogleFonts.raleway(
-                                                          fontSize: 13,
-                                                          color: Colors.black87,
-                                                        ),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Text(
+                                                            "\$${item.price.toStringAsFixed(2)}",
+                                                            style: GoogleFonts
+                                                                .raleway(
+                                                              fontSize: 13,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 2),
+                                                          Text(
+                                                            "Qty: ${item.quantity}",
+                                                            style: GoogleFonts
+                                                                .raleway(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black54,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ],
                                                   ),
