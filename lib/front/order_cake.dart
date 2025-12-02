@@ -151,17 +151,21 @@ class _OrderCakePageState extends State<OrderCakePage> {
 
   // ✅ Mobile Layout
   Widget buildMobileLayout(BuildContext context) {
-    return Padding( 
-      padding: const EdgeInsetsGeometry.all(20),
-    child:Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-         buildFormSection(context),
-         const SizedBox(height: 20),
-         buildProductSection(),
-      ],
-    ));
-  }
+  return SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(20),   // ✅ FIXED
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildFormSection(context),
+          const SizedBox(height: 20),
+          buildProductSection(),
+        ],
+      ),
+    ),
+  );
+}
+
 
   // ✅ Form Section
   Widget buildFormSection(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
@@ -414,7 +415,7 @@ class ProductCardMobile extends StatelessWidget {
     String imageUrl = product['image'] ?? 'https://via.placeholder.com/200';
     String safeImageUrl =
         'https://images.weserv.nl/?url=${Uri.encodeComponent(imageUrl)}';
-
+    print(safeImageUrl);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -432,24 +433,43 @@ class ProductCardMobile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ---------------- IMAGE SECTION ----------------
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('cakeDetails', extra: product);
-            },
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Container(
-                height: 150,
-                width: double.infinity,
-                color: Colors.grey.shade100,
-                child: Image.network(
-                  safeImageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 40),
-                ),
-              ),
+         GestureDetector(
+  onTap: () {
+    GoRouter.of(context).pushNamed('cakeDetails', extra: product);
+  },
+  child: ClipRRect(
+    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+    child: Container(
+      height: 150,
+      width: double.infinity,
+      color: Colors.grey.shade100,
+      child: CachedNetworkImage(
+        imageUrl: safeImageUrl,
+        fit: BoxFit.cover,
+        
+        // Placeholder while loading
+        placeholder: (_, __) => Center(
+          child: SizedBox(
+            width: 26,
+            height: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.5,
+              color: Colors.red.shade300,
             ),
           ),
+        ),
+
+        // Error fallback
+        errorWidget: (_, __, ___) => const Icon(
+          Icons.image_not_supported,
+          size: 40,
+          color: Colors.grey,
+        ),
+      ),
+    ),
+  ),
+),
+
 
           const SizedBox(height: 10),
 

@@ -58,7 +58,7 @@ class _CartScreenState extends State<CartScreen> {
   );
 }
 
-  void applyCoupon(String code) async {
+ Future<void> applyCoupon(String code) async {
   if (code.isEmpty) return;
 
   setState(() {
@@ -376,10 +376,10 @@ if (cart.tipAmount == 0)
       }
     },
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xffE2001A),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: const Text(
         "Add",
@@ -400,10 +400,10 @@ if (cart.tipAmount > 0)
       _tipController.clear();
     },
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.grey.shade500,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: const Text(
         "Remove",
@@ -566,7 +566,7 @@ if (cart.tipAmount > 0)
                   Text(
                     "\$${item.price.toStringAsFixed(2)}",
                     style: GoogleFonts.raleway(
-                      fontSize: 15,
+                      fontSize: 17,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -601,7 +601,7 @@ if (cart.tipAmount > 0)
                         Text(
                           '${item.quantity}',
                           style: GoogleFonts.raleway(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1441,9 +1441,9 @@ class _AmountDetailsRow extends StatelessWidget {
 }
 
 class VoucherInputField extends StatefulWidget {
-  final Function(String code) onApply;
+  final Future<void> Function(String code) onApply; // <-- make it async-friendly
   final VoidCallback? onRemove;
-  final String? appliedCode; // <-- use appliedCode instead of isCouponApplied
+  final String? appliedCode;
 
   const VoucherInputField({
     super.key,
@@ -1458,6 +1458,7 @@ class VoucherInputField extends StatefulWidget {
 
 class _VoucherInputFieldState extends State<VoucherInputField> {
   late TextEditingController _controller;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -1468,14 +1469,29 @@ class _VoucherInputFieldState extends State<VoucherInputField> {
   @override
   void didUpdateWidget(covariant VoucherInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update text field only if appliedCode changed externally
     if (oldWidget.appliedCode != widget.appliedCode) {
       _controller.text = widget.appliedCode ?? '';
     }
   }
 
+  Future<void> _applyCoupon() async {
+    final code = _controller.text.trim();
+    if (code.isEmpty || _isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    await widget.onApply(code);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isCouponApplied =
+        widget.appliedCode != null && widget.appliedCode!.isNotEmpty;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
@@ -1484,7 +1500,6 @@ class _VoucherInputFieldState extends State<VoucherInputField> {
       ),
       child: Row(
         children: [
-          // Left icon
           Container(
             width: 20,
             height: 20,
@@ -1492,86 +1507,72 @@ class _VoucherInputFieldState extends State<VoucherInputField> {
               color: const Color(0xffF7F7F9),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.confirmation_number,
-              size: 12,
-              color: Colors.black87,
-            ),
+            child: const Icon(Icons.confirmation_number, size: 12),
           ),
           const SizedBox(width: 10),
 
-          // Input field
           Expanded(
             child: TextField(
               controller: _controller,
-              decoration: InputDecoration(
-                hintText: "Enter your voucher code",
-                hintStyle: GoogleFonts.raleway(
-                  fontSize: 14,
-                  color: Colors.grey.shade500,
-                ),
-                border: InputBorder.none,
-              ),
-              style: GoogleFonts.raleway(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
+              decoration: InputDecoration( hintText: "Enter your voucher code", hintStyle: GoogleFonts.raleway( fontSize: 14, color: Colors.grey.shade500, ), border: InputBorder.none, ), style: GoogleFonts.raleway( fontSize: 12, color: Colors.black87, ),
             ),
           ),
 
-          // Apply icon
-       // If coupon is applied, show REMOVE button; otherwise show APPLY button
-widget.appliedCode != null && widget.appliedCode!.isNotEmpty
-    ? GestureDetector(
-        onTap: () {
-          if (widget.onRemove != null) widget.onRemove!();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xffE2001A),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            'Remove',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      )
-    : GestureDetector(
-        onTap: () {
-          final code = _controller.text.trim();
-          if (code.isNotEmpty) {
-            widget.onApply(code);
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xffE2001A),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            'Apply',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
-    ],
+          // ------- BUTTON -------
+          isCouponApplied
+              ? GestureDetector(
+                  onTap: widget.onRemove,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffE2001A),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      "Remove",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+              : GestureDetector(
+                  onTap: _applyCoupon,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffE2001A),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Apply",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+        ],
       ),
     );
   }
 }
+
+
+
 void showCouponDialog({
   required BuildContext context,
   required String title,

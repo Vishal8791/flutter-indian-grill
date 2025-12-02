@@ -24,6 +24,7 @@ dependencies:
   dropdown_button2:
     path: packages/dropdown_button2
   url_launcher: ^6.1.12
+  cached_network_image: ^3.3.1
   
 
 dev_dependencies:
