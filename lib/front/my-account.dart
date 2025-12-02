@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/session/user_session.dart';
 import 'package:indiangrill/services/woocommerce_service.dart';
+import 'package:indiangrill/style/style.dart';
+
 class MyAccount extends StatefulWidget {
   final Map<String, dynamic>? args;
 
@@ -21,7 +23,8 @@ class _MyAccountState extends State<MyAccount> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = widget.args;
-    displayText = (args != null && args['registration'] == 'yes') ? 'register' : 'login';
+    displayText =
+        (args != null && args['registration'] == 'yes') ? 'register' : 'login';
   }
 
   @override
@@ -80,7 +83,8 @@ class _MyAccountState extends State<MyAccount> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Confirm Logout'),
-                        content: const Text('Are you sure you want to log out?'),
+                        content:
+                            const Text('Are you sure you want to log out?'),
                         actions: <Widget>[
                           TextButton(
                             child: const Text('Cancel'),
@@ -125,73 +129,90 @@ class _MyAccountState extends State<MyAccount> {
   Widget buildTabletLayout() => buildDesktopLayout();
 
   Widget buildMobileLayout() {
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 🔹 Content first (Dashboard, Orders, etc.)
-      
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildTabItem('Dashboard', '/dashboard'),
+                _buildTabItem('Orders', '/orders'),
+                _buildTabItem('Downloads', '/downloads'),
+                _buildTabItem('Addresses', '/address'),
+                _buildTabItem('Account Details', '/account-details'),
+                _buildTabItem('Logout', '/logout'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          buildContentWidget(), // no Expanded
+        ],
+      ),
+    );
+  }
 
+  Widget _buildTabItem(String text, String route) {
+    final bool isSelected = route == selectedRoute;
 
-        // 🔹 Sidebar becomes a vertical button list
-        SidebarWidget(
-          items: const [
-            {'text': 'Dashboard', 'route': '/dashboard'},
-            {'text': 'Orders', 'route': '/orders'},
-            {'text': 'Downloads', 'route': '/downloads'},
-            {'text': 'Addresses', 'route': '/address'},
-            {'text': 'Account Details', 'route': '/account-details'},
-            {'text': 'Logout', 'route': '/logout'},
-          ],
-          selectedRoute: selectedRoute,
-          onRouteSelected: (route) async {
-            if (route == '/logout') {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Confirm Logout'),
-                    content: const Text('Are you sure you want to log out?'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      TextButton(
-                        child: const Text('Logout'),
-                        onPressed: () => Navigator.of(context).pop(true),
-                      ),
-                    ],
-                  );
-                },
-              );
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: GestureDetector(
+        onTap: () async {
+          if (route == '/logout') {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Confirm Logout'),
+                  content: const Text('Are you sure you want to log out?'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(false),
+                    ),
+                    TextButton(
+                      child: const Text('Logout'),
+                      onPressed: () => Navigator.of(context).pop(true),
+                    ),
+                  ],
+                );
+              },
+            );
 
-              if (confirm == true) {
-                await userSession.logOut();
-                if (context.mounted) context.go('/login');
-              }
-            } else {
-              setState(() {
-                selectedRoute = route;
-              });
+            if (confirm == true) {
+              await userSession.logOut();
+              if (context.mounted) context.go('/login');
             }
-          },
+          } else {
+            setState(() {
+              selectedRoute = route;
+            });
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.transparent, // No background
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : Colors.grey.shade400,
+              width: 2, // Adjust thickness
+            ),
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSelected ? AppColors.primary : Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
-
-        const SizedBox(height: 30),
-
-          Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: buildContentWidget(),
-        ),
-        
-      ],
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   /// Returns the right content widget based on selected route
   Widget buildContentWidget() {
@@ -268,9 +289,7 @@ class SidebarWidget extends StatelessWidget {
                     fontSize: 13,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? Colors.black
-                        : const Color(0xff666666),
+                    color: isSelected ? Colors.black : const Color(0xff666666),
                   ),
                 ),
               ),
@@ -346,132 +365,134 @@ class _OrdersWidgetState extends State<OrdersWidget> {
             itemCount: orders.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
-  final order = orders[index];
-  final orderId = order['id'];
-  final date = order['date_created'];
-  final status = order['status'];
-  final total = order['total'];
+              final order = orders[index];
+              final orderId = order['id'];
+              final date = order['date_created'];
+              final status = order['status'];
+              final total = order['total'];
 
-  // Safely read items
-  final items = order['items'] as Map<String, dynamic>? ?? {};
+              // Safely read items
+              final items = order['items'] as Map<String, dynamic>? ?? {};
 
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(
-        color: Colors.grey.shade300, // ✅ subtle light grey border
-        width: 1,
-      ),
-    ),    
-    color: Colors.transparent,
-    elevation: 0,
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🔹 Order Summary (same as before)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              'Order #$orderId',
-              style: GoogleFonts.raleway(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(
-              'Date: $date\nStatus: ${status.toUpperCase()}',
-              style: GoogleFonts.raleway(fontSize: 14),
-            ),
-            trailing: Text(
-              '\$$total',
-              style: GoogleFonts.raleway(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          const Divider(),
-
-          // 🔹 Order Items Section
-          if (items.isNotEmpty) ...[
-            Text(
-              'Items:',
-              style: GoogleFonts.raleway(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 6),
-            ...items.values.map((item) {
-              final name = item['name'];
-              final qty = item['quantity'];
-              final price = item['total'];
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        name ?? '',
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          color: Colors.black87,
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: Colors.grey.shade300, // ✅ subtle light grey border
+                    width: 1,
+                  ),
+                ),
+                color: Colors.transparent,
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔹 Order Summary (same as before)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          'Order #$orderId',
+                          style: GoogleFonts.raleway(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'x$qty',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.raleway(
-                          fontSize: 13,
-                          color: Colors.grey[700],
+                        subtitle: Text(
+                          'Date: $date\nStatus: ${status.toUpperCase()}',
+                          style: GoogleFonts.raleway(fontSize: 14),
+                        ),
+                        trailing: Text(
+                          '\$$total',
+                          style: GoogleFonts.raleway(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        '\$$price',
-                        textAlign: TextAlign.end,
-                        style: GoogleFonts.raleway(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+
+                      const Divider(),
+
+                      // 🔹 Order Items Section
+                      if (items.isNotEmpty) ...[
+                        Text(
+                          'Items:',
+                          style: GoogleFonts.raleway(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                        const SizedBox(height: 6),
+                        ...items.values.map((item) {
+                          final name = item['name'];
+                          final qty = item['quantity'];
+                          final price = item['total'];
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    name ?? '',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(
+                                    'x$qty',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(
+                                    '\$$price',
+                                    textAlign: TextAlign.end,
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ] else
+                        Text(
+                          'No items found.',
+                          style: GoogleFonts.raleway(
+                              fontSize: 13, color: Colors.grey),
+                        ),
+                    ],
+                  ),
                 ),
               );
-            }),
-          ] else
-            Text(
-              'No items found.',
-              style: GoogleFonts.raleway(fontSize: 13, color: Colors.grey),
-            ),
-        ],
-      ),
-    ),
-  );
-},
-
+            },
           );
         } else {
           return Center(
             child: Text(
               'No orders found.',
               style: GoogleFonts.raleway(
-                  fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500),
             ),
           );
         }
@@ -479,6 +500,7 @@ class _OrdersWidgetState extends State<OrdersWidget> {
     );
   }
 }
+
 class DownloadsWidget extends StatelessWidget {
   const DownloadsWidget({super.key});
 

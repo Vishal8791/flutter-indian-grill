@@ -2,10 +2,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider_plus/carousel_slider_plus.dart'; // Correct import for CarouselSlider
+import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:carousel_slider_plus/carousel_slider_plus.dart'; // Correct import for CarouselSlider
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:indiangrill/style/style.dart' show AppColors;
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,8 +19,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0; // Current index of the carousel
-
+  final CarouselSliderController _controller = CarouselSliderController();
+  int _currentIndex = 0;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(child: LayoutBuilder(
@@ -547,342 +550,223 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildMobileLayout() {
+    final List<String> sliderImages = [
+      "assets/images/slider/big_slider01.jpg",
+      "assets/images/slider/big_slider02.jpg",
+      "assets/images/slider/big_slider03.jpg",
+      "assets/images/slider/big_slider04.jpg",
+      "assets/images/slider/big_slider05.jpg",
+      "assets/images/slider/big_slider06.jpg",
+    ];
+
     return Column(
       children: [
-        SizedBox(
-          height: 125,
-          // width: 390,
-
-          // Remove any additional padding
-          child: CarouselSlider(
-            items: [
-              ClipRRect(
-                // Use ClipRRect to apply border radius
-                borderRadius: BorderRadius
-                    .zero, // Set radius to zero if no rounding is desired
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider01.jpg"),
-                      fit: BoxFit
-                          .cover, // Ensure the image covers the container without padding
-                    ),
-                  ),
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.zero,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider02.jpg"),
+        // Carousel with arrows overlay
+        Stack(
+          children: [
+            // Carousel
+            CarouselSlider.builder(
+              carouselController: _controller, // Use state-level controller
+              itemCount: sliderImages.length,
+              itemBuilder: (context, index, realIndex) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      sliderImages[index],
                       fit: BoxFit.cover,
+                      width: double.infinity,
                     ),
                   ),
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.zero,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider03.jpg"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.zero,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider04.jpg"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.zero,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider05.jpg"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.zero,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          AssetImage("assets/images/slider/big_slider06.jpg"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            options: CarouselOptions(
-              height: MediaQuery.of(context)
-                  .size
-                  .height, // Set height to full screen
-              autoPlay: true,
-              enlargeCenterPage: false,
-              // aspectRatio: 16 / 9,
-              enableInfiniteScroll: true,
-              autoPlayAnimationDuration: const Duration(seconds: 2),
-              viewportFraction: 1.0, // Take full width of the screen
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index; // Update current index
-                });
+                );
               },
+              options: CarouselOptions(
+                height: 180,
+                autoPlay: true,
+                viewportFraction: 1.0,
+                enlargeCenterPage: false,
+                enableInfiniteScroll: true,
+                autoPlayAnimationDuration: const Duration(seconds: 2),
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _currentIndex = index; // Use state-level variable
+                  });
+                },
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(6, (index) {
-              // Adjust the number of dots based on the number of images
-              return Container(
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 2.0, vertical: 20),
-                width: 8.0,
-                height: 8.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentIndex == index
-                      ? Colors.black // Active dot color
-                      : Colors.grey, // Inactive dot color
+
+            // Left arrow
+            // Left arrow
+            Positioned(
+              left: 10,
+              top: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () {
+                  int prevIndex = _currentIndex == 0
+                      ? sliderImages.length - 1
+                      : _currentIndex - 1;
+
+                  _controller.animateToPage(
+                    prevIndex,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.ease,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                    size: 12, // <-- size 12
+                  ),
                 ),
-              );
-            }),
-          ),
+              ),
+            ),
+
+// Right arrow
+            Positioned(
+              right: 10,
+              top: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () {
+                  int nextIndex = (_currentIndex + 1) % sliderImages.length;
+
+                  _controller.animateToPage(
+                    nextIndex,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.ease,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white,
+                    size: 12, // <-- size 12
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 0),
-          color: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ServiceCard(
-                    title: 'Order Online',
-                    icon: Icons.shopping_cart,
-                    width: 330, // Custom width for the first card
-                    height: 150, // Custom height for the first card
-                    onTap: () => context.pushNamed('order-online'),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ServiceCard(
-                    title: 'Catering Enquiry',
-                    icon: Icons.local_dining,
-                    width: 330, // Custom width for the first card
-                    height: 150, // Custom height for the first card
-                    onTap: () => context.pushNamed('category-enquiry'),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ServiceCard(
-                    title: 'Banquet',
-                    icon: Icons.restaurant,
-                    width: 330, // Custom width for the first card
-                    height: 150, // Custom height for the first card
-                    onTap: () => context.pushNamed('banquet'),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ServiceCard(
-                    title: 'Our Cakes',
-                    icon: Icons.cake,
-                    width: 330, // Custom width for the first card
-                    height: 150, // Custom height for the first card\
-                    onTap: () => context.pushNamed('ourcakes'),
-                  ),
-                  // const SizedBox(
-                  //   height: 20,
-                  // ),
-                ],
-              )
-            ],
-          ),
-        ),
-        Container(
-          color: Colors.white,
+          // color: Colors.white,
           padding: const EdgeInsets.fromLTRB(16, 40, 16, 60),
           child: Center(
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Center content horizontally
-              children: <Widget>[
-                Expanded(
-                  // Make the text take the available space
-                  child: Text(
-                    "WE SERVE HALAL MEAT",
-                    textAlign: TextAlign.center, // Center the text
-                    style: GoogleFonts.seaweedScript(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600,
-                      fontStyle: FontStyle.italic,
-                      color: const Color(0xff333333), // Dark gray color
-                    ),
-                  ),
-                ),
-              ],
+            child: Text(
+              "WE SERVE HALAL MEAT",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.seaweedScript(
+                fontSize: 40,
+                fontWeight: FontWeight.w600,
+                fontStyle: FontStyle.italic,
+                color: const Color(0xff333333),
+              ),
             ),
           ),
         ),
+
+        // Testimonial section
         Container(
-            color: const Color(0xffe0e0e0),
-            padding: const EdgeInsets.fromLTRB(40, 40, 40, 40),
-            child: Column(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Image.asset(
-                            'assets/images/uploads/2020/04/IMG_0118.jpg',
-                            // fit: BoxFit.cover,
-                            // height: 300,
-                          ),
-                        ]),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'About Us',
-                            style: GoogleFonts.raleway(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                'We are Located in the Heart of Montgomery County on RT 309 . We are Just two blocks away from the Montgomery mall. We invite you to come and enjoy the authentic taste of our time-honored Indian cooking. Inside, you’ll find fast-food dining that provides you a comfortable and friendly environment.',
-                                style: GoogleFonts.raleway(
-                                  fontSize: 13,
-                                  color: Colors.black,
-                                ),
-                              )),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 40),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Our Testimonial',
-                              style: GoogleFonts.raleway(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Center(
-                              child: Container(
-                                height: 200,
-                                padding:
-                                    const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                                child: CarouselSlider(
-                                  options: CarouselOptions(
-                                    // enableInfiniteScroll: true,
-                                    autoPlay: true,
-                                    viewportFraction: 1.0,
-                                    onPageChanged: (index, reason) {
-                                      setState(() {
-                                        _currentIndex =
-                                            index; // Update current index
-                                      });
-                                    },
-                                  ),
-                                  items: [
-                                    // First Carousel Item
-                                    _buildCarouselItem(
-                                      icon: Icons.format_quote,
-                                      middleText:
-                                          'The only limit to our realization of tomorrow is our doubts of today.',
-                                      bottomText: 'Franklin D. Roosevelt',
-                                    ),
-                                    // Second Carousel Item
-                                    _buildCarouselItem(
-                                      icon: Icons.format_quote,
-                                      middleText:
-                                          'Life is 10% what happens to us and 90% how we react to it.',
-                                      bottomText: 'Charles R. Swindoll',
-                                    ),
-                                    // Third Carousel Item
-                                    _buildCarouselItem(
-                                      icon: Icons.format_quote,
-                                      middleText:
-                                          'The purpose of our lives is to be happy.',
-                                      bottomText: 'Dalai Lama',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) {
-                                // Adjust the number of dots based on the number of images
-                                return Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 2.0, vertical: 15),
-                                  width: 8.0,
-                                  height: 8.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _currentIndex == index
-                                        ? Colors.black // Active dot color
-                                        : Colors.grey, // Inactive dot color
-                                  ),
-                                );
-                              }),
-                            ),
-                          ],
-                        )),
-                  ],
+          // color: const Color(0xffe0e0e0),
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              Text(
+                'Our Testimonial',
+                style: GoogleFonts.raleway(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
-              ],
-            )),
-        Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
-            child: Text(
-              'We are following all the CDC guidelines to ensure the safety of our customers and out staff members in this COVID situation',
-              style: GoogleFonts.raleway(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color(0XFFE2001A),
               ),
-            )),
+              const SizedBox(height: 20),
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: 200,
+                  autoPlay: true,
+                  viewportFraction: 1.0,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                ),
+                items: [
+                  _buildMobileCarouselItem(
+                    icon: Icons.format_quote,
+                    middleText:
+                        'The only limit to our realization of tomorrow is our doubts of today.',
+                    bottomText: 'Franklin D. Roosevelt',
+                  ),
+                  _buildMobileCarouselItem(
+                    icon: Icons.format_quote,
+                    middleText:
+                        'Life is 10% what happens to us and 90% how we react to it.',
+                    bottomText: 'Charles R. Swindoll',
+                  ),
+                  _buildMobileCarouselItem(
+                    icon: Icons.format_quote,
+                    middleText: 'The purpose of our lives is to be happy.',
+                    bottomText: 'Dalai Lama',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // CDC Guideline Text
+        Container(
+  padding: const EdgeInsets.all(16),
+  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [
+        Colors.red.shade50,
+        Colors.red.shade100,
+      ],
+    ),
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Icon(Icons.warning_amber_rounded,
+          color: const Color(0xFFE2001A), size: 40),
+
+      const SizedBox(height: 10),
+
+      Text(
+        'We follow all CDC COVID-19 safety guidelines for our customers and staff.',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.raleway(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          height: 1.5,
+          color: const Color(0XFFE2001A),
+        ),
+      ),
+    ],
+  ),
+),
+        buildRestaurantTimingCard(),
+        // Image.asset(
+        //   'assets/images/timing.png',
+        //   // fit: BoxFit.cover,
+        //   // height: 300,
+        // ),
       ],
     );
   }
@@ -1230,7 +1114,256 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+Widget buildRestaurantTimingCard() {
+  return Container(
+    // color: AppColors.appBg,
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+    decoration: BoxDecoration(
+      color: AppColors.appBg,
+      borderRadius: BorderRadius.circular(16),
+      // boxShadow: [
+      //   BoxShadow(
+      //     color: Colors.black.withOpacity(0.08),
+      //     blurRadius: 12,
+      //     offset: const Offset(0, 6),
+      //   ),
+      // ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // HEADLINE WITH LINES
+        Row(
+          children: [
+            const Expanded(
+              child: Divider(
+                color: AppColors.primary,
+                thickness: 1,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "Restaurant Timing",
+              style: GoogleFonts.raleway(
+                color: AppColors.primary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Divider(
+                color: AppColors.primary,
+                thickness: 1,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // OPEN STATUS PILL
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.red.shade50,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            "OPEN 7 DAYS WEEK",
+            style: GoogleFonts.raleway(
+              fontWeight: FontWeight.bold,
+              color: Colors.red.shade800,
+              fontSize: 14,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 22),
+
+        // TIMINGS SECTION
+        Column(
+          children: const [
+            _TimingRow(
+              dayText: "Monday to Thursday",
+              timeText: "11:30 AM - 9:30 PM",
+            ),
+            SizedBox(height: 12),
+            _TimingRow(
+              dayText: "Friday & Saturday",
+              timeText: "11:30 AM - 10:30 PM",
+            ),
+            SizedBox(height: 12),
+            _TimingRow(
+              dayText: "Sunday",
+              timeText: "11:30 AM - 9:30 PM",
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 22),
+
+        // CONTACT PHONE
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.phone, color: Colors.red, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "215-855-4900",
+              style: GoogleFonts.raleway(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // CONTACT EMAIL
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.email, color: Colors.red, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "contact@indian-grill.com",
+              style: GoogleFonts.raleway(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+class _TimingRow extends StatelessWidget {
+  final String dayText;
+  final String timeText;
+
+  const _TimingRow({
+    Key? key,
+    required this.dayText,
+    required this.timeText,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          dayText,
+          style: GoogleFonts.raleway(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          timeText,
+          style: GoogleFonts.raleway(
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+/// Helper widget for timing rows
+Widget _timingRow(String day, String hours) {
+  return Column(
+    children: [
+      Text(
+        day,
+        style: GoogleFonts.raleway(
+          fontSize: 19,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        hours,
+        style: GoogleFonts.raleway(
+          fontSize: 17,
+          color: Colors.black87,
+        ),
+      ),
+    ],
+  );
+}
+
 Widget _buildCarouselItem(
+    {required IconData icon,
+    required String middleText,
+    required String bottomText}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        // Top Icon
+        Icon(
+          icon,
+          size: 30,
+          color: Colors.red, // Customize color as needed
+        ),
+
+        Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: Text(
+            middleText,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.raleway(
+              fontSize: 16,
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Text(
+            bottomText,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.raleway(
+              fontSize: 14,
+              color: const Color(0xff666666),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildMobileCarouselItem(
     {required IconData icon,
     required String middleText,
     required String bottomText}) {

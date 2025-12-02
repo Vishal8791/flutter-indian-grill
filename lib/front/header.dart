@@ -701,191 +701,324 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
     );
   }
 
+  // Widget buildMobileLayout() {
+  //   return SafeArea(
+  //     // <-- Add this
+  //     child: Stack(
+  //       children: [
+  //         Container(
+  //           key: _headerKey,
+  //           color: Colors.white,
+  //           child: Column(
+  //             children: [
+  //               // Top bar: Phone + Login
+  //               // Top bar: Phone + Login/Register
+  //               // Container(
+  //               //   padding:
+  //               //       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+  //               //   child: Row(
+  //               //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               //     children: [
+  //               //       // Phone number
+  //               //       const Row(
+  //               //         children: [
+  //               //           FaIcon(
+  //               //             Icons.phone,
+  //               //             color: Colors.red,
+  //               //             size: 14,
+  //               //           ),
+  //               //           SizedBox(width: 8),
+  //               //           Text(
+  //               //             '215-855-4900',
+  //               //             style: TextStyle(
+  //               //               fontSize: 11,
+  //               //               fontWeight: FontWeight.bold,
+  //               //               color: Color(0xff666666),
+  //               //             ),
+  //               //           ),
+  //               //         ],
+  //               //       ),
+
+  //               //       // Login/Register logic (mobile version)
+  //               //       userSession.isLoggedIn
+  //               //           ? Row(
+  //               //             mainAxisSize: MainAxisSize.min,
+  //               //             children: [
+  //               //               // 🔹 "My Account" clickable text
+  //               //               MouseRegion(
+  //               //                 cursor: SystemMouseCursors.click,
+  //               //                 onEnter: (_) =>
+  //               //                     setState(() => _isHovering = true),
+  //               //                 onExit: (_) =>
+  //               //                     setState(() => _isHovering = false),
+  //               //                 child: GestureDetector(
+  //               //                   onTap: () {
+  //               //                     GoRouter.of(context)
+  //               //                         .pushNamed('my-account');
+  //               //                   },
+  //               //                   child: Text(
+  //               //                     'My Account',
+  //               //                     style: GoogleFonts.raleway(
+  //               //                       fontSize: 11,
+  //               //                       fontWeight: FontWeight.bold,
+  //               //                       color: _isHovering
+  //               //                           ? Color(0xffe2001A)
+  //               //                           : Colors.black,
+  //               //                     ),
+  //               //                   ),
+  //               //                 ),
+  //               //               ),
+
+  //               //               // 🔹 Vertical separator "|"
+  //               //               const Padding(
+  //               //                 padding: EdgeInsets.symmetric(horizontal: 8.0),
+  //               //                 child: Text(
+  //               //                   '|',
+  //               //                   style: TextStyle(
+  //               //                     fontSize: 20,
+  //               //                     color: Colors.grey,
+  //               //                   ),
+  //               //                 ),
+  //               //               ),
+
+  //               //               // 🔹 "Logout" clickable text
+  //               //               MouseRegion(
+  //               //                 cursor: SystemMouseCursors.click,
+  //               //                 child: GestureDetector(
+  //               //                   onTap: () {
+  //               //                     GoRouter.of(context).pushNamed('logout');
+  //               //                   },
+  //               //                   child: Text(
+  //               //                     'Logout',
+  //               //                     style: GoogleFonts.raleway(
+  //               //                       fontSize: 11,
+  //               //                       fontWeight: FontWeight.bold,
+  //               //                       color: Colors.red,
+  //               //                     ),
+  //               //                   ),
+  //               //                 ),
+  //               //               ),
+  //               //             ],
+  //               //           )
+  //               //           : Row(
+  //               //               children: [
+  //               //                 Visibility(
+  //               //                   visible: _isVisible,
+  //               //                   child: GestureDetector(
+  //               //                     onTap: () {
+  //               //                       GoRouter.of(context).pushNamed('login',
+  //               //                           extra: {'registration': 'yes'});
+  //               //                     },
+  //               //                     child: Text(
+  //               //                       'VIP REGISTRATION',
+  //               //                       style: GoogleFonts.raleway(
+  //               //                         fontSize: 11,
+  //               //                         fontWeight: FontWeight.bold,
+  //               //                         color: Colors.red,
+  //               //                       ),
+  //               //                     ),
+  //               //                   ),
+  //               //                 ),
+  //               //                 GestureDetector(
+  //               //                   onTap: () {
+  //               //                     GoRouter.of(context).pushNamed('login',
+  //               //                         extra: {'registration': 'no'});
+  //               //                   },
+  //               //                   child: Text(
+  //               //                     ' | LOGIN',
+  //               //                     style: GoogleFonts.raleway(
+  //               //                       fontSize: 11,
+  //               //                       fontWeight: FontWeight.bold,
+  //               //                       color: const Color(0xff666666),
+  //               //                     ),
+  //               //                   ),
+  //               //                 ),
+  //               //               ],
+  //               //             ),
+  //               //     ],
+  //               //   ),
+  //               // ),
+  //               // // Second row: Logo + Hamburger
+  //               Container(
+  //                 padding:
+  //                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+  //                 child: SizedBox(
+  //                   height: 60,
+  //                   child: Stack(
+  //                     alignment: Alignment.center,
+  //                     children: [
+  //                       // LEFT: Hamburger Menu
+  //                       Align(
+  //                         alignment: Alignment.centerLeft,
+  //                         child: Container(
+  //                           decoration: BoxDecoration(
+  //                             border: Border.all(
+  //                               color: Color(0XFFE2001A),
+  //                               width: 1.0,
+  //                             ),
+  //                             borderRadius: BorderRadius.circular(4),
+  //                           ),
+  //                           child: SizedBox(
+  //                             width: 34,
+  //                             height: 31,
+  //                             child: IconButton(
+  //                               icon: Icon(Icons.menu),
+  //                               onPressed: _toggleNavbar,
+  //                               iconSize: 18,
+  //                               color: const Color(0XFFE2001A),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+
+  //                       // CENTER: Logo (Always stays in center)
+  //                       Center(
+  //                         child: GestureDetector(
+  //                           onTap: () => GoRouter.of(context).pushNamed('home'),
+  //                           child: SizedBox(
+  //                             width: 140,
+  //                             child: Image.asset(
+  //                               'assets/images/logo/Indian-Grill-Logo.png',
+  //                               fit: BoxFit.contain,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+
+  //                       // RIGHT: Cart Icon
+  //                       Align(
+  //                         alignment: Alignment.centerRight,
+  //                         child: GestureDetector(
+  //                           onTap: () {
+  //                             GoRouter.of(context).pushNamed('cart');
+  //                           },
+  //                           child: Stack(
+  //                             clipBehavior: Clip.none,
+  //                             children: [
+  //                               Container(
+  //                                 padding: const EdgeInsets.all(8),
+  //                                 decoration: BoxDecoration(
+  //                                   color: Color(0XFFE2001A),
+  //                                   borderRadius: BorderRadius.circular(6),
+  //                                 ),
+  //                                 child: const Icon(
+  //                                   Icons.shopping_cart_outlined,
+  //                                   color: Colors.white,
+  //                                 ),
+  //                               ),
+
+  //                               // Cart badge
+  //                               Positioned(
+  //                                 right: -4,
+  //                                 top: -4,
+  //                                 child: Consumer<Cart>(
+  //                                   builder: (context, cart, child) {
+  //                                     return Container(
+  //                                       padding: const EdgeInsets.all(5),
+  //                                       decoration: const BoxDecoration(
+  //                                         color: Colors.red,
+  //                                         shape: BoxShape.circle,
+  //                                       ),
+  //                                       child: Text(
+  //                                         '${cart.itemCount}',
+  //                                         style: const TextStyle(
+  //                                           color: Colors.white,
+  //                                           fontSize: 10,
+  //                                           fontWeight: FontWeight.bold,
+  //                                         ),
+  //                                       ),
+  //                                     );
+  //                                   },
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               )
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget buildMobileLayout() {
-    return SafeArea(
-      // <-- Add this
-      child: Stack(
+    final cart = Provider.of<Cart>(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            key: _headerKey,
-            color: Colors.white,
-            child: Column(
-              children: [
-                // Top bar: Phone + Login
-                // Top bar: Phone + Login/Register
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Phone number
-                      const Row(
-                        children: [
-                          FaIcon(
-                            Icons.phone,
-                            color: Colors.red,
-                            size: 14,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '215-855-4900',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff666666),
-                            ),
-                          ),
-                        ],
-                      ),
+          // Left: Drawer icon
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // Open drawer
+            },
+          ),
 
-                      // Login/Register logic (mobile version)
-                      userSession.isLoggedIn
-                          ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // 🔹 "My Account" clickable text
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                onEnter: (_) =>
-                                    setState(() => _isHovering = true),
-                                onExit: (_) =>
-                                    setState(() => _isHovering = false),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    GoRouter.of(context)
-                                        .pushNamed('my-account');
-                                  },
-                                  child: Text(
-                                    'My Account',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: _isHovering
-                                          ? Color(0xffe2001A)
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // 🔹 Vertical separator "|"
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(
-                                  '|',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-
-                              // 🔹 "Logout" clickable text
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    GoRouter.of(context).pushNamed('logout');
-                                  },
-                                  child: Text(
-                                    'Logout',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                          : Row(
-                              children: [
-                                Visibility(
-                                  visible: _isVisible,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      GoRouter.of(context).pushNamed('login',
-                                          extra: {'registration': 'yes'});
-                                    },
-                                    child: Text(
-                                      'VIP REGISTRATION',
-                                      style: GoogleFonts.raleway(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    GoRouter.of(context).pushNamed('login',
-                                        extra: {'registration': 'no'});
-                                  },
-                                  child: Text(
-                                    ' | LOGIN',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xff666666),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ],
-                  ),
+          // Center: Logo
+          Expanded(
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  context.go('/'); // Navigate to homepage
+                },
+                child: Image.asset(
+                  'assets/images/logo/Indian-Grill-Logo.png',
+                  fit: BoxFit.contain,
+                  height: 50,
                 ),
-                // Second row: Logo + Hamburger
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Logo
-                      SizedBox(
-                        width: 120,
-                        height: 60,
-                        child: GestureDetector(
-                          onTap: () {
-                            GoRouter.of(context).pushNamed('home');
-                          },
-                          child: Image.asset(
-                            'assets/images/logo/Indian-Grill-Logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-
-                      // Hamburger menu
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color(0XFFE2001A),
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: SizedBox(
-                          width: 34,
-                          height: 31,
-                          child: IconButton(
-                            icon: FaIcon(Icons.menu),
-                            onPressed: _toggleNavbar,
-                            iconSize: 18,
-                            color: const Color(0XFFE2001A),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
+
+          // Right: Cart with badge
+          Stack(
+            clipBehavior: Clip.none, // allow badge to overflow
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: () {
+                  GoRouter.of(context)
+                      .pushNamed('cart'); // navigate to cart page
+                },
+              ),
+              if (cart.itemCount > 0)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Center(
+                      child: Text(
+                        cart.itemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          )
         ],
       ),
     );

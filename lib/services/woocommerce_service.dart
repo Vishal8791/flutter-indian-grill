@@ -40,6 +40,20 @@ class WooCommerceService {
     }
   }
 
+  Future<Map<String, dynamic>> validateCoupon(String code) async {
+  final url =
+      "https://dev.indian-grill.com/wp-json/custom/v1/validate-coupon?code=$code";
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Coupon validation error");
+  }
+}
+
+
   // Fetch custom fields for products
   Future<List<String>> fetchCustomFields() async {
     final response = await http.get(

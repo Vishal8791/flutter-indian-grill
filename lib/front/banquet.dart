@@ -300,7 +300,8 @@ class Banquet extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageWidth = screenWidth * 0.9;
     final imageHeight = imageWidth * 0.7;
-    return Container(
+    return SingleChildScrollView(
+    child:Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
@@ -459,6 +460,7 @@ class Banquet extends StatelessWidget {
           )
         ],
       ),
+    )
     );
   }
 

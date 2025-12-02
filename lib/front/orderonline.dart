@@ -29,6 +29,13 @@ class _OrderOnlineState extends State<OrderOnline> {
   int totalPages = 1;
   String? selectedCategoryId = '60';
   final ScrollController _scrollController = ScrollController();
+  // MOBILE infinite scroll state
+  final ScrollController mobileScrollController = ScrollController();
+  List<dynamic> mobileProducts = [];
+  int mobilePage = 1;
+  bool mobileLoading = false;
+  bool mobileHasMore = true;
+
   final List<String> notes = [
     "Allow extra 15 minutes for preparation time on Friday and Saturday than average waiting time.",
     "Payment by Credit Card the order amount must be at least \$15, in order to pay by Paypal/Credit Card"
@@ -36,12 +43,90 @@ class _OrderOnlineState extends State<OrderOnline> {
   int? expandedIndex; // Track expanded index
 
   @override
-  void initState() {
-    super.initState();
-    fetchCategories();
-    fetchTotalProductsCount();
-    fetchProducts(page: currentPage, category: selectedCategoryId);
+void initState() {
+  super.initState();
+
+  // existing initial calls (keep these if you still want desktop data)
+  fetchCategories();
+  fetchTotalProductsCount();
+  fetchProducts(page: currentPage, category: selectedCategoryId);
+
+  // mobile infinite scroll initial load & listener
+  _loadInitialMobileProducts();
+mobileScrollController.addListener(() {
+  //print("Scrolling...  pixels = ${mobileScrollController.position.pixels}");
+
+  if (mobileScrollController.position.pixels >=
+      mobileScrollController.position.maxScrollExtent - 200) {
+  //  print("🔥 Reached bottom threshold — should load more");
+    _loadMoreMobileProducts();
   }
+});
+
+}
+
+
+  Future<void> _loadFirstMobilePage() async {
+  setState(() {
+    mobileProducts = [];
+    mobilePage = 1;
+    mobileHasMore = true;
+  });
+
+  await _loadMoreMobileProducts();
+}
+
+/// Resets and loads the first page for mobile
+Future<void> _loadInitialMobileProducts() async {
+  setState(() {
+    mobileProducts = [];
+    mobilePage = 1;
+    mobileHasMore = true;
+    mobileLoading = false;
+  });
+
+  await _loadMoreMobileProducts();
+}
+
+/// Loads next page and appends results (uses your existing wooCommerceService)
+Future<void> _loadMoreMobileProducts() async {
+  if (mobileLoading || !mobileHasMore) return;
+
+  setState(() => mobileLoading = true);
+
+  try {
+    final int offset = (mobilePage - 1) * productsPerPage;
+
+    final List<dynamic> fetched = await wooCommerceService.fetchProducts(
+      offset: offset,
+      productsPerPage: productsPerPage,
+      category: selectedCategoryId,
+    );
+
+    setState(() {
+      if (fetched.isNotEmpty) {
+        mobileProducts.addAll(fetched);
+
+        // If fetched fewer than page size, no more pages.
+        if (fetched.length < productsPerPage) {
+          mobileHasMore = false;
+        } else {
+          mobilePage++;
+        }
+      } else {
+        mobileHasMore = false;
+      }
+    });
+  } catch (e) {
+    // optionally show error/snackbar
+    debugPrint("Error loading mobile products: $e");
+  } finally {
+    if (mounted) {
+      setState(() => mobileLoading = false);
+    }
+  }
+}
+
 
   void fetchCategories() async {
     try {
@@ -62,6 +147,7 @@ class _OrderOnlineState extends State<OrderOnline> {
 
   @override
   void dispose() {
+    mobileScrollController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -109,6 +195,7 @@ class _OrderOnlineState extends State<OrderOnline> {
     if (categoryId != null) {
       fetchProducts(page: 1, category: selectedCategoryId);
       fetchTotalProductsCount();
+      _loadInitialMobileProducts();
     }
   }
 
@@ -134,64 +221,114 @@ class _OrderOnlineState extends State<OrderOnline> {
   }
 
   Widget _buildMobileLayout() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          _buildProductList(),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Special Notes",
-                    style: GoogleFonts.raleway(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+  return Container(
+    color: Colors.white,
+    height: MediaQuery.of(context).size.height,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // CATEGORY BAR (Fixed)
+        HorizontalSidebarWidget(
+          items: categories,
+          onCategorySelected: onCategorySelected,
+          selectedCategoryId: selectedCategoryId,
+        ),
+
+        const SizedBox(height: 10),
+
+        // Scrollable part
+        Expanded(
+          child: SingleChildScrollView(
+            controller: mobileScrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // PRODUCT LIST (non-scrollable ListView)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: mobileProducts.length + (mobileHasMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == mobileProducts.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    final product = mobileProducts[index];
+
+                    return MobileMenuItemCard(
+                      key: ValueKey(index),
+                      foodType: product['foodType'],
+                      title: product['name'],
+                      productId: product['productId'],
+                      optionName: product['optionName'],
+                      description: product['description'] ?? "No description available",
+                      price: double.tryParse(product['price'] ?? "0") ?? 0.0,
+                      isExpanded: expandedIndex == index,
+                      onExpand: () {
+                        setState(() {
+                          expandedIndex = expandedIndex == index ? null : index;
+                        });
+                      },
+                      baseOptions: List<String>.from(product['baseOptions'] ?? []),
+                      comboOptions: List<String>.from(product['comboOptions'] ?? []),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // SPECIAL NOTES
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  const SizedBox(height: 8),
-                  ...notes.map((note) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("•  ",
-                                style: GoogleFonts.raleway(
-                                  fontSize: 12,
-                                )),
-                            Expanded(
-                              child: Text(
-                                note,
-                                style: GoogleFonts.raleway(fontSize: 14),
-                              ),
-                            ),
-                          ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Special Notes",
+                        style: GoogleFonts.raleway(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                      )),
-                ],
-              ),
+                      ),
+                      const SizedBox(height: 10),
+                      ...notes.map(
+                        (note) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("•  ",
+                                  style: GoogleFonts.raleway(fontSize: 12)),
+                              Expanded(
+                                child: Text(
+                                  note,
+                                  style: GoogleFonts.raleway(fontSize: 13.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          SidebarWidget(
-            items: categories,
-            onCategorySelected: onCategorySelected,
-            selectedCategoryId: null,
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildTabletLayout() {
     return Container(
@@ -327,7 +464,30 @@ class _OrderOnlineState extends State<OrderOnline> {
                 ),
               ),
             ),
-          )
+          ),
+          const SizedBox(height: 10,),
+          Row(
+          children: [
+            Row(
+              children: [
+                Image.asset('assets/images/veg.png', width: 28, height: 28),
+                const SizedBox(width: 4),
+                const Text('Veg', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Container(width: 1, height: 18, color: Colors.grey),
+            const SizedBox(width: 12),
+            Row(
+              children: [
+                Image.asset('assets/images/spicy.jpg', width: 28, height: 28),
+                const SizedBox(width: 4),
+                const Text('Spicy', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
+    
         ],
       ),
     );
@@ -377,6 +537,8 @@ class _OrderOnlineState extends State<OrderOnline> {
       ],
     );
   }
+
+  
 }
 
 class MenuItemCard extends StatefulWidget {
@@ -771,26 +933,46 @@ class _MenuItemCardState extends State<MenuItemCard> {
 void _showAlertBox(BuildContext context, String message) {
   showDialog(
     context: context,
-    barrierDismissible: false, // Prevent dismissing when tapping outside
+    barrierDismissible: false, // Prevent dismissing by tapping outside
     builder: (BuildContext context) {
       return Center(
         child: Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
           ),
-          elevation: 16,
+          elevation: 10,
+          backgroundColor: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.warning, color: Colors.orange, size: 40),
-                const SizedBox(height: 10),
+                // Icon inside a circle
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 40,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Message text
                 Text(
-                  message, // Use the message passed in
+                  message,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xff333333),
+                  ),
                 ),
               ],
             ),
@@ -800,9 +982,11 @@ void _showAlertBox(BuildContext context, String message) {
     },
   );
 
-  // Dismiss the dialog after 1 second
-  Future.delayed(const Duration(seconds: 1), () {
-    Navigator.of(context).pop();
+  // Automatically dismiss the dialog after 1.5 seconds
+  Future.delayed(const Duration(milliseconds: 1500), () {
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+    }
   });
 }
 
@@ -1204,5 +1388,383 @@ class WooCommerceCategory {
     } catch (error) {
       throw Exception('Error fetching subcategories: $error');
     }
+  }
+}
+
+class HorizontalSidebarWidget extends StatelessWidget {
+  final List<Map<String, String>> items;
+  final ValueChanged<Map<String, String>> onCategorySelected;
+  final String? selectedCategoryId;
+
+  const HorizontalSidebarWidget({
+    super.key,
+    required this.items,
+    required this.onCategorySelected,
+    required this.selectedCategoryId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 50,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(items.length, (index) {
+                final category = items[index];
+                final isSelected = category['id'] == selectedCategoryId;
+
+                return GestureDetector(
+                  onTap: () => onCategorySelected(category),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? Color(0xffe2001A)
+                            : Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      category['name'] ?? 'Unknown',
+                      style: GoogleFonts.raleway(
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.black
+                            : const Color(0xff666666),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // VEG / SPICY SECTION (same as original)
+         ],
+    );
+  }
+}
+
+class MobileMenuItemCard extends StatefulWidget {
+  final String title;
+  final String foodType;
+  final int productId;
+  final String optionName;
+  final String description;
+  final double price;
+  final bool isExpanded;
+  final VoidCallback onExpand;
+  final List<String> baseOptions;
+  final List<String> comboOptions;
+
+  const MobileMenuItemCard({
+    super.key,
+    required this.title,
+    required this.foodType,
+    required this.productId,
+    required this.optionName,
+    required this.description,
+    required this.price,
+    required this.isExpanded,
+    required this.onExpand,
+    required this.baseOptions,
+    required this.comboOptions,
+  });
+
+  @override
+  State<MobileMenuItemCard> createState() => _MobileMenuItemCardState();
+}
+
+class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
+  int quantity = 1;
+  String? selectedPreparation;
+  String? selectedChoice;
+
+  final TextEditingController _specialInstController = TextEditingController();
+
+  @override
+  void dispose() {
+    _specialInstController.dispose();
+    super.dispose();
+  }
+
+  void _increaseQty() {
+    setState(() => quantity++);
+  }
+
+  void _decreaseQty() {
+    if (quantity > 1) {
+      setState(() => quantity--);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onExpand,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ---------- TITLE + PRICE ----------
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Veg / Spicy icons
+                Column(
+                  children: [
+                    if (widget.foodType.toLowerCase().contains("veg"))
+                      Image.asset("assets/images/veg.png",
+                          width: 20, height: 20),
+                    if (widget.foodType.toLowerCase().contains("spicy"))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Image.asset("assets/images/spicy.jpg",
+                            width: 20, height: 20),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: GoogleFonts.raleway(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.description,
+                        style: GoogleFonts.raleway(
+                            fontSize: 13, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Text(
+                  "\$${widget.price.toStringAsFixed(2)}",
+                  style: GoogleFonts.raleway(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
+                ),
+              ],
+            ),
+
+            // ---------- EXPANDED AREA ----------
+            AnimatedCrossFade(
+              firstChild: const SizedBox(),
+              secondChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+
+                  // -------- Base Options ----------
+                  if (widget.baseOptions.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.optionName,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red)),
+                        const SizedBox(height: 6),
+                        ...widget.baseOptions.map((option) {
+                          return Row(
+                            children: [
+                              Radio<String>(
+                                value: option,
+                                groupValue: selectedPreparation,
+                                onChanged: (val) =>
+                                    setState(() => selectedPreparation = val),
+                              ),
+                              Text(option,
+                                  style: const TextStyle(fontSize: 14)),
+                            ],
+                          );
+                        }).toList()
+                      ],
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  // -------- Combo Option ----------
+                  if (widget.comboOptions.isNotEmpty &&
+                      selectedPreparation != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Choice of with Rice:",
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red)),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: widget.comboOptions.first,
+                              groupValue: selectedChoice,
+                              onChanged: (v) =>
+                                  setState(() => selectedChoice = v),
+                            ),
+                            Text(
+                              widget.comboOptions.first
+                                  .replaceFirst(RegExp(r'^.*\+\s*'), '')
+                                  .replaceAllMapped(
+                                      RegExp(r'\(\+\s*\$?([\d.]+)\)'),
+                                      (m) => '(\$${m.group(1)})'),
+                              style: const TextStyle(fontSize: 14),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  // -------- Special Instruction ----------
+                  const Text("Special Instruction:",
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: _specialInstController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // -------- Quantity + Add to Cart ----------
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Quantity
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey.shade200,
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                                onPressed: _decreaseQty,
+                                icon: const Icon(Icons.remove)),
+                            Text(quantity.toString(),
+                                style: const TextStyle(fontSize: 16)),
+                            IconButton(
+                                onPressed: _increaseQty,
+                                icon: const Icon(Icons.add)),
+                          ],
+                        ),
+                      ),
+
+                      // -------- Add to Cart --------
+                      ElevatedButton(
+                        onPressed: () {
+                          final prep = selectedPreparation ?? "";
+                          final choice = selectedChoice ?? "";
+                          final instruction =
+                              _specialInstController.text.trim();
+
+                          if (widget.baseOptions.isNotEmpty &&
+                              selectedPreparation == null) {
+                            _showAlertBox(context,
+                                "Please select a preparation option");
+                            return;
+                          }
+
+                          List<Map<String, String>> selectedOptions = [];
+
+                          if (selectedPreparation != null) {
+                            selectedOptions
+                                .add({widget.optionName: selectedPreparation!});
+                          }
+
+                          if (widget.baseOptions.isNotEmpty) {
+                            selectedOptions.add({
+                              "Choice of with Rice:":
+                                  selectedChoice != null ? "Yes" : "No"
+                            });
+                          }
+
+                          final combinedOption = (prep.isNotEmpty &&
+                                  choice.isNotEmpty)
+                              ? "$prep + $choice"
+                              : "$prep$choice";
+
+                          _addToCart(
+                            context,
+                            widget.productId,
+                            widget.title,
+                            widget.price,
+                            quantity,
+                            combinedOption,
+                            instruction,
+                            selectedOptions,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xffE2001A),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 20),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text("Add to cart",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              crossFadeState: widget.isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 200),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

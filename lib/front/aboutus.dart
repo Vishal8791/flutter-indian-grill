@@ -418,7 +418,8 @@ class _AboutusState  extends State<Aboutus> {
     int currentIndex = 0;
     final PageController _pageController = PageController(viewportFraction: 0.85);
    
-    return Container(
+    return SingleChildScrollView(
+    child:Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
       child: Align(
@@ -828,6 +829,7 @@ class _AboutusState  extends State<Aboutus> {
           ],
         ),
       ),
+    )
     );
   }
 

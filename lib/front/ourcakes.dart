@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
+import 'package:indiangrill/front/orderonline.dart';
+import 'package:indiangrill/style/style.dart' show AppColors;
 
 class OurCakes extends StatefulWidget {
   const OurCakes({super.key});
@@ -12,11 +14,13 @@ class OurCakes extends StatefulWidget {
 }
 
 class _OurCakesState extends State<OurCakes> {
+  late bool isMobileDevice;
   final WooCommerceService wooCommerceService = WooCommerceService();
   final WooCommerceCategory wooCommerceCategory = WooCommerceCategory();
   List<dynamic> products = [];
   List<Map<String, String>> categories = []; // Dynamic categories list with IDs
   bool isLoading = false;
+  bool isLoadingMore = false;
   int currentPage = 1;
   int totalProducts = 0;
   int productsPerPage = 21;
@@ -27,11 +31,48 @@ class _OurCakesState extends State<OurCakes> {
   @override
   void initState() {
     super.initState();
+    final screenWidth = WidgetsBinding.instance.window.physicalSize.width /
+        WidgetsBinding.instance.window.devicePixelRatio;
+    isMobileDevice = screenWidth < 600;
     fetchCategories(); // Fetch categories
     fetchTotalProductsCount(); // Fetch total count
     fetchProducts(
         page: currentPage,
         category: selectedCategoryId); // Fetch products for the first page
+    if (isMobileDevice) {
+      _scrollController.addListener(_onScroll);
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (!isLoadingMore && currentPage < totalPages) {
+        loadMoreProducts();
+      }
+    }
+  }
+
+  void loadMoreProducts() async {
+    if (isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    int nextPage = currentPage + 1;
+
+    List<dynamic> moreProducts = await wooCommerceService.fetchProducts(
+      offset: (nextPage - 1) * productsPerPage,
+      productsPerPage: productsPerPage,
+      category: selectedCategoryId,
+    );
+
+    setState(() {
+      currentPage = nextPage;
+      products.addAll(moreProducts);
+      isLoadingMore = false;
+    });
   }
 
   void fetchCategories() async {
@@ -53,6 +94,9 @@ class _OurCakesState extends State<OurCakes> {
 
   @override
   void dispose() {
+    if (isMobileDevice) {
+      _scrollController.removeListener(_onScroll);
+    }
     _scrollController.dispose(); // Dispose controller when not needed
     super.dispose();
   }
@@ -75,10 +119,13 @@ class _OurCakesState extends State<OurCakes> {
 
     setState(() {
       isLoading = false;
-      products = fetchedProducts;
+
       currentPage = page;
-      if (page == 1) {
+      if (page == 1 || !isMobileDevice) {
+        products = fetchedProducts;
         fetchTotalProductsCount(); // Recalculate total products count when changing category
+      } else {
+        products.addAll(fetchedProducts);
       }
     });
   }
@@ -211,27 +258,123 @@ class _OurCakesState extends State<OurCakes> {
     );
   }
 
-  Widget buildMobileLayout() {
+   Widget buildMobileLayout() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-      child: SingleChildScrollView(
-        // Add scroll support
+      height: MediaQuery.of(context).size.height, // Provides constraints
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildProductsArea(),
-            const SizedBox(height: 20),
-            SidebarWidget(
+            HorizontalSidebarWidget(
               items: categories,
               onCategorySelected: onCategorySelected,
               selectedCategoryId: selectedCategoryId,
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: buildMobileProductsGrid(),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget buildMobileProductsGrid() {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+    final bottomNavHeight = isMobile ? kBottomNavigationBarHeight : 0;
+
+    if (isLoading && products.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return GridView.builder(
+      controller: _scrollController, // infinite scroll works
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + bottomNavHeight + 70,
+      ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.6, // matches your design
+      ),
+      itemCount: products.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == products.length) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: CircularProgressIndicator(color: Colors.red),
+            ),
+          );
+        }
+
+        return ProductCardMobile(product: products[index]);
+      },
+    );
+  }
+
+  // Widget buildMobileLayout() {
+  //   return Container(
+  //     color: Colors.white,
+  //     height: MediaQuery.of(context).size.height, // Provides constraints
+  //     child: Padding(
+  //       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           HorizontalSidebarWidget(
+  //             items: categories,
+  //             onCategorySelected: onCategorySelected,
+  //             selectedCategoryId: selectedCategoryId,
+  //           ),
+  //           const SizedBox(height: 20),
+  //           Expanded(
+  //             child: buildMobileProductsGrid(),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Widget buildMobileProductsGrid() {
+  //   final bool isMobile = MediaQuery.of(context).size.width < 600;
+  //   final bottomNavHeight = isMobile ? kBottomNavigationBarHeight : 0;
+
+  //   if (isLoading && products.isEmpty) {
+  //     return const Center(child: CircularProgressIndicator());
+  //   }
+
+  //   return GridView.builder(
+  //     controller: _scrollController, // infinite scroll works
+  //     padding: EdgeInsets.only(
+  //       bottom: MediaQuery.of(context).padding.bottom + bottomNavHeight + 70,
+  //     ),
+  //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  //       crossAxisCount: 1,
+  //       // mainAxisSpacing: 12,
+  //       // crossAxisSpacing: 12,
+  //       // childAspectRatio: 0.72, // matches your design
+  //     ),
+  //     itemCount: products.length + (isLoadingMore ? 1 : 0),
+  //     itemBuilder: (context, index) {
+  //       if (index == products.length) {
+  //         return const Center(
+  //           child: Padding(
+  //             padding: EdgeInsets.all(12),
+  //             child: CircularProgressIndicator(color: Colors.red),
+  //           ),
+  //         );
+  //       }
+
+  //       return ProductCard(product: products[index]);
+  //     },
+  //   );
+  // }
 
   Widget buildProductsArea() {
     return Column(
@@ -248,7 +391,7 @@ class _OurCakesState extends State<OurCakes> {
                     isMobile: true,
                   ),
                   const SizedBox(height: 20),
-                  if (totalProducts > productsPerPage)
+                  if (!isMobileDevice && totalProducts > productsPerPage)
                     PaginationBar(
                       currentPage: currentPage,
                       totalPages: totalPages,
@@ -257,6 +400,110 @@ class _OurCakesState extends State<OurCakes> {
                 ],
               ),
       ],
+    );
+  }
+}
+
+class ProductCardMobile extends StatelessWidget {
+  final dynamic product;
+
+  const ProductCardMobile({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    String imageUrl = product['image'] ?? 'https://via.placeholder.com/200';
+    String safeImageUrl =
+        'https://images.weserv.nl/?url=${Uri.encodeComponent(imageUrl)}';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color:Color.fromARGB(255, 255, 135, 135),width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ---------------- IMAGE SECTION ----------------
+          GestureDetector(
+            onTap: () {
+              GoRouter.of(context).pushNamed('cakeDetails', extra: product);
+            },
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Container(
+                height: 150,
+                width: double.infinity,
+                color: Colors.grey.shade100,
+                child: Image.network(
+                  safeImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 40),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ---------------- NAME ----------------
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: SizedBox(
+              height: 40,
+              child:Center(
+              child: Text(
+                product['name'] ?? 'Cake Item',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              ),
+            ),
+          ),
+
+          const Spacer(),
+
+          // ---------------- ORDER NOW BUTTON ----------------
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: SizedBox(
+              height: 40,
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  GoRouter.of(context).pushNamed('orderCake', extra: product);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffE2001A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  "Order Now",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -406,8 +653,7 @@ class ProductGrid extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                   GoRouter.of(context)
-                        .pushNamed('orderCake', extra: product);
+                    GoRouter.of(context).pushNamed('orderCake', extra: product);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xffE2001A),
@@ -480,7 +726,8 @@ class PaginationBar extends StatelessWidget {
 }
 
 class WooCommerceService {
-  final String baseUrl = 'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
+  final String baseUrl =
+      'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
   final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
   final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
   final String cakeCategoryId = '73';

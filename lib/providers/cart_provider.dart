@@ -78,6 +78,30 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
+  // ✅ Coupon variables
+  String? appliedCouponCode;
+  double couponDiscount = 0.0;
+
+  // Apply coupon
+  void applyCoupon(String code, double discount) {
+    appliedCouponCode = code;
+    couponDiscount = discount;
+    notifyListeners();
+  }
+
+  // Remove coupon
+  void removeCoupon() {
+    appliedCouponCode = null;
+    couponDiscount = 0.0;
+    notifyListeners();
+  }
+
+  // Total after discount
+  double get totalAfterDiscount {
+    return total - couponDiscount;
+  }
+
+
   void addItem(
     String productId,
     String title,
@@ -186,6 +210,13 @@ class Cart with ChangeNotifier {
     String cartJson = json.encode(cartList);
     await prefs.setString('cart', cartJson);
     await prefs.setDouble('tipAmount', _tipAmount); // ✅ save tip separately
+     if (appliedCouponCode != null) {
+    await prefs.setString('appliedCouponCode', appliedCouponCode!);
+    await prefs.setDouble('couponDiscount', couponDiscount);
+  } else {
+    await prefs.remove('appliedCouponCode');
+    await prefs.remove('couponDiscount');
+  }
   }
 
   // ✅ Load cart + tip from SharedPreferences
@@ -201,6 +232,8 @@ class Cart with ChangeNotifier {
           item['id']: CartItem.fromMap(item as Map<String, dynamic>)
       };
     }
+    appliedCouponCode = prefs.getString('appliedCouponCode');
+  couponDiscount = prefs.getDouble('couponDiscount') ?? 0.0;
   }
 
   // Load the cart when the app starts

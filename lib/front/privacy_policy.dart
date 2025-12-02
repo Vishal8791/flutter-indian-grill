@@ -14,7 +14,8 @@ class PrivacyPolicy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView( 
+    child:Container(
         color: Colors.white,
         child: LayoutBuilder(builder: (context, Constraints) {
           double screenWidth = Constraints.maxWidth;
@@ -41,7 +42,8 @@ class PrivacyPolicy extends StatelessWidget {
               return buildMobileLayout(); // Mobile layout for web
             }
           }
-        }));
+        }))
+        );
   }
 
   Widget buildDesktopLayout() {

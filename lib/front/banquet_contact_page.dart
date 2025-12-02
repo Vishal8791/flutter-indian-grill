@@ -130,7 +130,8 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
   }
 
   Widget buildMobileLayout() {
-    return Container(
+    return SingleChildScrollView(
+        child: Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
@@ -147,7 +148,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
           buildFormContent(fullWidth: true), // mobile-friendly version
         ],
       ),
-    );
+    ));
   }
 
   /// Extracted form content so all layouts reuse the same logic
@@ -304,49 +305,48 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                   width: fullWidth ? double.infinity : null,
                   padding: const EdgeInsets.only(top: 20),
                   child: ElevatedButton(
-                    onPressed: () async {
-  if (_formKey.currentState!.validate()) {
-    setState(() {
-      isLoading = true;
-    });
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            isLoading = true;
+                          });
 
-    await submitbanquetForm(context);
+                          await submitbanquetForm(context);
 
-    setState(() {
-      isLoading = false;
-    });
-  }
-},
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xffe2001a),
-                      textStyle: const TextStyle(fontSize: 18),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xffe2001a),
+                        textStyle: const TextStyle(fontSize: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
-                    ),
-                     child: isLoading
-    ? const SizedBox(
-        height: 22,
-        width: 22,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.white,
-        ),
-      )
-    : Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-  child: Text(
-    'Submit',
-    style: GoogleFonts.raleway(
-      fontSize: 18,
-      fontWeight: FontWeight.w700,
-    ),
-  ),
-)
-
-                  ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 2),
+                              child: Text(
+                                'Submit',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            )),
                 ),
               ]
                   .expand((widget) => [widget, const SizedBox(height: 8)])

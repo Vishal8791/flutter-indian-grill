@@ -60,8 +60,8 @@ class MyAppRouter {
           builder: (context, state) => const MainLayout(child: OrderOnline()),
         ),
         GoRoute(
-          name: 'category-enquiry',
-          path: '/category-enquiry',
+          name: 'catering-enquiry',
+          path: '/catering-enquiry',
           builder: (context, state) =>
               const MainLayout(child: CateringEnquiry()),
         ),
@@ -147,12 +147,12 @@ class MyAppRouter {
         GoRoute(
           name: 'cart',
           path: '/cart',
-          builder: (context, state) => const MainLayout(child: CartScreen()),
+          builder: (context, state) => const MainLayout(child: CartScreen(), hideHeader: true),
         ),
         GoRoute(
           name: 'checkout',
           path: '/checkout',
-          builder: (context, state) => const MainLayout(child: CheckoutPage()),
+          builder: (context, state) => const MainLayout(child: CheckoutPage(), hideHeader: true),
         ),
         GoRoute(
           name: 'lost-password',
@@ -169,6 +169,7 @@ class MyAppRouter {
                 extras['orderId'] == null ||
                 extras['items'] == null ||
                 extras['paymentMethod'] == null ||
+                extras['shippingMethod'] == null ||
                 extras['totals'] == null) {
               return '/';   // ✅ valid here
             }
@@ -183,6 +184,7 @@ class MyAppRouter {
                 orderId: extras['orderId'].toString(),
                 items: extras['items'],
                 paymentMethod: extras['paymentMethod'].toString(),
+                shippingMethod: extras['shippingMethod'].toString(),
                 totals: extras['totals'],
               ),
             );

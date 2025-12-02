@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:indiangrill/project/routes/app_routes_config.dart';
 import 'package:indiangrill/session/user_session.dart';
+import 'package:indiangrill/style/style.dart' show AppColors;
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 
@@ -53,7 +54,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Indian Grill',
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.appBg,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.red,
           surface: Colors.white,

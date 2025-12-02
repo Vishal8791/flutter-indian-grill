@@ -216,7 +216,8 @@ class BanquetMenu extends StatelessWidget {
   }
 
   Widget buildMobileLayout() {
-    return Container(
+    return SingleChildScrollView(
+    child:Container(
       color: Colors.white,
       // Adjusted padding for better alignment
       child: Column(
@@ -302,6 +303,7 @@ class BanquetMenu extends StatelessWidget {
               ])),
         ],
       ),
+    )
     );
   }
 

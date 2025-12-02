@@ -923,7 +923,9 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
   }
 
   Widget buildMobileLayout() {
-    return Container(
+    return SingleChildScrollView(
+    
+   child: Container(
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
       color: Colors.white,
       child: Column(
@@ -1560,7 +1562,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
                             shape:
                                 WidgetStateProperty.all<RoundedRectangleBorder>(
                               RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(25),
                               ),
                             ),
                           ),
@@ -1573,19 +1575,22 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
           color: Colors.white,
         ),
       )
-    : Text(
+    :Center( 
+    child:Text(
         'Send',
         style: GoogleFonts.raleway(
           fontSize: 18,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
         ),
       ),
                         )
+                      )
                       : const SizedBox()),
             ],
           ),
         ],
       ),
+    )
     );
   }
 

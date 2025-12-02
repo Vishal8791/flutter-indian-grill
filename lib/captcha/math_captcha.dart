@@ -67,7 +67,7 @@ class _MathCaptchaState extends State<MathCaptcha> {
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(0),
+              borderRadius: BorderRadius.circular(10),
               borderSide:
                   const BorderSide(color: Color(0xff666666), width: 0.5),
             ),

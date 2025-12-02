@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiangrill/main.dart';
 import 'package:indiangrill/providers/cart_provider.dart';
+import 'package:indiangrill/services/woocommerce_service.dart';
+import 'package:indiangrill/style/style.dart' show AppColors;
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:indiangrill/front/header_back_button.dart';
 class CartScreen extends StatefulWidget {
   static const routeName = '/cart';
-
+  
   const CartScreen({super.key});
 
   @override
@@ -19,7 +21,12 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final TextEditingController _tipController = TextEditingController();
- double _tipAmount = 0.0;
+  double _tipAmount = 0.0;
+  String? appliedCouponCode;
+  double couponDiscount = 0.0;
+  bool isApplyingCoupon = false;
+  String? _couponError;
+  bool _couponApplying = false;
 
   @override
   void initState() {
@@ -37,6 +44,72 @@ class _CartScreenState extends State<CartScreen> {
     });
     cart.setTip(_tipAmount); // ✅ Save to SharedPreferences
   }
+  void removeCoupon() {
+  final code = Provider.of<Cart>(context, listen: false).appliedCouponCode;
+  Provider.of<Cart>(context, listen: false).removeCoupon();
+  setState(() {
+    _couponError = null;
+  });
+   showCouponDialog(
+    context: context,
+    title: "Coupon Removed",
+    message: "Coupon '${code ?? ''}' has been removed.",
+    success: false,
+  );
+}
+
+  void applyCoupon(String code) async {
+  if (code.isEmpty) return;
+
+  setState(() {
+    _couponApplying = true;
+    _couponError = null;
+  });
+
+  try {
+    final response = await WooCommerceService().validateCoupon(code);
+
+    if (response["valid"] == true) {
+      final discount = double.tryParse("${response['amount']}") ?? 0.0;
+
+      Provider.of<Cart>(context, listen: false).applyCoupon(code, discount);
+
+      setState(() {
+        _couponError = null;
+        _couponApplying = false;
+      });
+      showCouponDialog(
+        context: context,
+        title: "Coupon Applied!",
+        message: "Coupon '$code' applied successfully!\nDiscount: \$${discount.toStringAsFixed(2)}",
+        success: true,
+      );
+    } else {
+      setState(() {
+        _couponError = response["message"] ?? "Invalid coupon";
+        _couponApplying = false;
+      });
+      showCouponDialog(
+        context: context,
+        title: "Invalid Coupon",
+        message: _couponError!,
+        success: false,
+      );
+    }
+  } catch (e) {
+    setState(() {
+      _couponError = "Something went wrong";
+      _couponApplying = false;
+    });
+     showCouponDialog(
+      context: context,
+      title: "Error",
+      message: _couponError!,
+      success: false,
+    );
+  }
+}
+
 
   void _removeTip() {
     final cart = Provider.of<Cart>(context, listen: false);
@@ -47,6 +120,7 @@ class _CartScreenState extends State<CartScreen> {
     cart.setTip(0.0); // ✅ Clear persisted tip too
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -94,374 +168,473 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget buildMobileLayout(BuildContext context) {
-    final cart = Provider.of<Cart>(context);
-    final cartItems = cart.items.values.toList();
-    final double subTotal = cart.items.values
-        .map((item) => item.price * item.quantity)
-        .fold(0.0, (prev, element) => prev + element);
-    final double grandTotal = subTotal + cart.tipAmount; // ✅ uses provider tip
+ Widget buildMobileLayout(BuildContext context) {
+  final cart = Provider.of<Cart>(context);
+  final cartItems = cart.items.values.toList();
+  final double subTotal = cart.items.values
+      .map((item) => item.price * item.quantity)
+      .fold(0.0, (prev, element) => prev + element);
+  // final double grandTotal = subTotal + cart.tipAmount;
+  final double grandTotal = cart.totalAfterDiscount; 
 
-    final double tax = 0.78; // Example for subtitle
-    if (_tipController.text.isEmpty && cart.tipAmount > 0) {
-  _tipController.text = cart.tipAmount.toStringAsFixed(2);
-}
+  final double tax = 0.0;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
-      child:Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Table headings
-          Row(
+  if (_tipController.text.isEmpty && cart.tipAmount > 0) {
+    _tipController.text = cart.tipAmount.toStringAsFixed(2);
+  }
+
+ if (cartItems.isEmpty) {
+  return Column(
+    children: [
+      // ---------------- Header ----------------
+     const HeaderBackButton(title: 'Cart'),
+      // ---------------- Empty Cart Content ----------------
+      Expanded(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                flex: 3,
-                child: Center(
-                  child: Text(
-                    "ITEMS",
-                    style: GoogleFonts.raleway(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
-                  ),
+              Icon(
+                Icons.shopping_cart_outlined,
+                size: 70,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Your cart is empty",
+                style: GoogleFonts.raleway(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
                 ),
               ),
-              Expanded(
-                flex: 7,
-                child: Center(
-                  child: Text(
-                    "PRODUCT",
-                    style: GoogleFonts.raleway(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                "Add delicious items to continue",
+                style: GoogleFonts.raleway(
+                  fontSize: 14,
+                  color: Colors.black45,
                 ),
               ),
-              Expanded(
-                flex: 4,
-                child: Center(
-                  child: Text(
-                    "QUANTITY",
-                    style: GoogleFonts.raleway(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => GoRouter.of(context).pushNamed('order-online'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffE2001A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: Text(
+                  "START ORDERING",
+                  style: GoogleFonts.raleway(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          ...cartItems.asMap().entries.map((entry) {
-            int idx = entry.key;
-            var item = entry.value;
-            return Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 14),
+        ),
+      ),
+    ],
+  );
+}
+
+
+  // --------------- MAIN LAYOUT ----------------
+  return Column(
+    children: [
+      // 1️⃣ Product List — Scrollable
+      Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    child: Row(
+      children: [
+        // ----------------- Back Button -----------------
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: const EdgeInsets.all(8), // inner padding
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12), // rounded background
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_rounded,
+              size: 20,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+
+        // ----------------- Spacer to push title center -----------------
+        const Spacer(),
+
+        // ----------------- Title -----------------
+        Text(
+          'Cart',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+
+        const Spacer(), // so the text stays centered
+
+        // Optional: right icon placeholder to balance row
+        const SizedBox(width: 40), // same width as back button
+      ],
+    ),
+  ),
+        
+      
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          children: cartItems.map((item) => buildCartItemCard(item)).toList(),
+        ),
+      ),
+
+      // 2️⃣ Bottom Container — Fixed
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: const BoxDecoration(
+          color: Color(0xffEEEEEE),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Voucher Input
+         VoucherInputField(
+  appliedCode: Provider.of<Cart>(context).appliedCouponCode,
+  onApply: applyCoupon,
+  onRemove: removeCoupon,
+),
+
+
+          if (_couponError != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 12, top: 4),
+              child: Text(
+                _couponError!,
+                style: const TextStyle(fontSize: 11, color: Colors.red),
+              ),
+            ),
+        
+
+
+            const SizedBox(height: 10),
+
+            // Tip Input
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade100),
-                borderRadius: BorderRadius.circular(3),
                 color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    flex: 3,
-                    child:Center(
-                    child: Text(
-                      (idx + 1).toString().padLeft(2, '0'),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.raleway(
-                          fontWeight: FontWeight.w700, fontSize: 15),
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffF7F7F9),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    ),
+                    child: const Icon(Icons.attach_money,
+                        size: 12, color: Colors.black87),
                   ),
-                  Expanded(
-                    flex: 7,
-                    child:Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(item.title,
-                            style: GoogleFonts.raleway(
-                                fontWeight: FontWeight.w700, fontSize: 15)),
-                        const SizedBox(height: 1),
-                        if (item.selectedoptions != null &&
-                            item.selectedoptions.isNotEmpty)
-                          ...item.selectedoptions.map((opt) {
-                            if (opt.isNotEmpty) {
-                              final value = opt.values.first;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 2),
-                                child: Text("Choice of: $value",
-                                    style: GoogleFonts.raleway(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87)),
-                              );
-                            } else {
-                              return const SizedBox();
-                            }
-                          }),
+                  const SizedBox(width: 10),
+                 Expanded(
+  child: TextField(
+    controller: _tipController,
+    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    decoration: InputDecoration(
+      border: InputBorder.none,
+      hintText: "Enter Tip Amount",
+      hintStyle: GoogleFonts.raleway(
+        fontSize: 14,
+        color: Colors.grey.shade500,
+      ),
+    ),
+  ),
+),
 
-                          if (item.specialInstruction != null &&
-                              item.specialInstruction!.trim().isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                "Special Notes: ${item.specialInstruction}",
-                                style: GoogleFonts.raleway(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                    ),
+// ---------------- IF NO TIP → SHOW ADD BUTTON ----------------
+if (cart.tipAmount == 0) 
+  GestureDetector(
+    onTap: () {
+      final tip = double.tryParse(_tipController.text.trim()) ?? 0.0;
+      if (tip > 0) {
+        cart.setTip(tip);
+        FocusScope.of(context).unfocus();
+      }
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xffE2001A),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Text(
+        "Add",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  ),
+
+// ---------------- IF TIP ADDED → SHOW REMOVE BUTTON ----------------
+if (cart.tipAmount > 0)
+  GestureDetector(
+    onTap: () {
+      cart.setTip(0.0);
+      _tipController.clear();
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade500,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Text(
+        "Remove",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  ),
+  ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            _AmountDetailsRow(
+                label: "Sub Total", value: subTotal, bold: false),
+            _AmountDetailsRow(
+                label: "Pick Up From Store", value: 0.0, bold: false),
+            if (cart.tipAmount > 0)
+              _AmountDetailsRow(label: "Tip", value: cart.tipAmount, bold: false),
+            if (cart.couponDiscount > 0)
+                _AmountDetailsRow(
+                  label: "Coupon (${cart.appliedCouponCode})",
+                  value: -cart.couponDiscount, // negative to show discount
+                  bold: false, // optional: show in green
+                ),
+            const Divider(color: Colors.grey),
+
+            _AmountDetailsRow(
+                label: "Grand Total",
+                value: grandTotal,
+                bold: true,
+                subtitle: null),
+
+            const SizedBox(height: 12),
+
+            // Checkout Button
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '\$${grandTotal.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800),
                   ),
-                  Expanded(
-                    flex: 4,
-                    child:Center(
-                      child:FittedBox(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline,
-                              size: 18, color: Color(0xffE2001A)),
-                          onPressed: () => _handleDecrease(context, item.id),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          GoRouter.of(context).pushNamed('checkout'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
                         ),
-                        Text('${item.quantity}',
-                            style: GoogleFonts.raleway(
-                                fontSize: 15, fontWeight: FontWeight.w600)),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline,
-                              size: 18, color: Color(0xffE2001A)),
-                          onPressed: () => cart.increaseQuantity(item.id),
+                        padding: const EdgeInsets.fromLTRB(0, 4, 4, 4),
+                      ),
+                      child: Text(
+                        "CHECKOUT",
+                        style: GoogleFonts.raleway(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
                       ),
                     ),
                   ),
                 ],
               ),
-            );
-          }),
-          const SizedBox(height: 12),
-          // CONTINUE ORDERING BUTTON
-          _RedOutlineButton(
-            label: "CONTINUE ORDERING",
-            width: MediaQuery.of(context).size.width * 0.6,
-            onPressed: () => GoRouter.of(context).pushNamed('order-online'),
-          ),
-          const SizedBox(height: 12),
-          // ADD COUPON BUTTON WITH FIELD
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.75,
-          child:Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  style: GoogleFonts.raleway(
-                      fontSize: 14, color: const Color(0xffE2001A)),
-                  decoration: InputDecoration(
-                    hintText: "ADD COUPON",
-                    hintStyle: GoogleFonts.raleway(
-                        fontSize: 14, color: const Color(0xffE2001A)),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    border: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 224, 224, 224), width: 1),
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 201, 201, 201), width: 1),
-                      borderRadius: BorderRadius.zero,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 13)),
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(Colors.white),
-                    foregroundColor:
-                        WidgetStateProperty.all<Color>(const Color(0xffE2001A)),
-                    side: WidgetStateProperty.all(const BorderSide(
-                      color: Color.fromARGB(255, 201, 201, 201),
-                    )),
-                    elevation: WidgetStateProperty.all(0),
-                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero)),
-                  ),
-                  onPressed: () {},
-                  child: const Icon(Icons.add, color: Color(0xffE2001A)),
-                ),
-              ),
-            ],
-          ),
-          ),
-          const SizedBox(height: 12),
-          // UPDATE ORDER BUTTON
-          _RedOutlineButton(
-            label: "UPDATE ORDER",
-            width: MediaQuery.of(context).size.width * 0.45,
-            onPressed: () {}, // Add logic if needed
-          ),
-          const SizedBox(height: 18),
-          // WANT TO ADD A TIP
-          Text("Want to add a Tip",
-              style: GoogleFonts.raleway(
-                  color: const Color(0xffE2001A),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14)),
-          SizedBox(height: 10,),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.7,
-          child:Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _tipController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  style: GoogleFonts.raleway(fontSize: 13, color: Colors.black),
-                  decoration: InputDecoration(
-                    hintText: "0",
-                    hintStyle:
-                        GoogleFonts.raleway(fontSize: 13, color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Colors.grey.shade300, width: 1),
-                      borderRadius: BorderRadius.zero,
-                    ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(width: 8),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                 onPressed: () {
-                    final enteredTip = double.tryParse(_tipController.text.trim()) ?? 0.0;
-                    cart.setTip(enteredTip); // ✅ updates provider
-                    FocusScope.of(context).unfocus(); // optional - closes keyboard
-                  },
-
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(Colors.white),
-                    foregroundColor:
-                        WidgetStateProperty.all<Color>(const Color(0xffE2001A)),
-                    side: WidgetStateProperty.all(const BorderSide(
-                      color: Color(0xffE2001A),
-                    )),
-                    padding: WidgetStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 15)),
-                    elevation: WidgetStateProperty.all(0),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                    ),
-                  ),
-                  child: Text("Add",
-                      style: GoogleFonts.raleway(
-                          fontSize: 14, fontWeight: FontWeight.w500)),
-                ),
-                
-              ),
-              if (cart.tipAmount > 0) ...[
-  const SizedBox(width: 8),
-  SizedBox(
-    height: 48,
-    child: ElevatedButton(
-      onPressed: () {
-        cart.setTip(0.0); // ✅ clear tip in provider
-        _tipController.clear();
-      },
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
-        foregroundColor: WidgetStateProperty.all<Color>(Colors.grey.shade700),
-        side: WidgetStateProperty.all(const BorderSide(color: Colors.grey)),
-        elevation: WidgetStateProperty.all(0),
-        padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 15)),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+          ],
         ),
       ),
-      child: Text("Remove",
-          style: GoogleFonts.raleway(
-              fontSize: 14, fontWeight: FontWeight.w500)),
-    ),
-  ),
-],
+    ],
+  );
+}
 
+ Widget buildCartItemCard(CartItem item) {
+  final cart = Provider.of<Cart>(context);
+  final double subTotal = cart.items.values
+      .map((item) => item.price * item.quantity)
+      .fold(0.0, (prev, element) => prev + element);
+
+  if (_tipController.text.isEmpty && cart.tipAmount > 0) {
+    _tipController.text = cart.tipAmount.toStringAsFixed(2);
+  }
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 14),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // IMAGE
+        ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+          ),
+          child: Image.asset(
+            'assets/images/uploads/dummy_image.jpg',
+            width: 90,
+            height: 90,
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // TITLE + SUBTITLE + PRICE + QUANTITY
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title
+              Text(
+                item.title,
+                style: GoogleFonts.raleway(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              // const SizedBox(height: 2),
+              // // Subtitle
+              // Text(
+              //   "By Indian Grill",
+              //   style: GoogleFonts.raleway(
+              //     fontSize: 12,
+              //     color: Colors.grey,
+              //   ),
+              // ),
+              const SizedBox(height: 8),
+              // PRICE + QUANTITY STEP IN SAME ROW
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Price
+                  Text(
+                    "\$${item.price.toStringAsFixed(2)}",
+                    style: GoogleFonts.raleway(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  // Quantity Stepper
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 236, 236, 236),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _handleDecrease(context, item.id),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: const Icon(
+                              Icons.remove,
+                              size: 10,
+                              color: Color(0xffFF6A00),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${item.quantity}',
+                          style: GoogleFonts.raleway(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => cart.increaseQuantity(item.id),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffe2001a),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          ),
-          const SizedBox(height: 16),
-          // Subtotal/details rows
-          _AmountDetailsRow(label: "Sub Total", value: subTotal, bold: false),
-          _AmountDetailsRow(
-              label: "Pick Up From Store", value: 0.0, bold: false),
-          const SizedBox(height: 5),
-          if (cart.tipAmount > 0)
-  _AmountDetailsRow(
-    label: "Tip",
-    value: cart.tipAmount,
-    bold: false,
-  ),
-  const SizedBox(height: 5,),
-          _AmountDetailsRow(
-              label: "Grand Total",
-              value: grandTotal,
-              bold: true,
-              subtitle: "(includes \$${tax.toStringAsFixed(2)} Tax)"),
-          const SizedBox(height: 18),
-          // Checkout Button
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.4,
-            child: ElevatedButton(
-              onPressed: () => GoRouter.of(context).pushNamed('checkout'),
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(const Color(0xffE2001A)),
-                foregroundColor: WidgetStateProperty.all(Colors.white),
-                shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
-                padding: WidgetStateProperty.all(
-                    const EdgeInsets.symmetric(vertical: 16)),
-                textStyle: WidgetStateProperty.all(GoogleFonts.raleway(
-                    fontSize: 15, fontWeight: FontWeight.w600)),
-              ),
-              child: const Text("CHECKOUT"),
-            ),
-          ),
-        ],
-      ),
+        ),
+
+        const SizedBox(width: 12),
+      ],
     ),
-    );
-  }
+  );
+}
 
   Widget _buildCartContent(BuildContext context,
       {required double fontSize, double spacing = 20, bool isMobile = false}) {
@@ -1018,26 +1191,146 @@ void _handleDecrease(BuildContext context, String productId) {
   if (currentQuantity <= 1) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Remove Item?"),
-        content: const Text("Do you want to remove this item from cart?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text("Cancel"),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.delete_outline,
+                size: 40,
+                color: Colors.red.shade400,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Remove Item?",
+                style: GoogleFonts.raleway(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Do you want to remove this item from your cart?",
+                style: GoogleFonts.raleway(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade400),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        "Cancel",
+                        style: GoogleFonts.raleway(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        cart.removeItem(productId);
+                        Navigator.of(ctx).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade400,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        "Remove",
+                        style: GoogleFonts.raleway(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              cart.removeItem(productId);
-              Navigator.of(ctx).pop();
-            },
-            child: const Text("Remove", style: TextStyle(color: Colors.red)),
-          ),
-        ],
+        ),
       ),
     );
   } else {
     cart.decreaseQuantity(productId);
+  }
+}
+
+
+class _RedOutlineButtonMobile extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final double? width; // 👈 Optional width parameter
+
+  const _RedOutlineButtonMobile({
+    required this.label,
+    required this.onPressed,
+    this.width, // 👈 Allow width to be nullable
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      // width: width ?? double.infinity,
+      //height: 46,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(
+            color: Color(0xffE2001A),
+            width: 1.0, // 👈 Equal border thickness on all sides
+          ),
+          foregroundColor: const Color(0xffE2001A),
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.zero, // 👈 Sharp corners (no uneven curves)
+          ),
+          textStyle: GoogleFonts.raleway(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          alignment: Alignment.center,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: GoogleFonts.raleway(
+            fontSize: 8,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xffE2001A),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -1055,40 +1348,41 @@ class _RedOutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-  width: width ?? double.infinity,
-  height: 46,
-  child: OutlinedButton(
-    onPressed: onPressed,
-    style: OutlinedButton.styleFrom(
-      side: const BorderSide(
-        color: Color(0xffE2001A),
-        width: 1.0, // 👈 Equal border thickness on all sides
+      width: width ?? double.infinity,
+      height: 46,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(
+            color: Color(0xffE2001A),
+            width: 1.0, // 👈 Equal border thickness on all sides
+          ),
+          foregroundColor: const Color(0xffE2001A),
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.zero, // 👈 Sharp corners (no uneven curves)
+          ),
+          textStyle: GoogleFonts.raleway(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+          alignment: Alignment.center,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: GoogleFonts.raleway(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xffE2001A),
+          ),
+        ),
       ),
-      foregroundColor: const Color(0xffE2001A),
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero, // 👈 Sharp corners (no uneven curves)
-      ),
-      textStyle: GoogleFonts.raleway(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      alignment: Alignment.center,
-    ),
-    child: Text(
-      label,
-      textAlign: TextAlign.center,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      style: GoogleFonts.raleway(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: const Color(0xffE2001A),
-      ),
-    ),
-  ),
-);
-}
+    );
+  }
 }
 
 // Key-Value row for order details
@@ -1117,7 +1411,7 @@ class _AmountDetailsRow extends StatelessWidget {
               style: GoogleFonts.raleway(
                 fontSize: bold ? 16 : 14,
                 fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-                color: bold ? Colors.grey : const Color.fromARGB(255, 187, 187, 187),
+                color: Colors.black,
               ),
             ),
           ),
@@ -1129,7 +1423,7 @@ class _AmountDetailsRow extends StatelessWidget {
                 style: GoogleFonts.raleway(
                   fontSize: bold ? 16 : 14,
                   fontWeight: FontWeight.bold,
-                  color: bold ? Colors.grey : Colors.grey,
+                  color: Colors.black,
                 ),
               ),
               if (bold && subtitle != null)
@@ -1144,4 +1438,213 @@ class _AmountDetailsRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class VoucherInputField extends StatefulWidget {
+  final Function(String code) onApply;
+  final VoidCallback? onRemove;
+  final String? appliedCode; // <-- use appliedCode instead of isCouponApplied
+
+  const VoucherInputField({
+    super.key,
+    required this.onApply,
+    this.onRemove,
+    this.appliedCode,
+  });
+
+  @override
+  State<VoucherInputField> createState() => _VoucherInputFieldState();
+}
+
+class _VoucherInputFieldState extends State<VoucherInputField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.appliedCode ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant VoucherInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update text field only if appliedCode changed externally
+    if (oldWidget.appliedCode != widget.appliedCode) {
+      _controller.text = widget.appliedCode ?? '';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          // Left icon
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: const Color(0xffF7F7F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.confirmation_number,
+              size: 12,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Input field
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: "Enter your voucher code",
+                hintStyle: GoogleFonts.raleway(
+                  fontSize: 14,
+                  color: Colors.grey.shade500,
+                ),
+                border: InputBorder.none,
+              ),
+              style: GoogleFonts.raleway(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+
+          // Apply icon
+       // If coupon is applied, show REMOVE button; otherwise show APPLY button
+widget.appliedCode != null && widget.appliedCode!.isNotEmpty
+    ? GestureDetector(
+        onTap: () {
+          if (widget.onRemove != null) widget.onRemove!();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xffE2001A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          alignment: Alignment.center,
+          child: const Text(
+            'Remove',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      )
+    : GestureDetector(
+        onTap: () {
+          final code = _controller.text.trim();
+          if (code.isNotEmpty) {
+            widget.onApply(code);
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xffE2001A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          alignment: Alignment.center,
+          child: const Text(
+            'Apply',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+    ],
+      ),
+    );
+  }
+}
+void showCouponDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required bool success, // true for applied, false for error/removed
+}) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: success ? Colors.green.shade50 : Colors.red.shade50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: success ? Colors.green : Colors.red, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              success ? Icons.check_circle_outline : Icons.error_outline,
+              color: success ? Colors.green : Colors.red,
+              size: 50,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: GoogleFonts.raleway(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: success ? Colors.green.shade800 : Colors.red.shade800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.raleway(
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: success ? Colors.green : Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(
+                "OK",
+                style: GoogleFonts.raleway(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    ),
+  );
 }
