@@ -40,24 +40,24 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/logo/Indian-Grill-Logo.png
+    - assets/images/logo/Indian-Grill-Logo.webp
     - assets/images/uploads/2020/04/
     - assets/images/uploads/2016/11/
     - assets/images/uploads/2019/03/
     - assets/images/uploads/2017/05/
     - assets/images/uploads/2017/01/
     - assets/images/uploads/2017/02/
-    - assets/images/uploads/dummy_image.jpg
+    - assets/images/uploads/dummy_image.webp
     - assets/images/slider/
     - assets/images/uploads/
-    - assets/images/uploads/head-chef-2.jpg
+    - assets/images/uploads/head-chef-2.webp
     - assets/woocommerce.env
-    - assets/images/veg.png
-    - assets/images/spicy.jpg
-    - assets/images/timing.png
+    - assets/images/veg.webp
+    - assets/images/spicy.webp
+    - assets/images/timing.webp
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/logo/Indian-Grill-Logo.png"
+  image_path: "assets/images/logo/Indian-Grill-Logo.webp"
   min_sdk_android: 21

@@ -68,7 +68,7 @@ class _AboutusState  extends State<Aboutus> {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/uploads/2016/11/IMG_0118.jpg',
+                            'assets/images/uploads/2016/11/IMG_0118.webp',
                             width: 570,
                           ),
                         ],
@@ -277,7 +277,7 @@ class _AboutusState  extends State<Aboutus> {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/uploads/2016/11/dine-in-area.jpg',
+                            'assets/images/uploads/2016/11/dine-in-area.webp',
                             width: 570,
                           ),
                         ],
@@ -434,7 +434,7 @@ class _AboutusState  extends State<Aboutus> {
                     children: [
                       Expanded(
                         child: Image.asset(
-                          'assets/images/uploads/2016/11/IMG_0118.jpg',
+                          'assets/images/uploads/2016/11/IMG_0118.webp',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -494,7 +494,7 @@ class _AboutusState  extends State<Aboutus> {
                         children: [
                           Expanded(
                             child: Image.asset(
-                              'assets/images/uploads/2016/11/dine-in-area.jpg',
+                              'assets/images/uploads/2016/11/dine-in-area.webp',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -849,7 +849,7 @@ class _AboutusState  extends State<Aboutus> {
                     Expanded(
                       flex: 5,
                       child: Image.asset(
-                        'assets/images/uploads/2016/11/IMG_0118.jpg',
+                        'assets/images/uploads/2016/11/IMG_0118.webp',
                         fit: BoxFit.cover, // Ensures the image covers the area
                         height: 600,
                       ),

@@ -160,11 +160,11 @@ class Banquet extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 decoration: BoxDecoration(
@@ -219,23 +219,23 @@ class Banquet extends StatelessWidget {
                     // Use the ImageWithTextOverlay widget here
                     ImageWithTextOverlay(
                       imagePath:
-                          'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
+                          'assets/images/uploads/2019/03/birthday-e1551877081621.webp',
                       overlayText: 'Birthday Party',
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image1.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image1.webp',
                       overlayText: 'Wedding',
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image6.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image6.webp',
                       overlayText: 'Anniversary',
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image3.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image3.webp',
                       overlayText: 'Engagement',
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/baby.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/baby.webp',
                       overlayText: 'Baby Shower',
                     ),
                   ],
@@ -309,11 +309,11 @@ class Banquet extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 decoration: BoxDecoration(
@@ -368,7 +368,7 @@ class Banquet extends StatelessWidget {
                     // Use the ImageWithTextOverlay widget here
                     buildImageTile(
                       context,
-                      'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
+                      'assets/images/uploads/2019/03/birthday-e1551877081621.webp',
                       'Birthday Party',
                       imageWidth,
                       imageHeight,
@@ -376,7 +376,7 @@ class Banquet extends StatelessWidget {
                     const SizedBox(height: 20),
                     buildImageTile(
                       context,
-                      'assets/images/uploads/2019/03/image1.jpeg',
+                      'assets/images/uploads/2019/03/image1.webp',
                       'Wedding',
                       imageWidth,
                       imageHeight,
@@ -384,7 +384,7 @@ class Banquet extends StatelessWidget {
                     const SizedBox(height: 20),
                     buildImageTile(
                       context,
-                      'assets/images/uploads/2019/03/image6.jpeg',
+                      'assets/images/uploads/2019/03/image6.webp',
                       'Anniversary',
                       imageWidth,
                       imageHeight,
@@ -392,7 +392,7 @@ class Banquet extends StatelessWidget {
                     const SizedBox(height: 20),
                     buildImageTile(
                       context,
-                      'assets/images/uploads/2019/03/image3.jpeg',
+                      'assets/images/uploads/2019/03/image3.webp',
                       'Engagement',
                       imageWidth,
                       imageHeight,
@@ -400,7 +400,7 @@ class Banquet extends StatelessWidget {
                     const SizedBox(height: 20),
                     buildImageTile(
                       context,
-                      'assets/images/uploads/2019/03/baby.jpeg',
+                      'assets/images/uploads/2019/03/baby.webp',
                       'Baby Shower',
                       imageWidth,
                       imageHeight,
@@ -477,11 +477,11 @@ class Banquet extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 decoration: BoxDecoration(
@@ -536,31 +536,31 @@ class Banquet extends StatelessWidget {
                     // Use the ImageWithTextOverlay widget here
                     ImageWithTextOverlay(
                       imagePath:
-                          'assets/images/uploads/2019/03/birthday-e1551877081621.jpeg',
+                          'assets/images/uploads/2019/03/birthday-e1551877081621.webp',
                       overlayText: 'Birthday Party',
                       width: imageSize,
                       height: imageSize,
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image1.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image1.webp',
                       overlayText: 'Wedding',
                       width: imageSize,
                       height: imageSize,
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image6.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image6.webp',
                       overlayText: 'Anniversary',
                       width: imageSize,
                       height: imageSize,
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/image3.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/image3.webp',
                       overlayText: 'Engagement',
                       width: imageSize,
                       height: imageSize,
                     ),
                     ImageWithTextOverlay(
-                      imagePath: 'assets/images/uploads/2019/03/baby.jpeg',
+                      imagePath: 'assets/images/uploads/2019/03/baby.webp',
                       overlayText: 'Baby Shower',
                       width: imageSize,
                       height: imageSize,

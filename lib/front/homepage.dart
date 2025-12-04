@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider01.jpg"),
+                          AssetImage("assets/images/slider/big_slider01.webp"),
                       fit: BoxFit
                           .cover, // Ensure the image covers the container without padding
                     ),
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider02.jpg"),
+                          AssetImage("assets/images/slider/big_slider02.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider03.jpg"),
+                          AssetImage("assets/images/slider/big_slider03.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider04.jpg"),
+                          AssetImage("assets/images/slider/big_slider04.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider05.jpg"),
+                          AssetImage("assets/images/slider/big_slider05.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -137,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider06.jpg"),
+                          AssetImage("assets/images/slider/big_slider06.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -417,7 +417,7 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Image.asset(
-                              'assets/images/uploads/2020/04/IMG_0118.jpg',
+                              'assets/images/uploads/2020/04/IMG_0118.webp',
                               // fit: BoxFit.cover,
                               // height: 300,
                             ),
@@ -551,12 +551,12 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildMobileLayout() {
     final List<String> sliderImages = [
-      "assets/images/slider/big_slider01.jpg",
-      "assets/images/slider/big_slider02.jpg",
-      "assets/images/slider/big_slider03.jpg",
-      "assets/images/slider/big_slider04.jpg",
-      "assets/images/slider/big_slider05.jpg",
-      "assets/images/slider/big_slider06.jpg",
+      "assets/images/slider/big_slider01.webp",
+      "assets/images/slider/big_slider02.webp",
+      "assets/images/slider/big_slider03.webp",
+      "assets/images/slider/big_slider04.webp",
+      "assets/images/slider/big_slider05.webp",
+      "assets/images/slider/big_slider06.webp",
     ];
 
     return Column(
@@ -763,7 +763,7 @@ class _HomePageState extends State<HomePage> {
 ),
         buildRestaurantTimingCard(),
         // Image.asset(
-        //   'assets/images/timing.png',
+        //   'assets/images/timing.webp',
         //   // fit: BoxFit.cover,
         //   // height: 300,
         // ),
@@ -788,7 +788,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider01.jpg"),
+                          AssetImage("assets/images/slider/big_slider01.webp"),
                       fit: BoxFit
                           .cover, // Ensure the image covers the container without padding
                     ),
@@ -801,7 +801,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider02.jpg"),
+                          AssetImage("assets/images/slider/big_slider02.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -813,7 +813,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider03.jpg"),
+                          AssetImage("assets/images/slider/big_slider03.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -825,7 +825,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider04.jpg"),
+                          AssetImage("assets/images/slider/big_slider04.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -837,7 +837,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider05.jpg"),
+                          AssetImage("assets/images/slider/big_slider05.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -849,7 +849,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image:
-                          AssetImage("assets/images/slider/big_slider06.jpg"),
+                          AssetImage("assets/images/slider/big_slider06.webp"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -980,7 +980,7 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Image.asset(
-                              'assets/images/uploads/2020/04/IMG_0118.jpg',
+                              'assets/images/uploads/2020/04/IMG_0118.webp',
                               // fit: BoxFit.cover,
                               // height: 300,
                             ),

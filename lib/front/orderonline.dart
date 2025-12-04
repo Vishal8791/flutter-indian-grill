@@ -470,7 +470,7 @@ Future<void> _loadMoreMobileProducts() async {
           children: [
             Row(
               children: [
-                Image.asset('assets/images/veg.png', width: 28, height: 28),
+                Image.asset('assets/images/veg.webp', width: 28, height: 28),
                 const SizedBox(width: 4),
                 const Text('Veg', style: TextStyle(fontSize: 12)),
               ],
@@ -480,7 +480,7 @@ Future<void> _loadMoreMobileProducts() async {
             const SizedBox(width: 12),
             Row(
               children: [
-                Image.asset('assets/images/spicy.jpg', width: 28, height: 28),
+                Image.asset('assets/images/spicy.webp', width: 28, height: 28),
                 const SizedBox(width: 4),
                 const Text('Spicy', style: TextStyle(fontSize: 12)),
               ],
@@ -612,10 +612,10 @@ class _MenuItemCardState extends State<MenuItemCard> {
                 child: Column(
                   children: [
                     if ((widget.foodType ?? '').toLowerCase().contains('veg'))
-                      Image.asset('assets/images/veg.png',
+                      Image.asset('assets/images/veg.webp',
                           width: 25, height: 25),
                     if ((widget.foodType ?? '').toLowerCase().contains('spicy'))
-                      Image.asset('assets/images/spicy.jpg',
+                      Image.asset('assets/images/spicy.webp',
                           width: 25, height: 25),
                   ],
                 ),
@@ -1102,7 +1102,7 @@ class SidebarWidget extends StatelessWidget {
           Row(
             children: [
               Image.asset(
-                'assets/images/veg.png',
+                'assets/images/veg.webp',
                 width: 30,
                 height: 30,
               ),
@@ -1127,7 +1127,7 @@ class SidebarWidget extends StatelessWidget {
           Row(
             children: [
               Image.asset(
-                'assets/images/spicy.jpg',
+                'assets/images/spicy.webp',
                 width: 30,
                 height: 30,
               ),
@@ -1538,12 +1538,12 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
                 Column(
                   children: [
                     if (widget.foodType.toLowerCase().contains("veg"))
-                      Image.asset("assets/images/veg.png",
+                      Image.asset("assets/images/veg.webpp",
                           width: 20, height: 20),
                     if (widget.foodType.toLowerCase().contains("spicy"))
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Image.asset("assets/images/spicy.jpg",
+                        child: Image.asset("assets/images/spicy.webp",
                             width: 20, height: 20),
                       ),
                   ],

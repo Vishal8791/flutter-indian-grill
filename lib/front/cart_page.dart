@@ -525,7 +525,7 @@ if (cart.tipAmount > 0)
             bottomLeft: Radius.circular(16),
           ),
           child: Image.asset(
-            'assets/images/uploads/dummy_image.jpg',
+            'assets/images/uploads/dummy_image.webp',
             width: 90,
             height: 90,
             fit: BoxFit.cover,

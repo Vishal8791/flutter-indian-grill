@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/captcha/math_captcha.dart';
 import 'package:indiangrill/front/career.dart'; // For LabeledTextField
 import 'package:indiangrill/front/datepicker/date_picker_field.dart';
-
+import 'package:http/http.dart' as http;
 class OrderCakePage extends StatefulWidget {
   final Map product;
   const OrderCakePage({super.key, required this.product});
@@ -29,8 +29,14 @@ class _OrderCakePageState extends State<OrderCakePage> {
   final TextEditingController toyoptionController = TextEditingController();
   final TextEditingController ordertypeController = TextEditingController();
   final TextEditingController captchaController = TextEditingController();
+  final TextEditingController specialRequestController = TextEditingController();
+
+  bool isSubmitted = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String specialCakeType = "None"; // default
+  String? selectedcakeSize;
+  String? selectedfreshcream;
   String needCandles = "No";
   String cakeFor = "Boy"; // default value
   String toysOption = "Yes"; // default value
@@ -61,8 +67,6 @@ class _OrderCakePageState extends State<OrderCakePage> {
     '--Other--'
   ];
 
-  String? selectedcakeSize;
-  String? selectedfreshcream;
   @override
   void initState() {
     super.initState();
@@ -83,6 +87,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
     cakeSizeController.dispose();
     specialCakeController.dispose();
     freshCreamController.dispose();
+    specialRequestController.dispose();
     super.dispose();
   }
 
@@ -169,9 +174,16 @@ class _OrderCakePageState extends State<OrderCakePage> {
 
   // ✅ Form Section
   Widget buildFormSection(BuildContext context) {
-    return Column(
+  if (isSubmitted) {
+    return buildSuccessMessage();
+  }
+
+  return Form(
+    key: _formKey,
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // CAKE NAME HEADER
         Row(
           children: [
             Text("Cake name: ",
@@ -184,349 +196,401 @@ class _OrderCakePageState extends State<OrderCakePage> {
                     fontSize: 16, color: const Color(0xffe2001a))),
           ],
         ),
-        Text('Please fill up the form below to send a request to order a cake.',
-            style: GoogleFonts.raleway(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey[700])),
-        const SizedBox(height: 10),
-        DatePickerField(controller: dateController, labelText: "Date"),
-        LabeledTextField(labelText: "Time ", controller: timeController),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Special Cakes:",
-                  style: GoogleFonts.raleway(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
-              Wrap(
-                spacing: 10,
-                children: [
-                  buildRadioOption(
-                    value: "Sugar-Free",
-                    groupValue: specialCakeType,
-                    onChanged: (val) {
-                      setState(() {
-                        specialCakeType = val!;
-                        specialCakeController.text = val!;
-                      });
-                    },
-                  ),
-                  buildRadioOption(
-                    value: "Vanilla",
-                    groupValue: specialCakeType,
-                    onChanged: (val) {
-                      setState(() {
-                        specialCakeType = val!;
-                        specialCakeController.text = val!;
-                      });
-                    },
-                  ),
-                  buildRadioOption(
-                    value: "Chocolate",
-                    groupValue: specialCakeType,
-                    onChanged: (val) {
-                      setState(() {
-                        specialCakeType = val!;
-                        specialCakeController.text = val!;
-                      });
-                    },
-                  ),
-                  buildRadioOption(
-                    value: "None",
-                    groupValue: specialCakeType,
-                    onChanged: (val) {
-                      setState(() {
-                        specialCakeType = val!;
-                        specialCakeController.text = val!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
+
+        Text(
+          'Please fill up the form below to send a request to order a cake.',
+          style: GoogleFonts.raleway(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.grey[700],
           ),
         ),
+
         const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            'Cake Size : ',
-            style: GoogleFonts.raleway(
-              fontSize: 13,
-              color: const Color(0xff666666),
-            ),
-          ),
+
+        // DATE
+        DatePickerField(
+          controller: dateController,
+          labelText: "Date",
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
-              isExpanded: true, // Make dropdown full width of parent
-              buttonDecoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 0.5),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              // buttonPadding: const EdgeInsets.symmetric(
-              //     horizontal: 12, vertical: 12),
-              value: selectedcakeSize,
-              onChanged: (String? newValue) {
+
+        // TIME
+        LabeledTextField(
+          labelText: "Time",
+          controller: timeController,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Please enter time";
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 10),
+
+        // SPECIAL CAKES
+        Text("Special Cakes:",
+            style: GoogleFonts.raleway(
+                fontSize: 14, fontWeight: FontWeight.w600)),
+        Wrap(
+          spacing: 10,
+          children: [
+            buildRadioOption(
+              value: "Sugar-Free",
+              groupValue: specialCakeType,
+              onChanged: (val) {
                 setState(() {
-                  selectedcakeSize = newValue;
-                  cakeSizeController.text = newValue ?? cakeSize.first;
+                  specialCakeType = val!;
+                  specialCakeController.text = val!;
                 });
               },
-              items: cakeSize
-                  .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(
-                          item,
-                          style: GoogleFonts.raleway(
-                            fontSize: 13,
-                            color: const Color(0xff666666),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-              dropdownPadding: const EdgeInsets.all(1),
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.white,
-              ),
-              dropdownMaxHeight: 200,
-              scrollbarAlwaysShow: true,
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            'Fresh Cream : ',
-            style: GoogleFonts.raleway(
-              fontSize: 13,
-              color: const Color(0xff666666),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
-              isExpanded: true, // Make dropdown full width of parent
-              buttonDecoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 0.5),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              // buttonPadding: const EdgeInsets.symmetric(
-              //     horizontal: 12, vertical: 12),
-              value: selectedfreshcream,
-              onChanged: (String? newValue) {
+            buildRadioOption(
+              value: "Vanilla",
+              groupValue: specialCakeType,
+              onChanged: (val) {
                 setState(() {
-                  selectedfreshcream = newValue;
-                  freshCreamController.text = newValue ?? freshcream.first;
+                  specialCakeType = val!;
+                  specialCakeController.text = val!;
                 });
               },
-              items: freshcream
-                  .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(
-                          item,
-                          style: GoogleFonts.raleway(
-                            fontSize: 13,
-                            color: const Color(0xff666666),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-              dropdownPadding: const EdgeInsets.all(1),
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.white,
-              ),
-              dropdownMaxHeight: 200,
-              scrollbarAlwaysShow: true,
             ),
-          ),
+            buildRadioOption(
+              value: "Chocolate",
+              groupValue: specialCakeType,
+              onChanged: (val) {
+                setState(() {
+                  specialCakeType = val!;
+                  specialCakeController.text = val!;
+                });
+              },
+            ),
+            buildRadioOption(
+              value: "None",
+              groupValue: specialCakeType,
+              onChanged: (val) {
+                setState(() {
+                  specialCakeType = val!;
+                  specialCakeController.text = val!;
+                });
+              },
+            ),
+          ],
         ),
+
         const SizedBox(height: 10),
-        LabeledTextField(
-            labelText: "Decorations/Toys ", controller: decorationController),
+
+        // CAKE SIZE DROPDOWN
+        Text('Cake Size : ',
+            style: GoogleFonts.raleway(fontSize: 13, color: Color(0xff666666))),
+        DropdownButtonFormField<String>(
+          value: selectedcakeSize,
+          items: cakeSize
+              .map((item) =>
+                  DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
+          onChanged: (val) {
+            setState(() {
+              selectedcakeSize = val;
+              cakeSizeController.text = val!;
+            });
+          },
+          validator: (value) =>
+              value == null ? "Please select cake size" : null,
+        ),
+
         const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Candles (PickUp from store) :",
-                  style: GoogleFonts.raleway(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
-              Wrap(
-                spacing: 10,
-                children: [
-                  buildRadioOption(
-                    value: "Yes",
-                    groupValue: needCandles,
-                    onChanged: (val) {
-                      setState(() {
-                        needCandles = val!;
-                      });
-                    },
-                  ),
-                  buildRadioOption(
-                    value: "No",
-                    groupValue: needCandles,
-                    onChanged: (val) {
-                      setState(() {
-                        needCandles = val!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+
+        // FRESH CREAM
+        Text('Fresh Cream : ',
+            style: GoogleFonts.raleway(fontSize: 13, color: Color(0xff666666))),
+        DropdownButtonFormField<String>(
+          value: selectedfreshcream,
+          items: freshcream
+              .map((item) =>
+                  DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
+          onChanged: (val) {
+            setState(() {
+              selectedfreshcream = val;
+              freshCreamController.text = val!;
+            });
+          },
+          validator: (value) =>
+              value == null ? "Please select fresh cream" : null,
         ),
+
+        const SizedBox(height: 10),
+
+        // DECORATION
         LabeledTextField(
-            labelText: "Writing On Cake ", controller: cakeMessageController),
-        // Cake For :
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            "Cake For :",
-            style:
-                GoogleFonts.raleway(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
+          labelText: "Decorations/Toys",
+          controller: decorationController,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Please enter decoration details";
+            }
+            return null;
+          },
         ),
+
+        const SizedBox(height: 10),
+
+        // CANDLES
+        Text("Candles (PickUp from store) :",
+            style: GoogleFonts.raleway(
+                fontSize: 14, fontWeight: FontWeight.w600)),
+        Wrap(
+          spacing: 10,
+          children: [
+            buildRadioOption(
+              value: "Yes",
+              groupValue: needCandles,
+              onChanged: (val) => setState(() => needCandles = val!),
+            ),
+            buildRadioOption(
+              value: "No",
+              groupValue: needCandles,
+              onChanged: (val) => setState(() => needCandles = val!),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // WRITING ON CAKE
+        LabeledTextField(
+          labelText: "Writing On Cake",
+          controller: cakeMessageController,
+        ),
+
+        const SizedBox(height: 10),
+
+        // CAKE FOR
+        Text("Cake For :",
+            style: GoogleFonts.raleway(
+                fontSize: 14, fontWeight: FontWeight.w600)),
         Wrap(
           spacing: 10,
           children: [
             buildRadioOption(
               value: "Boy",
               groupValue: cakeFor,
-              onChanged: (val) {
-                setState(() {
-                  cakeFor = val!;
-                });
-              },
+              onChanged: (val) => setState(() => cakeFor = val!),
             ),
             buildRadioOption(
               value: "Girl",
               groupValue: cakeFor,
-              onChanged: (val) {
-                setState(() {
-                  cakeFor = val!;
-                });
-              },
+              onChanged: (val) => setState(() => cakeFor = val!),
             ),
           ],
         ),
 
-// Toys :
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Text(
-            "Toys (For selection call store at 215-855-4900) :",
-            style:
-                GoogleFonts.raleway(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-        ),
+        // TOYS
+        const SizedBox(height: 20),
+        Text("Toys (For selection call store):",
+            style: GoogleFonts.raleway(
+                fontSize: 14, fontWeight: FontWeight.w600)),
         Wrap(
           spacing: 10,
           children: [
             buildRadioOption(
               value: "Yes",
               groupValue: toysOption,
-              onChanged: (val) {
-                setState(() {
-                  toysOption = val!;
-                });
-              },
+              onChanged: (val) => setState(() => toysOption = val!),
             ),
             buildRadioOption(
               value: "No",
               groupValue: toysOption,
-              onChanged: (val) {
-                setState(() {
-                  toysOption = val!;
-                });
-              },
+              onChanged: (val) => setState(() => toysOption = val!),
             ),
           ],
         ),
 
-          LabeledTextField(
-            labelText: "Special Request ", controller: cakeMessageController),
-        
+        const SizedBox(height: 10),
+
+        // SPECIAL REQUEST
+        LabeledTextField(
+          labelText: "Special Request",
+          controller: specialRequestController,
+        ),
+
         const SizedBox(height: 20),
+
         Text("Customer Information",
             style:
                 GoogleFonts.raleway(fontSize: 18, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
-        LabeledTextField(labelText: "Name", controller: nameController),
-        const SizedBox(height: 10),
+
+        // NAME
         LabeledTextField(
-            labelText: "Contact Number", controller: phoneController),
-        const SizedBox(height: 10),
-        LabeledTextField(labelText: "Email", controller: emailController),
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Text(
-            "Order Type : ",
-            style: 
-                GoogleFonts.raleway(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
+          labelText: "Name",
+          controller: nameController,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Please enter your name";
+            }
+            return null;
+          },
         ),
+
+        const SizedBox(height: 10),
+
+        // PHONE
+        LabeledTextField(
+          labelText: "Contact Number",
+          controller: phoneController,
+          keyboardType: TextInputType.phone,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Please enter phone number";
+            }
+            if (value.trim().length < 7) {
+              return "Invalid phone number";
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 10),
+
+        // EMAIL
+        LabeledTextField(
+          labelText: "Email",
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Please enter email";
+            }
+            if (!value.contains("@")) {
+              return "Enter valid email";
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 10),
+
+        // ORDER TYPE
+        Text("Order Type : ",
+            style: GoogleFonts.raleway(
+                fontSize: 14, fontWeight: FontWeight.w600)),
         Wrap(
           spacing: 10,
           children: [
             buildRadioOption(
               value: "PickUp from store",
               groupValue: ordertype,
-              onChanged: (val) {
-                setState(() {
-                  ordertype = val!;
-                });
-              },
+              onChanged: (val) => setState(() => ordertype = val!),
             ),
           ],
         ),
+
         const SizedBox(height: 10),
-        LabeledTextField(labelText: "How they heard about us :", controller: referenceController),
+
+        // REFERENCE
+        LabeledTextField(
+          labelText: "How they heard about us",
+          controller: referenceController,
+        ),
 
         const SizedBox(height: 20),
+
+        // CAPTCHA
         MathCaptcha(controller: captchaController),
 
         const SizedBox(height: 20),
+
+        // SUBMIT BUTTON
         ElevatedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Order placed successfully!")),
-            );
+          onPressed: () async {
+            if (!_formKey.currentState!.validate()) return;
+
+            final url = Uri.parse(
+                "https://dev.indian-grill.com/wp-json/custom/v1/order-cake");
+
+            final Map<String, dynamic> body = {
+              "product_name": widget.product['name'],
+              "date": dateController.text,
+              "time": timeController.text,
+              "special_cake": specialCakeController.text,
+              "cake_size": cakeSizeController.text,
+              "fresh_cream": freshCreamController.text,
+              "decoration": decorationController.text,
+              "candles": needCandles,
+              "writing_on_cake": cakeMessageController.text,
+              "cake_for": cakeFor,
+              "toys": toysOption,
+              "special_request": specialRequestController.text,
+              "name": nameController.text,
+              "phone": phoneController.text,
+              "email": emailController.text,
+              "order_type": ordertype,
+              "reference": referenceController.text,
+            };
+
+            try {
+              final response = await http.post(url, body: body);
+
+              if (response.statusCode == 200) {
+                setState(() => isSubmitted = true);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error: ${response.body}")),
+                );
+              }
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to submit: $e")),
+              );
+            }
           },
-         style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  backgroundColor:
-                                      const Color(0xffe2001a), // Text color
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  textStyle: const TextStyle(fontSize: 20),
-                                ).copyWith(
-                                  shape: WidgetStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          4), // No border radius
-                                    ),
-                                  ),
-                                ),
-                                child: const Text('Send'),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xffe2001a),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: const TextStyle(fontSize: 20),
+          ),
+          child: const Text('Send'),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
+
+  Widget buildSuccessMessage() {
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.green.shade50,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.green),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(Icons.check_circle, color: Colors.green, size: 80),
+        const SizedBox(height: 20),
+        Text(
+          "Thank You!",
+          style: GoogleFonts.raleway(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Colors.green.shade700,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Your cake order request has been submitted successfully. We will contact you soon!",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.raleway(fontSize: 16),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget buildRadioOption({
     required String value,
@@ -554,7 +618,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
     final image = widget.product['image'] != null &&
             widget.product['image'].toString().isNotEmpty
         ? 'https://images.weserv.nl/?url=${Uri.encodeComponent(widget.product['image'])}'
-        : "assets/cake.png";
+        : "assets/cake.webpp";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1166,7 +1166,7 @@ class CartSummarySection extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              'assets/images/uploads/dummy_image.jpg',
+              'assets/images/uploads/dummy_image.webp',
               width: 70,
               height: 70,
               fit: BoxFit.cover,

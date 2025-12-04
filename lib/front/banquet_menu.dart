@@ -138,11 +138,11 @@ class BanquetMenu extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 // margin: EdgeInsets.all(4.0),
@@ -225,11 +225,11 @@ class BanquetMenu extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 // margin: EdgeInsets.all(4.0),
@@ -316,11 +316,11 @@ class BanquetMenu extends StatelessWidget {
         children: [
           CarouselSlider(
             items: [
-              'assets/images/uploads/2019/03/image5-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image7-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image4-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image3-768x1024.jpeg',
-              'assets/images/uploads/2019/03/image2-768x1024.jpeg',
+              'assets/images/uploads/2019/03/image5-768x1024.webp',
+              'assets/images/uploads/2019/03/image7-768x1024.webp',
+              'assets/images/uploads/2019/03/image4-768x1024.webp',
+              'assets/images/uploads/2019/03/image3-768x1024.webp',
+              'assets/images/uploads/2019/03/image2-768x1024.webp',
             ].map((imageUrl) {
               return Container(
                 // margin: EdgeInsets.all(4.0),

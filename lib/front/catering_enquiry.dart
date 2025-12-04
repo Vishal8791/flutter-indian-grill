@@ -911,7 +911,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
               Expanded(
                 flex: 3,
                 child: Image.asset(
-                  'assets/images/uploads/2016/11/store.jpg',
+                  'assets/images/uploads/2016/11/store.webp',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -1071,7 +1071,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
               ),
               // Right column with image
               Image.asset(
-                'assets/images/uploads/2016/11/store.jpg',
+                'assets/images/uploads/2016/11/store.webp',
                 fit: BoxFit.cover,
               ),
 
@@ -2327,7 +2327,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
               Expanded(
                 flex: 3,
                 child: Image.asset(
-                  'assets/images/uploads/2016/11/store.jpg',
+                  'assets/images/uploads/2016/11/store.webp',
                   fit: BoxFit.cover,
                 ),
               ),

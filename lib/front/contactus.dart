@@ -309,7 +309,7 @@ class _ContactusState extends State<Contactus> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Image.asset(
-                            'assets/images/uploads/2020/04/IMG_0118.jpg',
+                            'assets/images/uploads/2020/04/IMG_0118.webp',
                           ),
                           const SizedBox(
                             height: 30,
@@ -453,7 +453,7 @@ class _ContactusState extends State<Contactus> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Image.asset(
-                            'assets/images/uploads/2020/04/IMG_0118.jpg',
+                            'assets/images/uploads/2020/04/IMG_0118.webp',
                           ),
                           const SizedBox(
                             height: 30,

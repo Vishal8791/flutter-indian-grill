@@ -1034,7 +1034,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 /// purple text style, and bold purple underline, whose value is one of "One",
 /// "Two", "Free", or "Four".
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.webp)
 ///
 /// ** See code in examples/api/lib/material/dropdown/dropdown_button.0.dart **
 /// {@end-tool}

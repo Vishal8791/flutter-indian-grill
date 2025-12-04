@@ -178,7 +178,7 @@ class _RegisterState extends State<Register> {
                   Flexible(
                     flex: 6, // Setting flex to 1 for equal division
                     child: Image.asset(
-                      'assets/images/uploads/head-chef-2.jpg',
+                      'assets/images/uploads/head-chef-2.webp',
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -626,7 +626,7 @@ class _RegisterState extends State<Register> {
           Flexible(
             flex: 5, // Setting flex to 1 for equal division
             child: Image.asset(
-              'assets/images/uploads/head-chef-2.jpg',
+              'assets/images/uploads/head-chef-2.webp',
               fit: BoxFit.cover,
             ),
           ),

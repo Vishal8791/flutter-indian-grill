@@ -15,7 +15,7 @@
 Flutter's core Dropdown Button widget with steady dropdown menu and many other options you can
 customize to your needs.
 
-<img src="https://user-images.githubusercontent.com/70890146/144847227-a1fbf63b-e4a0-4fac-ba73-33cc468b7075.jpg" alt="Image" width="700"/>
+<img src="https://user-images.githubusercontent.com/70890146/144847227-a1fbf63b-e4a0-4fac-ba73-33cc468b7075.webp" alt="Image" width="700"/>
 
 - [Features](#features)
 - [Options](#options)
@@ -149,7 +149,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 
 ### 1. Simple DropdownButton2 with no styling:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771200-15e7e98e-bdf2-4265-b810-035191f7e607.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771200-15e7e98e-bdf2-4265-b810-035191f7e607.webp" alt="Image" width="300"/>
 
 ```dart
 final List<String> items = [
@@ -205,7 +205,7 @@ Widget build(BuildContext context) {
 
 ### 2. DropdownButton2 with some styling and customization:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771235-8dd0b019-e93b-4613-9035-42dbedd9ba9e.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771235-8dd0b019-e93b-4613-9035-42dbedd9ba9e.webp" alt="Image" width="300"/>
 
 ```dart
 final List<String> items = [
@@ -311,7 +311,7 @@ Widget build(BuildContext context) {
 
 ### 3. DropdownButton2 with items of different heights like dividers:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771246-49ea5ed8-78d7-4e0d-a411-331649cef3d5.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771246-49ea5ed8-78d7-4e0d-a411-331649cef3d5.webp" alt="Image" width="300"/>
 
 ```dart
   final List<String> items = [
@@ -400,7 +400,7 @@ Widget build(BuildContext context) {
 
 ### 4. DropdownButton2 as Multiselect Dropdown with Checkboxes:
 
-<img src="https://user-images.githubusercontent.com/70890146/168461570-1682bf63-f1e9-40c1-a86d-aa4c3acdd1c9.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/168461570-1682bf63-f1e9-40c1-a86d-aa4c3acdd1c9.webp" alt="Image" width="300"/>
 
 ```dart
 final List<String> items = [
@@ -504,7 +504,7 @@ Widget build(BuildContext context) {
 
 ### 5. DropdownButton2 as Searchable Dropdown:
 
-<img src="https://user-images.githubusercontent.com/70890146/173115793-de4ec762-ab62-4395-b64a-01ae096ed4e3.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/173115793-de4ec762-ab62-4395-b64a-01ae096ed4e3.webp" alt="Image" width="300"/>
 
 ```dart
 final List<String> items = [
@@ -610,7 +610,7 @@ Widget build(BuildContext context) {
 
 ***Example 1*** using icon:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771258-e1a128dd-5b4c-46f6-bc89-645f7748c51b.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771258-e1a128dd-5b4c-46f6-bc89-645f7748c51b.webp" alt="Image" width="300"/>
 
 ```dart
 class CustomButtonTest extends StatefulWidget {
@@ -735,7 +735,7 @@ class MenuItems {
 
 ***Example 2*** using image and openWithLongPress parameter:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771270-2be603a4-84e8-47e7-9c69-91c938626866.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771270-2be603a4-84e8-47e7-9c69-91c938626866.webp" alt="Image" width="300"/>
 
 ```dart
 class CustomButtonTest extends StatefulWidget {
@@ -759,7 +759,7 @@ class _CustomButtonTestState extends State<CustomButtonTest> {
                 borderRadius: BorderRadius.circular(40),
                 image: const DecorationImage(
                   image: NetworkImage(
-                    'https://cdn.pixabay.com/photo/2020/05/11/06/20/city-5156636_960_720.jpg',
+                    'https://cdn.pixabay.com/photo/2020/05/11/06/20/city-5156636_960_720.webp',
                   ),
                   fit: BoxFit.cover,
                 ),
@@ -867,7 +867,7 @@ class MenuItems {
 
 ### 7. Using DropdownButtonFormField2 with Form:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771294-4b98a3f4-5cb7-452f-a1be-5d3e1275fb93.jpg" alt="Image" width="500"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771294-4b98a3f4-5cb7-452f-a1be-5d3e1275fb93.webp" alt="Image" width="500"/>
 
 ```dart
 
@@ -1111,7 +1111,7 @@ class CustomDropdownButton2 extends StatelessWidget {
 
 ### How simple you can use it:
 
-<img src="https://user-images.githubusercontent.com/70890146/144771305-23338e9d-9664-46e5-a7b7-ffc02e9d61a3.jpg" alt="Image" width="300"/>
+<img src="https://user-images.githubusercontent.com/70890146/144771305-23338e9d-9664-46e5-a7b7-ffc02e9d61a3.webp" alt="Image" width="300"/>
 
 ```dart
 final List<String> items = [

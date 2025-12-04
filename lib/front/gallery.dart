@@ -15,32 +15,32 @@ class _GalleryState extends State<Gallery> {
   String selectedButton = 'All';
 
   final List<String> imageAll = [
-    'assets/images/uploads/2017/05/noodle.jpg',
-    'assets/images/uploads/2017/05/Thali.jpg',
-    'assets/images/uploads/2017/05/chkn-Biryani.jpg',
-    'assets/images/uploads/2017/01/noodles-and-veg-manchurian.jpg',
-    'assets/images/uploads/2017/01/vada-pav.jpg',
-    'assets/images/uploads/2017/01/jalebi.jpg',
-    'assets/images/uploads/2017/01/IMG_0190.jpg',
-    'assets/images/uploads/2017/01/IMG_0166.jpg',
-    'assets/images/uploads/2017/01/IMG_0163.jpg',
-    'assets/images/uploads/2017/01/IMG_0135.jpg',
-    'assets/images/uploads/2017/01/garlic-naan.jpg',
-    'assets/images/uploads/2017/01/gallery_04.jpg'
+    'assets/images/uploads/2017/05/noodle.webp',
+    'assets/images/uploads/2017/05/Thali.webp',
+    'assets/images/uploads/2017/05/chkn-Biryani.webp',
+    'assets/images/uploads/2017/01/noodles-and-veg-manchurian.webp',
+    'assets/images/uploads/2017/01/vada-pav.webp',
+    'assets/images/uploads/2017/01/jalebi.webp',
+    'assets/images/uploads/2017/01/IMG_0190.webp',
+    'assets/images/uploads/2017/01/IMG_0166.webp',
+    'assets/images/uploads/2017/01/IMG_0163.webp',
+    'assets/images/uploads/2017/01/IMG_0135.webp',
+    'assets/images/uploads/2017/01/garlic-naan.webp',
+    'assets/images/uploads/2017/01/gallery_04.webp'
   ];
 
   final List<String> imageCake = [
-    'assets/images/uploads/2017/01/Cakes19.jpg',
-    'assets/images/uploads/2017/01/Cakes18.jpg',
-    'assets/images/uploads/2017/01/Cakes17-1.jpg',
-    'assets/images/uploads/2017/01/Cakes16.jpg'
+    'assets/images/uploads/2017/01/Cakes19.webp',
+    'assets/images/uploads/2017/01/Cakes18.webp',
+    'assets/images/uploads/2017/01/Cakes17-1.webp',
+    'assets/images/uploads/2017/01/Cakes16.webp'
   ];
 
   final List<String> imageFood = [
-    'assets/images/uploads/2017/01/food1.jpg',
-    'assets/images/uploads/2017/01/food2.jpg',
-    'assets/images/uploads/2017/01/food3.jpg',
-    'assets/images/uploads/2017/01/food4.jpg'
+    'assets/images/uploads/2017/01/food1.webp',
+    'assets/images/uploads/2017/01/food2.webp',
+    'assets/images/uploads/2017/01/food3.webp',
+    'assets/images/uploads/2017/01/food4.webp'
   ];
 
   @override

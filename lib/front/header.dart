@@ -428,7 +428,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                   child: Center(
                     // Ensures the logo is centered in its section
                     child: Image.asset(
-                      'assets/images/logo/indian-grill-logo.png', // Replace with the actual path of the logo
+                      'assets/images/logo/indian-grill-logo.webp', // Replace with the actual path of the logo
                       height: 80,
                       width: 135, // Adjust logo size
                     ),
@@ -878,7 +878,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
   //                           child: SizedBox(
   //                             width: 140,
   //                             child: Image.asset(
-  //                               'assets/images/logo/Indian-Grill-Logo.png',
+  //                               'assets/images/logo/Indian-Grill-Logo.webp',
   //                               fit: BoxFit.contain,
   //                             ),
   //                           ),
@@ -972,7 +972,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                   context.go('/'); // Navigate to homepage
                 },
                 child: Image.asset(
-                  'assets/images/logo/Indian-Grill-Logo.png',
+                  'assets/images/logo/Indian-Grill-Logo.webp',
                   fit: BoxFit.contain,
                   height: 50,
                 ),
@@ -1284,7 +1284,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                   child: Center(
                     // Ensures the logo is centered in its section
                     child: Image.asset(
-                      'assets/images/logo/Indian-Grill-Logo.png', // Replace with the actual path of the logo
+                      'assets/images/logo/Indian-Grill-Logo.webp', // Replace with the actual path of the logo
                       height: 90,
                       width: 150, // Adjust logo size
                     ),

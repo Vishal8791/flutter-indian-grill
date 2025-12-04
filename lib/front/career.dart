@@ -116,9 +116,9 @@ class _CareerState extends State<Career> {
           'pdf',
           'doc',
           'docx',
-          'jpg',
-          'jpeg',
-          'png',
+          'webp',
+          'webp',
+          'webp',
           'gif'
         ], // allow documents + images
       );
