@@ -11,7 +11,7 @@ import 'package:indiangrill/front/checkout.dart';
 import 'package:indiangrill/front/contactus.dart';
 import 'package:indiangrill/front/gallery.dart';
 import 'package:indiangrill/front/homepage.dart';
-import 'package:indiangrill/front/my-account.dart';
+import 'package:indiangrill/front/my_account.dart';
 import 'package:indiangrill/front/order_cake.dart';
 import 'package:indiangrill/front/order_success_page.dart';
 import 'package:indiangrill/front/privacy_policy.dart';
@@ -41,8 +41,8 @@ class MyAppRouter {
               const MainLayout(child: BanquetContactPage()),
         ),
         GoRoute(
-          name: 'my-account',
-          path: '/my-account',
+          name: 'my_account',
+          path: '/my_account',
           builder: (context, state) => const MainLayout(child: MyAccount()),
           redirect: (context, state) {
             if (!userSession.isLoggedIn) return '/login';
@@ -125,7 +125,7 @@ class MyAppRouter {
           redirect: (context, state) {
             // ✅ If user is logged in, do NOT allow access to login page
             if (userSession.isLoggedIn) {
-              return '/my-account';
+              return '/my_account';
             }
             return null; // allow access if not logged in
           },
@@ -147,12 +147,12 @@ class MyAppRouter {
         GoRoute(
           name: 'cart',
           path: '/cart',
-          builder: (context, state) => const MainLayout(child: CartScreen(), hideHeader: true),
+          builder: (context, state) => const MainLayout(hideHeader: true, child: CartScreen()),
         ),
         GoRoute(
           name: 'checkout',
           path: '/checkout',
-          builder: (context, state) => const MainLayout(child: CheckoutPage(), hideHeader: true),
+          builder: (context, state) => const MainLayout(hideHeader: true, child: CheckoutPage()),
         ),
         GoRoute(
           name: 'lost-password',

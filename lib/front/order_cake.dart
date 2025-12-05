@@ -1,4 +1,6 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/captcha/math_captcha.dart';
@@ -10,10 +12,10 @@ class OrderCakePage extends StatefulWidget {
   const OrderCakePage({super.key, required this.product});
 
   @override
-  _OrderCakePageState createState() => _OrderCakePageState();
+  OrderCakePageState createState() => OrderCakePageState();
 }
 
-class _OrderCakePageState extends State<OrderCakePage> {
+class OrderCakePageState extends State<OrderCakePage> {
   // ✅ Input Controllers
   final TextEditingController dateController = TextEditingController();
   final TextEditingController cakeMessageController = TextEditingController();
@@ -76,6 +78,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
     freshCreamController.text = selectedfreshcream!;
   }
 
+  @override
   void dispose() {
     dateController.dispose();
     cakeMessageController.dispose();
@@ -241,7 +244,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
               onChanged: (val) {
                 setState(() {
                   specialCakeType = val!;
-                  specialCakeController.text = val!;
+                  specialCakeController.text = val;
                 });
               },
             ),
@@ -251,7 +254,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
               onChanged: (val) {
                 setState(() {
                   specialCakeType = val!;
-                  specialCakeController.text = val!;
+                  specialCakeController.text = val;
                 });
               },
             ),
@@ -261,7 +264,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
               onChanged: (val) {
                 setState(() {
                   specialCakeType = val!;
-                  specialCakeController.text = val!;
+                  specialCakeController.text = val;
                 });
               },
             ),
@@ -271,7 +274,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
               onChanged: (val) {
                 setState(() {
                   specialCakeType = val!;
-                  specialCakeController.text = val!;
+                  specialCakeController.text = val;
                 });
               },
             ),
@@ -284,7 +287,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
         Text('Cake Size : ',
             style: GoogleFonts.raleway(fontSize: 13, color: Color(0xff666666))),
         DropdownButtonFormField<String>(
-          value: selectedcakeSize,
+          initialValue: selectedcakeSize,
           items: cakeSize
               .map((item) =>
                   DropdownMenuItem(value: item, child: Text(item)))
@@ -305,7 +308,7 @@ class _OrderCakePageState extends State<OrderCakePage> {
         Text('Fresh Cream : ',
             style: GoogleFonts.raleway(fontSize: 13, color: Color(0xff666666))),
         DropdownButtonFormField<String>(
-          value: selectedfreshcream,
+          initialValue: selectedfreshcream,
           items: freshcream
               .map((item) =>
                   DropdownMenuItem(value: item, child: Text(item)))

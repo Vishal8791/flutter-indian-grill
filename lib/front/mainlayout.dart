@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indiangrill/front/footer.dart';
 import 'package:indiangrill/front/header.dart';
-import 'package:indiangrill/providers/cart_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/widgets/app_drawer.dart';
 class MainLayout extends StatefulWidget {
   final Widget child;
@@ -22,7 +19,7 @@ class _MainLayoutState extends State<MainLayout> {
   // MAP ROUTES TO BOTTOM NAV INDEX (ACTIVE TAB SYNC)
   // -----------------------------------------------------------
   int _getIndexFromRoute(BuildContext context) {
-    final location = GoRouter.of(context).location;
+    final location = GoRouterState.of(context).uri.toString();
 
     if (location == "/") return 0;
     if (location.startsWith("/order-online")) return 1;
@@ -115,7 +112,7 @@ Widget build(BuildContext context) {
 
     // 👇 Bottom nav only on mobile + hidden on specific pages
     bottomNavigationBar: 
-      isMobile && !_hideBottomNav(GoRouter.of(context).location)
+      isMobile && !_hideBottomNav(GoRouterState.of(context).uri.toString())
         ? _buildBottomNavBar()
         : null,
   );

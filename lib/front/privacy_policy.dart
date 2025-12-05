@@ -17,8 +17,8 @@ class PrivacyPolicy extends StatelessWidget {
     return SingleChildScrollView( 
     child:Container(
         color: Colors.white,
-        child: LayoutBuilder(builder: (context, Constraints) {
-          double screenWidth = Constraints.maxWidth;
+        child: LayoutBuilder(builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
           if (kIsWeb) {
             if (screenWidth > 1024) {
               // print("Web/Desktop layout is being used");

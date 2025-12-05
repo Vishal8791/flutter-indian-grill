@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,16 +7,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:indiangrill/front/orderonline.dart';
-import 'package:indiangrill/style/style.dart' show AppColors;
-
 class OurCakes extends StatefulWidget {
   const OurCakes({super.key});
 
   @override
-  _OurCakesState createState() => _OurCakesState();
+  OurCakesState createState() => OurCakesState();
 }
 
-class _OurCakesState extends State<OurCakes> {
+class OurCakesState extends State<OurCakes> {
   late bool isMobileDevice;
   final WooCommerceService wooCommerceService = WooCommerceService();
   final WooCommerceCategory wooCommerceCategory = WooCommerceCategory();
@@ -89,7 +89,7 @@ class _OurCakesState extends State<OurCakes> {
             }).toList();
       });
     } catch (error) {
-      print("Error fetching categories: $error");
+    //  print("Error fetching categories: $error");
     }
   }
 
@@ -259,7 +259,7 @@ class _OurCakesState extends State<OurCakes> {
     );
   }
 
-   Widget buildMobileLayout() {
+  Widget buildMobileLayout() {
     return Container(
       color: Colors.white,
       height: MediaQuery.of(context).size.height, // Provides constraints
@@ -415,12 +415,13 @@ class ProductCardMobile extends StatelessWidget {
     String imageUrl = product['image'] ?? 'https://via.placeholder.com/200';
     String safeImageUrl =
         'https://images.weserv.nl/?url=${Uri.encodeComponent(imageUrl)}';
-    print(safeImageUrl);
+  //  print(safeImageUrl);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:Color.fromARGB(255, 255, 135, 135),width: 1.0),
+        border:
+            Border.all(color: Color.fromARGB(255, 255, 135, 135), width: 1.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -433,43 +434,43 @@ class ProductCardMobile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ---------------- IMAGE SECTION ----------------
-         GestureDetector(
-  onTap: () {
-    GoRouter.of(context).pushNamed('cakeDetails', extra: product);
-  },
-  child: ClipRRect(
-    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-    child: Container(
-      height: 150,
-      width: double.infinity,
-      color: Colors.grey.shade100,
-      child: CachedNetworkImage(
-        imageUrl: safeImageUrl,
-        fit: BoxFit.cover,
-        
-        // Placeholder while loading
-        placeholder: (_, __) => Center(
-          child: SizedBox(
-            width: 26,
-            height: 26,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.5,
-              color: Colors.red.shade300,
+          GestureDetector(
+            onTap: () {
+              GoRouter.of(context).pushNamed('cakeDetails', extra: product);
+            },
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Container(
+                height: 150,
+                width: double.infinity,
+                color: Colors.grey.shade100,
+                child: CachedNetworkImage(
+                  imageUrl: safeImageUrl,
+                  fit: BoxFit.cover,
+
+                  // Placeholder while loading
+                  placeholder: (_, __) => Center(
+                    child: SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        color: Colors.red.shade300,
+                      ),
+                    ),
+                  ),
+
+                  // Error fallback
+                  errorWidget: (_, __, ___) => const Icon(
+                    Icons.image_not_supported,
+                    size: 40,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-
-        // Error fallback
-        errorWidget: (_, __, ___) => const Icon(
-          Icons.image_not_supported,
-          size: 40,
-          color: Colors.grey,
-        ),
-      ),
-    ),
-  ),
-),
-
 
           const SizedBox(height: 10),
 
@@ -478,16 +479,16 @@ class ProductCardMobile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SizedBox(
               height: 40,
-              child:Center(
-              child: Text(
-                product['name'] ?? 'Cake Item',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              child: Center(
+                child: Text(
+                  product['name'] ?? 'Cake Item',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
               ),
             ),
           ),
@@ -622,8 +623,7 @@ class ProductGrid extends StatelessWidget {
             'https://images.weserv.nl/?url=${Uri.encodeComponent(imageUrl)}';
 
         // Example target URLs (replace with your real links or navigation logic)
-        final String productLink = product['link'] ?? '#';
-        final String orderLink = product['orderLink'] ?? '#';
+      
 
         return Container(
           decoration: BoxDecoration(
@@ -788,11 +788,11 @@ class WooCommerceService {
           };
         }).toList();
       } else {
-        print('Failed to fetch products. Status code: ${response.statusCode}');
+ //       print('Failed to fetch products. Status code: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Unexpected error: $e');
+ //     print('Unexpected error: $e');
       return [];
     }
   }
@@ -820,7 +820,7 @@ class WooCommerceService {
         return 0;
       }
     } catch (e) {
-      print('Error fetching total count: $e');
+    //  print('Error fetching total count: $e');
       return 0;
     }
   }

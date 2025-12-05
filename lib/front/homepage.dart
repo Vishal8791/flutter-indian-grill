@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:indiangrill/style/style.dart' show AppColors;
-import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,8 +23,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(child: LayoutBuilder(
-      builder: (context, Constraints) {
-        double screenWidth = Constraints.maxWidth;
+      builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
         // print("Current Width: $screenWidth");
 
         if (kIsWeb) {
@@ -507,8 +506,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  child: Row(
+                                Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: List.generate(3, (index) {
                                       // Adjust the number of dots based on the number of images
@@ -527,7 +525,7 @@ class _HomePageState extends State<HomePage> {
                                       );
                                     }),
                                   ),
-                                ),
+                                
                               ],
                             ))),
                   ],
@@ -1071,8 +1069,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  child: Row(
+                                Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: List.generate(3, (index) {
                                       // Adjust the number of dots based on the number of images
@@ -1091,7 +1088,7 @@ class _HomePageState extends State<HomePage> {
                                       );
                                     }),
                                   ),
-                                ),
+                                
                               ],
                             ))),
                   ],
@@ -1263,10 +1260,9 @@ class _TimingRow extends StatelessWidget {
   final String timeText;
 
   const _TimingRow({
-    Key? key,
     required this.dayText,
     required this.timeText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1294,28 +1290,6 @@ class _TimingRow extends StatelessWidget {
 }
 
 /// Helper widget for timing rows
-Widget _timingRow(String day, String hours) {
-  return Column(
-    children: [
-      Text(
-        day,
-        style: GoogleFonts.raleway(
-          fontSize: 19,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
-      ),
-      const SizedBox(height: 4),
-      Text(
-        hours,
-        style: GoogleFonts.raleway(
-          fontSize: 17,
-          color: Colors.black87,
-        ),
-      ),
-    ],
-  );
-}
 
 Widget _buildCarouselItem(
     {required IconData icon,

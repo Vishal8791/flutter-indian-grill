@@ -96,8 +96,8 @@ class BanquetMenu extends StatelessWidget {
     return Container(
         color: Colors.white,
         child: LayoutBuilder(
-          builder: (context, Constraints) {
-            double screenWidth = Constraints.maxWidth;
+          builder: (context, constraints) {
+            double screenWidth = constraints.maxWidth;
             // print("Current Width: $screenWidth");
 
             if (kIsWeb) {
@@ -412,10 +412,10 @@ class LabeledList extends StatefulWidget {
   });
 
   @override
-  _LabeledListState createState() => _LabeledListState();
+  LabeledListState createState() => LabeledListState();
 }
 
-class _LabeledListState extends State<LabeledList> {
+class LabeledListState extends State<LabeledList> {
   bool _isExpanded = false;
 
   @override

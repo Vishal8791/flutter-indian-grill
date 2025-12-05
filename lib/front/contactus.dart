@@ -1,4 +1,6 @@
 // contactus.dart
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -44,7 +46,7 @@ class _ContactusState extends State<Contactus> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+     //   final data = jsonDecode(response.body);
         setState(() {
           formSubmitted = true;
           nameController.clear();
@@ -67,7 +69,7 @@ class _ContactusState extends State<Contactus> {
         // );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error submitting form.')),
       );
     }
@@ -79,8 +81,8 @@ class _ContactusState extends State<Contactus> {
         controller: _scrollController,
         child: Container(
             color: Colors.white,
-            child: LayoutBuilder(builder: (context, Constraints) {
-              double screenWidth = Constraints.maxWidth;
+            child: LayoutBuilder(builder: (context, constraints) {
+              double screenWidth = constraints.maxWidth;
               if (kIsWeb) {
                 if (screenWidth > 1024) {
                   // print("Web/Desktop layout is being used");
@@ -234,10 +236,9 @@ class _ContactusState extends State<Contactus> {
                                                 return null;
                                               },
                                             ),
-                                            Container(
-                                                child: MathCaptcha(
+                                            MathCaptcha(
                                                     controller:
-                                                        captchaController)),
+                                                        captchaController),
                                             Container(
                                               padding: const EdgeInsets.only(
                                                   top: 20),
@@ -384,9 +385,8 @@ class _ContactusState extends State<Contactus> {
                                 LabeledTextField(
                                     labelText: 'Comment',
                                     controller: commentController),
-                                Container(
-                                    child: MathCaptcha(
-                                        controller: captchaController)),
+                                MathCaptcha(
+                                        controller: captchaController),
                                 Container(
                                   padding: const EdgeInsets.only(top: 20),
                                   child: Builder(
@@ -582,8 +582,7 @@ class _ContactusState extends State<Contactus> {
                           return null;
                         },
                       ),
-                      Container(
-                          child: MathCaptcha(controller: captchaController)),
+                      MathCaptcha(controller: captchaController),
                       Container(
                         padding: const EdgeInsets.only(top: 20),
                         child: ElevatedButton(

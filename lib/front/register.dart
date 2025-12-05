@@ -5,8 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:indiangrill/front/my-account.dart';
-import 'package:indiangrill/project/routes/app_routes_config.dart';
+import 'package:indiangrill/front/my_account.dart';
 import 'package:indiangrill/session/user_session.dart';
 
 class Register extends StatefulWidget {
@@ -16,15 +15,13 @@ class Register extends StatefulWidget {
   const Register({super.key, this.args, required this.registration});
 
   @override
-  _RegisterState createState() => _RegisterState();
+  RegisterState createState() => RegisterState();
 }
 
-class _RegisterState extends State<Register> {
+class RegisterState extends State<Register> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   late String displayText;
-  bool _isVisible = true;
-  bool _isHovering = false;
 
   String msg = ''; // Declare a message variable
   Future<void> registerUser() async {
@@ -41,8 +38,8 @@ class _RegisterState extends State<Register> {
           'role': 'customer',
         }),
       );
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      // print('Response status: ${response.statusCode}');
+      // print('Response body: ${response.body}');
       if (response.statusCode == 200) {
         // Handle success
         setState(() {
@@ -58,7 +55,7 @@ class _RegisterState extends State<Register> {
         });
       }
     } catch (e) {
-      print('Error: $e');
+      // print('Error: $e');
       setState(() {
         msg = 'An error occurred: $e'; // Set error message on exception
       });
@@ -78,29 +75,28 @@ class _RegisterState extends State<Register> {
           'password': passwordController.text,
         }),
       );
-      print(response);
+      // print(response);
       if (response.statusCode == 200) {
-        //   print('login done');
+        //   // print('login done');
         // Assuming success if status code is 200
         //  print(userSession.isLoggedIn);
         await userSession.logIn(email: emailController.text.trim());
         // Mark user as logged in
-        setState(() {}); // force UI update
-        if (context.mounted) {
-          context.go('/my-account');
-        }
+        if (!mounted) return;
+        context.go('/my_account');
+
         // Navigate to next screen or update UI accordingly
       } else {
-        print(response);
+        // print(response);
         // Decode error message if the API provides one
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         setState(() {
           msg = responseBody['message'] ?? 'Login failed. Please try again.';
         });
-        print(msg);
+        // print(msg);
       }
     } catch (e) {
-      print('Login error: $e');
+      // print('Login error: $e');
       setState(() {
         msg = 'An error occurred: $e';
       });
@@ -185,381 +181,359 @@ class _RegisterState extends State<Register> {
                   if (displayText == 'register')
                     Flexible(
                       flex: 4, // Setting flex to 1 for equal division
-                      child: Container(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding:
-                                  const EdgeInsets.fromLTRB(50, 50, 50, 30),
-                              color: const Color(0XFFF1F1F1),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Join with us',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
+                            color: const Color(0XFFF1F1F1),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Join with us',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                // Check if msg is not null
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    msg,
+                                    style: TextStyle(
+                                      color: msg == 'Registration successful'
+                                          ? Colors.green
+                                          : Colors.red,
+                                      fontSize: 16,
                                     ),
                                   ),
-                                  // Check if msg is not null
-                                  Padding(
+                                ),
+                                LabeledTextField(
+                                  labelText: '',
+                                  controller: emailController,
+                                  hintText: 'Email address',
+                                ),
+                                LabeledTextField(
+                                  labelText: '',
+                                  controller: passwordController,
+                                  hintText: 'Password',
+                                  obscureText: true,
+                                ),
+                                Container(
+                                    alignment: Alignment.centerLeft,
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: Text(
-                                      msg!,
-                                      style: TextStyle(
-                                        color: msg == 'Registration successful'
-                                            ? Colors.green
-                                            : Colors.red,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  LabeledTextField(
-                                    labelText: '',
-                                    controller: emailController,
-                                    hintText: 'Email address',
-                                  ),
-                                  LabeledTextField(
-                                    labelText: '',
-                                    controller: passwordController,
-                                    hintText: 'Password',
-                                    obscureText: true,
-                                  ),
-                                  Container(
-                                      alignment: Alignment.centerLeft,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 20),
-                                      child: Row(
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Add your onPressed code here!
-                                              registerUser();
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor: const Color(
-                                                  0xffe2001a), // Text color
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 20),
-                                              textStyle: GoogleFonts.raleway(
-                                                  fontSize: 12),
-                                            ).copyWith(
-                                              shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          0), // No border radius
-                                                ),
+                                        vertical: 20),
+                                    child: Row(
+                                      children: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // Add your onPressed code here!
+                                            registerUser();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: const Color(
+                                                0xffe2001a), // Text color
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 24, vertical: 20),
+                                            textStyle: GoogleFonts.raleway(
+                                                fontSize: 12),
+                                          ).copyWith(
+                                            shape: WidgetStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        0), // No border radius
                                               ),
                                             ),
-                                            child: const Text('Register'),
                                           ),
-                                          Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 20),
-                                              child: Text(
-                                                'Need any help?',
-                                                style: GoogleFonts.raleway(
-                                                  fontSize: 12,
-                                                  color:
-                                                      const Color(0xffe2001a),
-                                                ),
-                                              )),
-                                        ],
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              color: const Color(0xffe5e5e5),
-                              padding:
-                                  const EdgeInsets.fromLTRB(50, 30, 50, 30),
-                              child: Column(
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      text: 'Already member? ',
-                                      style: GoogleFonts.raleway(
-                                          color: const Color(
-                                              0xff666666)), // Default style for the text
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: 'Sign In',
-                                          style: GoogleFonts.raleway(
-                                            color: const Color(
-                                                0xffe2001a), // Set color to red for "SIGN IN"
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              switchTo('login');
-                                            },
+                                          child: const Text('Register'),
                                         ),
-                                        TextSpan(
-                                          text:
-                                              ' now or connect with social account',
-                                          style: GoogleFonts.raleway(
-                                              color: const Color(0xff666666)),
-                                        ),
+                                        Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 20),
+                                            child: Text(
+                                              'Need any help?',
+                                              style: GoogleFonts.raleway(
+                                                fontSize: 12,
+                                                color: const Color(0xffe2001a),
+                                              ),
+                                            )),
                                       ],
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                      height:
-                                          20), // Space between text and buttons
-
-                                  // Facebook button
-                                  _buildSocialButton(
-                                    color: const Color(0xff3b5998),
-                                    icon: Icons.facebook,
-                                    label: 'Like on ',
-                                    boldLabel: 'facebook',
-                                    onTap: () {
-                                      print('Facebook tapped');
-                                    },
-                                  ),
-
-                                  const SizedBox(
-                                      height: 10), // Space between buttons
-
-                                  // Google+ button
-                                  _buildSocialButton(
-                                    color: const Color(0xffdb4a39),
-                                    icon: Icons
-                                        .g_mobiledata, // Example icon, customize as needed
-                                    label: 'Like on ',
-                                    boldLabel: 'google+',
-                                    onTap: () {
-                                      print('Google+ tapped');
-                                    },
-                                  ),
-
-                                  const SizedBox(
-                                      height: 10), // Space between buttons
-
-                                  // Twitter button
-                                  _buildSocialButton(
-                                    color: const Color(0xff1DA1F2),
-                                    icon: Icons
-                                        .alternate_email, // Example icon, customize as needed
-                                    label: 'Like on ',
-                                    boldLabel: 'twitter',
-                                    onTap: () {
-                                      print('Twitter tapped');
-                                    },
-                                  ),
-                                ],
-                              ),
+                                    )),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Container(
+                            color: const Color(0xffe5e5e5),
+                            padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+                            child: Column(
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    text: 'Already member? ',
+                                    style: GoogleFonts.raleway(
+                                        color: const Color(
+                                            0xff666666)), // Default style for the text
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: 'Sign In',
+                                        style: GoogleFonts.raleway(
+                                          color: const Color(
+                                              0xffe2001a), // Set color to red for "SIGN IN"
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            switchTo('login');
+                                          },
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            ' now or connect with social account',
+                                        style: GoogleFonts.raleway(
+                                            color: const Color(0xff666666)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                    height:
+                                        20), // Space between text and buttons
+
+                                // Facebook button
+                                _buildSocialButton(
+                                  color: const Color(0xff3b5998),
+                                  icon: Icons.facebook,
+                                  label: 'Like on ',
+                                  boldLabel: 'facebook',
+                                  onTap: () {
+                                    // print('Facebook tapped');
+                                  },
+                                ),
+
+                                const SizedBox(
+                                    height: 10), // Space between buttons
+
+                                // Google+ button
+                                _buildSocialButton(
+                                  color: const Color(0xffdb4a39),
+                                  icon: Icons
+                                      .g_mobiledata, // Example icon, customize as needed
+                                  label: 'Like on ',
+                                  boldLabel: 'google+',
+                                  onTap: () {
+                                    // print('Google+ tapped');
+                                  },
+                                ),
+
+                                const SizedBox(
+                                    height: 10), // Space between buttons
+
+                                // Twitter button
+                                _buildSocialButton(
+                                  color: const Color(0xff1DA1F2),
+                                  icon: Icons
+                                      .alternate_email, // Example icon, customize as needed
+                                  label: 'Like on ',
+                                  boldLabel: 'twitter',
+                                  onTap: () {
+                                    // print('Twitter tapped');
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   if (displayText == 'login')
                     Flexible(
                       flex: 4, // Setting flex to 1 for equal division
-                      child: Container(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding:
-                                  const EdgeInsets.fromLTRB(50, 50, 50, 30),
-                              color: const Color(0XFFF1F1F1),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Account Sign In',
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
+                            color: const Color(0XFFF1F1F1),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Account Sign In',
+                                  style: GoogleFonts.raleway(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  LabeledTextField(
-                                    labelText: '',
-                                    controller: emailController,
-                                    hintText: 'Username or email address',
-                                  ),
-                                  LabeledTextField(
-                                    labelText: '',
-                                    controller: passwordController,
-                                    hintText: 'Password',
-                                    obscureText: true,
-                                  ),
-                                  if (msg.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 0),
-                                      child: Text(
-                                        msg,
-                                        style: GoogleFonts.raleway(
-                                          color: Colors.red,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                ),
+                                LabeledTextField(
+                                  labelText: '',
+                                  controller: emailController,
+                                  hintText: 'Username or email address',
+                                ),
+                                LabeledTextField(
+                                  labelText: '',
+                                  controller: passwordController,
+                                  hintText: 'Password',
+                                  obscureText: true,
+                                ),
+                                if (msg.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text(
+                                      msg,
+                                      style: GoogleFonts.raleway(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                  Container(
-                                      alignment: Alignment.centerLeft,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 20),
-                                      child: Row(
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Add your onPressed code here!
-                                              loginUser();
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor: const Color(
-                                                  0xffe2001a), // Text color
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 20),
-                                              textStyle: GoogleFonts.raleway(
-                                                  fontSize: 12),
-                                            ).copyWith(
-                                              shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          0), // No border radius
-                                                ),
-                                              ),
-                                            ),
-                                            child: const Text('Login'),
-                                          ),
-                                          MouseRegion(
-                                            cursor: SystemMouseCursors.click,
-                                            onEnter: (_) {
-                                              setState(() {
-                                                _isHovering = true;
-                                                _isVisible = true;
-                                              });
-                                            },
-                                            onExit: (_) {
-                                              setState(() {
-                                                _isHovering = false;
-                                              });
-                                            },
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                GoRouter.of(context).pushNamed(
-                                                    'lost-password'); // Adjust route name if needed
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        20, 0, 0, 0),
-                                                child: Text(
-                                                  'Lost your password?',
-                                                  style: GoogleFonts.raleway(
-                                                    fontSize: 12,
-                                                    color:
-                                                        const Color(0xffe2001a),
-                                                    decoration: TextDecoration
-                                                        .underline, // Optional, for link-style appearance
-                                                  ),
-                                                ),
+                                  ),
+                                Container(
+                                    alignment: Alignment.centerLeft,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    child: Row(
+                                      children: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // Add your onPressed code here!
+                                            loginUser();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: const Color(
+                                                0xffe2001a), // Text color
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 24, vertical: 20),
+                                            textStyle: GoogleFonts.raleway(
+                                                fontSize: 12),
+                                          ).copyWith(
+                                            shape: WidgetStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        0), // No border radius
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              color: const Color(0xffe5e5e5),
-                              padding:
-                                  const EdgeInsets.fromLTRB(50, 30, 50, 30),
-                              child: Column(
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      text: 'Not Member yet? ',
-                                      style: GoogleFonts.raleway(
-                                          color: const Color(
-                                              0xff666666)), // Default style for the text
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: 'Sign Up',
-                                          style: GoogleFonts.raleway(
-                                            color: const Color(
-                                                0xffe2001a), // Set color to red for "SIGN IN"
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              switchTo('register');
-                                            },
+                                          child: const Text('Login'),
                                         ),
-                                        TextSpan(
-                                          text:
-                                              ' now or connect with social account',
-                                          style: GoogleFonts.raleway(
-                                              color: const Color(0xff666666)),
+                                        MouseRegion(
+                                          cursor: SystemMouseCursors.click,
+                                          onEnter: (_) {},
+                                          onExit: (_) {},
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              GoRouter.of(context).pushNamed(
+                                                  'lost-password'); // Adjust route name if needed
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      20, 0, 0, 0),
+                                              child: Text(
+                                                'Lost your password?',
+                                                style: GoogleFonts.raleway(
+                                                  fontSize: 12,
+                                                  color:
+                                                      const Color(0xffe2001a),
+                                                  decoration: TextDecoration
+                                                      .underline, // Optional, for link-style appearance
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ],
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                      height:
-                                          20), // Space between text and buttons
-
-                                  // Facebook button
-                                  _buildSocialButton(
-                                    color: const Color(0xff3b5998),
-                                    icon: Icons.facebook,
-                                    label: 'Like on ',
-                                    boldLabel: 'facebook',
-                                    onTap: () {
-                                      print('Facebook tapped');
-                                    },
-                                  ),
-
-                                  const SizedBox(
-                                      height: 10), // Space between buttons
-
-                                  // Google+ button
-                                  _buildSocialButton(
-                                    color: const Color(0xffdb4a39),
-                                    icon: Icons
-                                        .g_mobiledata, // Example icon, customize as needed
-                                    label: 'Like on ',
-                                    boldLabel: 'google+',
-                                    onTap: () {
-                                      print('Google+ tapped');
-                                    },
-                                  ),
-
-                                  const SizedBox(
-                                      height: 10), // Space between buttons
-
-                                  // Twitter button
-                                  _buildSocialButton(
-                                    color: const Color(0xff1DA1F2),
-                                    icon: Icons
-                                        .alternate_email, // Example icon, customize as needed
-                                    label: 'Like on ',
-                                    boldLabel: 'twitter',
-                                    onTap: () {
-                                      print('Twitter tapped');
-                                    },
-                                  ),
-                                ],
-                              ),
+                                    )),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Container(
+                            color: const Color(0xffe5e5e5),
+                            padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+                            child: Column(
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    text: 'Not Member yet? ',
+                                    style: GoogleFonts.raleway(
+                                        color: const Color(
+                                            0xff666666)), // Default style for the text
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: 'Sign Up',
+                                        style: GoogleFonts.raleway(
+                                          color: const Color(
+                                              0xffe2001a), // Set color to red for "SIGN IN"
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            switchTo('register');
+                                          },
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            ' now or connect with social account',
+                                        style: GoogleFonts.raleway(
+                                            color: const Color(0xff666666)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                    height:
+                                        20), // Space between text and buttons
+
+                                // Facebook button
+                                _buildSocialButton(
+                                  color: const Color(0xff3b5998),
+                                  icon: Icons.facebook,
+                                  label: 'Like on ',
+                                  boldLabel: 'facebook',
+                                  onTap: () {
+                                    // print('Facebook tapped');
+                                  },
+                                ),
+
+                                const SizedBox(
+                                    height: 10), // Space between buttons
+
+                                // Google+ button
+                                _buildSocialButton(
+                                  color: const Color(0xffdb4a39),
+                                  icon: Icons
+                                      .g_mobiledata, // Example icon, customize as needed
+                                  label: 'Like on ',
+                                  boldLabel: 'google+',
+                                  onTap: () {
+                                    // print('Google+ tapped');
+                                  },
+                                ),
+
+                                const SizedBox(
+                                    height: 10), // Space between buttons
+
+                                // Twitter button
+                                _buildSocialButton(
+                                  color: const Color(0xff1DA1F2),
+                                  icon: Icons
+                                      .alternate_email, // Example icon, customize as needed
+                                  label: 'Like on ',
+                                  boldLabel: 'twitter',
+                                  onTap: () {
+                                    // print('Twitter tapped');
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     )
                 ],
@@ -633,306 +607,302 @@ class _RegisterState extends State<Register> {
           if (displayText == 'register')
             Flexible(
               flex: 5, // Setting flex to 1 for equal division
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
-                      color: const Color(0XFFF1F1F1),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Join with us',
-                            style: GoogleFonts.raleway(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                            ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
+                    color: const Color(0XFFF1F1F1),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Join with us',
+                          style: GoogleFonts.raleway(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
                           ),
-                          LabeledTextField(
-                            labelText: '',
-                            controller: emailController,
-                            hintText: 'Email address',
-                          ),
-                          LabeledTextField(
-                            labelText: '',
-                            controller: passwordController,
-                            hintText: 'Password',
-                            obscureText: true,
-                          ),
-                          Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      registerUser();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      backgroundColor:
-                                          const Color(0xffe2001a), // Text color
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 20),
-                                      textStyle:
-                                          GoogleFonts.raleway(fontSize: 12),
-                                    ).copyWith(
-                                      shape: WidgetStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              0), // No border radius
-                                        ),
+                        ),
+                        LabeledTextField(
+                          labelText: '',
+                          controller: emailController,
+                          hintText: 'Email address',
+                        ),
+                        LabeledTextField(
+                          labelText: '',
+                          controller: passwordController,
+                          hintText: 'Password',
+                          obscureText: true,
+                        ),
+                        Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    registerUser();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor:
+                                        const Color(0xffe2001a), // Text color
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 20),
+                                    textStyle:
+                                        GoogleFonts.raleway(fontSize: 12),
+                                  ).copyWith(
+                                    shape: WidgetStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            0), // No border radius
                                       ),
                                     ),
-                                    child: const Text('Register'),
                                   ),
-                                  Padding(
-                                      padding: const EdgeInsets.only(left: 20),
-                                      child: Text(
-                                        'Need any help?',
-                                        style: GoogleFonts.raleway(
-                                          fontSize: 12,
-                                          color: const Color(0xffe2001a),
-                                        ),
-                                      )),
-                                ],
-                              )),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      color: const Color(0xffe5e5e5),
-                      padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
-                      child: Column(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              text: 'Already member? ',
-                              style: GoogleFonts.raleway(
-                                  color: const Color(
-                                      0xff666666)), // Default style for the text
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: 'Sign In',
-                                  style: GoogleFonts.raleway(
-                                    color: const Color(
-                                        0xffe2001a), // Set color to red for "SIGN IN"
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      switchTo('login');
-                                    },
+                                  child: const Text('Register'),
                                 ),
-                                TextSpan(
-                                  text: ' now or connect with social account',
-                                  style: GoogleFonts.raleway(
-                                      color: const Color(0xff666666)),
-                                ),
+                                Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      'Need any help?',
+                                      style: GoogleFonts.raleway(
+                                        fontSize: 12,
+                                        color: const Color(0xffe2001a),
+                                      ),
+                                    )),
                               ],
-                            ),
-                          ),
-                          const SizedBox(
-                              height: 20), // Space between text and buttons
-
-                          // Facebook button
-                          _buildSocialButton(
-                            color: const Color(0xff3b5998),
-                            icon: Icons.facebook,
-                            label: 'Like on ',
-                            boldLabel: 'facebook',
-                            onTap: () {
-                              print('Facebook tapped');
-                            },
-                          ),
-
-                          const SizedBox(height: 10), // Space between buttons
-
-                          // Google+ button
-                          _buildSocialButton(
-                            color: const Color(0xffdb4a39),
-                            icon: Icons
-                                .g_mobiledata, // Example icon, customize as needed
-                            label: 'Like on ',
-                            boldLabel: 'google+',
-                            onTap: () {
-                              print('Google+ tapped');
-                            },
-                          ),
-
-                          const SizedBox(height: 10), // Space between buttons
-
-                          // Twitter button
-                          _buildSocialButton(
-                            color: const Color(0xff1DA1F2),
-                            icon: Icons
-                                .alternate_email, // Example icon, customize as needed
-                            label: 'Like on ',
-                            boldLabel: 'twitter',
-                            onTap: () {
-                              print('Twitter tapped');
-                            },
-                          ),
-                        ],
-                      ),
+                            )),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    color: const Color(0xffe5e5e5),
+                    padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+                    child: Column(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            text: 'Already member? ',
+                            style: GoogleFonts.raleway(
+                                color: const Color(
+                                    0xff666666)), // Default style for the text
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: 'Sign In',
+                                style: GoogleFonts.raleway(
+                                  color: const Color(
+                                      0xffe2001a), // Set color to red for "SIGN IN"
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    switchTo('login');
+                                  },
+                              ),
+                              TextSpan(
+                                text: ' now or connect with social account',
+                                style: GoogleFonts.raleway(
+                                    color: const Color(0xff666666)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                            height: 20), // Space between text and buttons
+
+                        // Facebook button
+                        _buildSocialButton(
+                          color: const Color(0xff3b5998),
+                          icon: Icons.facebook,
+                          label: 'Like on ',
+                          boldLabel: 'facebook',
+                          onTap: () {
+                            // print('Facebook tapped');
+                          },
+                        ),
+
+                        const SizedBox(height: 10), // Space between buttons
+
+                        // Google+ button
+                        _buildSocialButton(
+                          color: const Color(0xffdb4a39),
+                          icon: Icons
+                              .g_mobiledata, // Example icon, customize as needed
+                          label: 'Like on ',
+                          boldLabel: 'google+',
+                          onTap: () {
+                            // print('Google+ tapped');
+                          },
+                        ),
+
+                        const SizedBox(height: 10), // Space between buttons
+
+                        // Twitter button
+                        _buildSocialButton(
+                          color: const Color(0xff1DA1F2),
+                          icon: Icons
+                              .alternate_email, // Example icon, customize as needed
+                          label: 'Like on ',
+                          boldLabel: 'twitter',
+                          onTap: () {
+                            // print('Twitter tapped');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           if (displayText == 'login')
             Flexible(
               flex: 4, // Setting flex to 1 for equal division
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
-                      color: const Color(0XFFF1F1F1),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Account Sign In',
-                            style: GoogleFonts.raleway(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                            ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(50, 50, 50, 30),
+                    color: const Color(0XFFF1F1F1),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Account Sign In',
+                          style: GoogleFonts.raleway(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
                           ),
-                          LabeledTextField(
-                            labelText: '',
-                            controller: emailController,
-                            hintText: 'Username or email address',
-                          ),
-                          LabeledTextField(
-                            labelText: '',
-                            controller: passwordController,
-                            hintText: 'Password',
-                            obscureText: true,
-                          ),
-                          Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Add your onPressed code here!
-                                      print('Login button pressed!');
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      backgroundColor:
-                                          const Color(0xffe2001a), // Text color
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 20),
-                                      textStyle:
-                                          GoogleFonts.raleway(fontSize: 12),
-                                    ).copyWith(
-                                      shape: WidgetStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              0), // No border radius
-                                        ),
+                        ),
+                        LabeledTextField(
+                          labelText: '',
+                          controller: emailController,
+                          hintText: 'Username or email address',
+                        ),
+                        LabeledTextField(
+                          labelText: '',
+                          controller: passwordController,
+                          hintText: 'Password',
+                          obscureText: true,
+                        ),
+                        Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Add your onPressed code here!
+                                    // print('Login button pressed!');
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor:
+                                        const Color(0xffe2001a), // Text color
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 20),
+                                    textStyle:
+                                        GoogleFonts.raleway(fontSize: 12),
+                                  ).copyWith(
+                                    shape: WidgetStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            0), // No border radius
                                       ),
                                     ),
-                                    child: const Text('Login'),
                                   ),
-                                  Padding(
-                                      padding: const EdgeInsets.only(left: 20),
-                                      child: Text(
-                                        'Lost your password?',
-                                        style: GoogleFonts.raleway(
-                                          fontSize: 12,
-                                          color: const Color(0xffe2001a),
-                                        ),
-                                      )),
-                                ],
-                              )),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      color: const Color(0xffe5e5e5),
-                      padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
-                      child: Column(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              text: 'Not Member yet? ',
-                              style: GoogleFonts.raleway(
-                                  color: const Color(
-                                      0xff666666)), // Default style for the text
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: 'Sign Up',
-                                  style: GoogleFonts.raleway(
-                                    color: const Color(
-                                        0xffe2001a), // Set color to red for "SIGN IN"
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      switchTo('register');
-                                    },
+                                  child: const Text('Login'),
                                 ),
-                                TextSpan(
-                                  text: ' now or connect with social account',
-                                  style: GoogleFonts.raleway(
-                                      color: const Color(0xff666666)),
-                                ),
+                                Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      'Lost your password?',
+                                      style: GoogleFonts.raleway(
+                                        fontSize: 12,
+                                        color: const Color(0xffe2001a),
+                                      ),
+                                    )),
                               ],
-                            ),
-                          ),
-                          // const SizedBox(
-                          //     height: 20), // Space between text and buttons
-
-                          // // Facebook button
-                          // _buildSocialButton(
-                          //   color: const Color(0xff3b5998),
-                          //   icon: Icons.facebook,
-                          //   label: 'Like on ',
-                          //   boldLabel: 'facebook',
-                          //   onTap: () {
-                          //     print('Facebook tapped');
-                          //   },
-                          // ),
-
-                          // const SizedBox(height: 10), // Space between buttons
-
-                          // // Google+ button
-                          // _buildSocialButton(
-                          //   color: const Color(0xffdb4a39),
-                          //   icon: Icons
-                          //       .g_mobiledata, // Example icon, customize as needed
-                          //   label: 'Like on ',
-                          //   boldLabel: 'google+',
-                          //   onTap: () {
-                          //     print('Google+ tapped');
-                          //   },
-                          // ),
-
-                          // const SizedBox(height: 10), // Space between buttons
-
-                          // // Twitter button
-                          // _buildSocialButton(
-                          //   color: const Color(0xff1DA1F2),
-                          //   icon: Icons
-                          //       .alternate_email, // Example icon, customize as needed
-                          //   label: 'Like on ',
-                          //   boldLabel: 'twitter',
-                          //   onTap: () {
-                          //     print('Twitter tapped');
-                          //   },
-                          // ),
-                        ],
-                      ),
+                            )),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    color: const Color(0xffe5e5e5),
+                    padding: const EdgeInsets.fromLTRB(50, 30, 50, 30),
+                    child: Column(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            text: 'Not Member yet? ',
+                            style: GoogleFonts.raleway(
+                                color: const Color(
+                                    0xff666666)), // Default style for the text
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: 'Sign Up',
+                                style: GoogleFonts.raleway(
+                                  color: const Color(
+                                      0xffe2001a), // Set color to red for "SIGN IN"
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    switchTo('register');
+                                  },
+                              ),
+                              TextSpan(
+                                text: ' now or connect with social account',
+                                style: GoogleFonts.raleway(
+                                    color: const Color(0xff666666)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // const SizedBox(
+                        //     height: 20), // Space between text and buttons
+
+                        // // Facebook button
+                        // _buildSocialButton(
+                        //   color: const Color(0xff3b5998),
+                        //   icon: Icons.facebook,
+                        //   label: 'Like on ',
+                        //   boldLabel: 'facebook',
+                        //   onTap: () {
+                        //     print('Facebook tapped');
+                        //   },
+                        // ),
+
+                        // const SizedBox(height: 10), // Space between buttons
+
+                        // // Google+ button
+                        // _buildSocialButton(
+                        //   color: const Color(0xffdb4a39),
+                        //   icon: Icons
+                        //       .g_mobiledata, // Example icon, customize as needed
+                        //   label: 'Like on ',
+                        //   boldLabel: 'google+',
+                        //   onTap: () {
+                        //     print('Google+ tapped');
+                        //   },
+                        // ),
+
+                        // const SizedBox(height: 10), // Space between buttons
+
+                        // // Twitter button
+                        // _buildSocialButton(
+                        //   color: const Color(0xff1DA1F2),
+                        //   icon: Icons
+                        //       .alternate_email, // Example icon, customize as needed
+                        //   label: 'Like on ',
+                        //   boldLabel: 'twitter',
+                        //   onTap: () {
+                        //     print('Twitter tapped');
+                        //   },
+                        // ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             )
         ],
@@ -941,7 +911,6 @@ class _RegisterState extends State<Register> {
   }
 
   Widget buildMobileLayout() {
-    String currentScreen = "login";
     return SingleChildScrollView(
       child: Container(
         color: Colors.white,
@@ -1025,25 +994,25 @@ class _RegisterState extends State<Register> {
                     // Sign In link
                     Align(
                       alignment: Alignment.center,
-                    child:RichText(
-                      text: TextSpan(
-                        text: 'Already member? ',
-                        style: GoogleFonts.raleway(
-                            color: const Color(0xff666666), fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: 'Sign In',
-                            style: GoogleFonts.raleway(
-                                color: const Color(0xffe2001a),
-                                fontWeight: FontWeight.bold),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                switchTo('login');
-                              },
-                          ),
-                        ],
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Already member? ',
+                          style: GoogleFonts.raleway(
+                              color: const Color(0xff666666), fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: 'Sign In',
+                              style: GoogleFonts.raleway(
+                                  color: const Color(0xffe2001a),
+                                  fontWeight: FontWeight.bold),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  switchTo('login');
+                                },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
@@ -1054,9 +1023,7 @@ class _RegisterState extends State<Register> {
               Container(
                 decoration: BoxDecoration(
                   color: Color(0XFFF1F1F1),
-                  borderRadius: BorderRadius.circular(
-                   25
-                  ),
+                  borderRadius: BorderRadius.circular(25),
                 ),
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -1093,17 +1060,8 @@ class _RegisterState extends State<Register> {
                     ),
                     MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) {
-                        setState(() {
-                          _isHovering = true;
-                          _isVisible = true;
-                        });
-                      },
-                      onExit: (_) {
-                        setState(() {
-                          _isHovering = false;
-                        });
-                      },
+                      onEnter: (_) {},
+                      onExit: (_) {},
                       child: GestureDetector(
                         onTap: () {
                           GoRouter.of(context).pushNamed(
@@ -1159,28 +1117,28 @@ class _RegisterState extends State<Register> {
                     ),
                     const SizedBox(height: 20),
                     // Sign Up link
-                   Align(
-                    alignment: Alignment.center,
-                   child:RichText(
-                      text: TextSpan(
-                        text: 'Not Member yet? ',
-                        style: GoogleFonts.raleway(
-                            color: const Color(0xff666666), fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: 'Sign Up',
-                            style: GoogleFonts.raleway(
-                                color: const Color(0xffe2001a),
-                                fontWeight: FontWeight.bold),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                switchTo('register');
-                              },
-                          ),
-                        ],
+                    Align(
+                      alignment: Alignment.center,
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Not Member yet? ',
+                          style: GoogleFonts.raleway(
+                              color: const Color(0xff666666), fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: 'Sign Up',
+                              style: GoogleFonts.raleway(
+                                  color: const Color(0xffe2001a),
+                                  fontWeight: FontWeight.bold),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  switchTo('register');
+                                },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                   ),
                   ],
                 ),
               ),

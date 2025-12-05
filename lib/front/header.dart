@@ -13,18 +13,18 @@ class Header extends StatefulWidget {
   const Header({super.key});
 
   @override
-  _HeaderState createState() => _HeaderState();
+  HeaderState createState() => HeaderState();
 }
 
-class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
-  bool _isNavbarOpen = false;
+class HeaderState extends State<Header> with SingleTickerProviderStateMixin {
+
   bool _isVisible = true;
   bool _isHovering = false;
   Timer? _timer;
-  final GlobalKey _headerKey = GlobalKey();
+
   OverlayEntry? _overlayEntry;
   late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -35,10 +35,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1), // slide from above
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  
 
     _startBlinking();
   }
@@ -52,277 +49,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
   }
 
   bool _isCartHovering = false;
-  bool _isBanquetExpanded = false;
-  bool _isContactExpanded = false;
-
-  // Add this helper to close the navbar reliably
-  void _closeNavbar({bool immediate = false}) {
-    if (!mounted || !_isNavbarOpen) return;
-
-    if (immediate) {
-      // Remove instantly (useful when tapping a menu item before navigation)
-      _overlayEntry?.remove();
-      _overlayEntry = null;
-
-      setState(() {
-        _isNavbarOpen = false;
-        _controller.reset();
-      });
-      return;
-    }
-
-    // Animated close (for close button)
-    _controller.reverse().whenCompleteOrCancel(() {
-      if (!mounted) return;
-
-      _overlayEntry?.remove();
-      _overlayEntry = null;
-
-      setState(() {
-        _isNavbarOpen = false;
-        _controller.reset();
-      });
-    });
-  }
-
-  void _toggleNavbar() {
-    if (!mounted) return;
-
-    if (_isNavbarOpen) {
-      _closeNavbar();
-    } else {
-      final overlay = Overlay.of(context);
-      if (overlay == null) return;
-
-      _overlayEntry = _createOverlayEntry();
-      overlay.insert(_overlayEntry!);
-
-      _controller.forward(from: 0.0); // start clean each time
-      setState(() {
-        _isNavbarOpen = true;
-      });
-    }
-  }
-
-  String? _clickedRoute;
-  OverlayEntry _createOverlayEntry() {
-    final RenderBox renderBox =
-        _headerKey.currentContext!.findRenderObject() as RenderBox;
-    final Offset position = renderBox.localToGlobal(Offset.zero);
-    final double top = position.dy + renderBox.size.height;
-
-    final String currentRoute = GoRouter.of(context).location.split('/').last;
-
-    return OverlayEntry(
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setOverlayState) => Stack(
-            children: [
-              // Backdrop
-              GestureDetector(
-                onTap: _closeNavbar,
-                child: Container(
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height,
-                ),
-              ),
-
-              // Navbar
-              Positioned(
-                top: top,
-                left: 0,
-                right: 0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SizeTransition(
-                    axisAlignment: -1.0,
-                    sizeFactor: _controller,
-                    child: Material(
-                      elevation: 10,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // 🔹 Home
-                          _buildNavItem(
-                            label: "Home",
-                            route: "home",
-                            currentRoute: currentRoute,
-                            onTap: () {
-                              setState(() => _clickedRoute = "home");
-                              _closeNavbar(immediate: true);
-                              GoRouter.of(context).pushNamed("home");
-                            },
-                          ),
-
-                          // 🔹 Other direct items
-                          ...[
-                            {"label": "Order Online", "route": "order-online"},
-                            {
-                              "label": "Catering Enquiry",
-                              "route": "category-enquiry"
-                            },
-                            {"label": "Gallery", "route": "gallery"},
-                            {"label": "Our Cakes", "route": "ourcakes"},
-                          ].map((item) {
-                            return _buildNavItem(
-                              label: item["label"]!,
-                              route: item["route"]!,
-                              currentRoute: currentRoute,
-                              onTap: () {
-                                setState(() => _clickedRoute = item["route"]!);
-                                _closeNavbar(immediate: true);
-                                GoRouter.of(context).pushNamed(item["route"]!);
-                              },
-                            );
-                          }),
-
-                          // 🔹 Banquet expandable
-                          _buildExpandableNav(
-                            title: "Banquet",
-                            isExpanded: _isBanquetExpanded,
-                            onToggle: () {
-                              setOverlayState(() {
-                                _isBanquetExpanded = !_isBanquetExpanded;
-                              });
-                            },
-                            items: [
-                              {"label": "Banquets", "route": "banquet"},
-                              {"label": "Menu", "route": "banquet-menu"},
-                            ],
-                            currentRoute: currentRoute,
-                          ),
-
-                          // 🔹 Contact expandable
-                          _buildExpandableNav(
-                            title: "Contact Us",
-                            isExpanded: _isContactExpanded,
-                            onToggle: () {
-                              setOverlayState(() {
-                                _isContactExpanded = !_isContactExpanded;
-                              });
-                            },
-                            items: [
-                              {"label": "Contact Us", "route": "contactus"},
-                              {"label": "About Us", "route": "about-us"},
-                              {"label": "Career", "route": "career"},
-                            ],
-                            currentRoute: currentRoute,
-                          ),
-
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// 🔹 Single item
-  Widget _buildNavItem({
-    required String label,
-    required String route,
-    required String currentRoute,
-    required VoidCallback onTap,
-  }) {
-    final bool isActive = _clickedRoute == route || currentRoute == route;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFE2001A) : Colors.white,
-          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.raleway(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: isActive ? Colors.white : Colors.grey.shade800,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 🔹 Expandable group (Banquet / Contact Us)
-  Widget _buildExpandableNav({
-    required String title,
-    required bool isExpanded,
-    required VoidCallback onToggle,
-    required List<Map<String, String>> items,
-    required String currentRoute,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onToggle,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.raleway(
-                      fontSize: 16,
-                      // fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.grey.shade800,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (isExpanded)
-            ...items.map((item) {
-              final bool isActive = _clickedRoute == item["route"] ||
-                  currentRoute == item["route"];
-              return GestureDetector(
-                onTap: () {
-                  setState(() => _clickedRoute = item["route"]!);
-                  _closeNavbar(immediate: true);
-                  GoRouter.of(context).pushNamed(item["route"]!);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  alignment: Alignment.center,
-                  color: isActive ? Colors.grey.shade300 : Colors.white,
-                  child: Text(
-                    item["label"]!,
-                    style: GoogleFonts.raleway(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isActive ? Colors.red : Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
-
+ 
   void _startBlinking() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!_isHovering) {
@@ -336,12 +63,6 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
   void _stopBlinking() {
     _timer?.cancel();
   }
-
-  // @override
-  // void dispose() {
-  //   _stopBlinking();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -701,253 +422,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
     );
   }
 
-  // Widget buildMobileLayout() {
-  //   return SafeArea(
-  //     // <-- Add this
-  //     child: Stack(
-  //       children: [
-  //         Container(
-  //           key: _headerKey,
-  //           color: Colors.white,
-  //           child: Column(
-  //             children: [
-  //               // Top bar: Phone + Login
-  //               // Top bar: Phone + Login/Register
-  //               // Container(
-  //               //   padding:
-  //               //       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-  //               //   child: Row(
-  //               //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //               //     children: [
-  //               //       // Phone number
-  //               //       const Row(
-  //               //         children: [
-  //               //           FaIcon(
-  //               //             Icons.phone,
-  //               //             color: Colors.red,
-  //               //             size: 14,
-  //               //           ),
-  //               //           SizedBox(width: 8),
-  //               //           Text(
-  //               //             '215-855-4900',
-  //               //             style: TextStyle(
-  //               //               fontSize: 11,
-  //               //               fontWeight: FontWeight.bold,
-  //               //               color: Color(0xff666666),
-  //               //             ),
-  //               //           ),
-  //               //         ],
-  //               //       ),
-
-  //               //       // Login/Register logic (mobile version)
-  //               //       userSession.isLoggedIn
-  //               //           ? Row(
-  //               //             mainAxisSize: MainAxisSize.min,
-  //               //             children: [
-  //               //               // 🔹 "My Account" clickable text
-  //               //               MouseRegion(
-  //               //                 cursor: SystemMouseCursors.click,
-  //               //                 onEnter: (_) =>
-  //               //                     setState(() => _isHovering = true),
-  //               //                 onExit: (_) =>
-  //               //                     setState(() => _isHovering = false),
-  //               //                 child: GestureDetector(
-  //               //                   onTap: () {
-  //               //                     GoRouter.of(context)
-  //               //                         .pushNamed('my-account');
-  //               //                   },
-  //               //                   child: Text(
-  //               //                     'My Account',
-  //               //                     style: GoogleFonts.raleway(
-  //               //                       fontSize: 11,
-  //               //                       fontWeight: FontWeight.bold,
-  //               //                       color: _isHovering
-  //               //                           ? Color(0xffe2001A)
-  //               //                           : Colors.black,
-  //               //                     ),
-  //               //                   ),
-  //               //                 ),
-  //               //               ),
-
-  //               //               // 🔹 Vertical separator "|"
-  //               //               const Padding(
-  //               //                 padding: EdgeInsets.symmetric(horizontal: 8.0),
-  //               //                 child: Text(
-  //               //                   '|',
-  //               //                   style: TextStyle(
-  //               //                     fontSize: 20,
-  //               //                     color: Colors.grey,
-  //               //                   ),
-  //               //                 ),
-  //               //               ),
-
-  //               //               // 🔹 "Logout" clickable text
-  //               //               MouseRegion(
-  //               //                 cursor: SystemMouseCursors.click,
-  //               //                 child: GestureDetector(
-  //               //                   onTap: () {
-  //               //                     GoRouter.of(context).pushNamed('logout');
-  //               //                   },
-  //               //                   child: Text(
-  //               //                     'Logout',
-  //               //                     style: GoogleFonts.raleway(
-  //               //                       fontSize: 11,
-  //               //                       fontWeight: FontWeight.bold,
-  //               //                       color: Colors.red,
-  //               //                     ),
-  //               //                   ),
-  //               //                 ),
-  //               //               ),
-  //               //             ],
-  //               //           )
-  //               //           : Row(
-  //               //               children: [
-  //               //                 Visibility(
-  //               //                   visible: _isVisible,
-  //               //                   child: GestureDetector(
-  //               //                     onTap: () {
-  //               //                       GoRouter.of(context).pushNamed('login',
-  //               //                           extra: {'registration': 'yes'});
-  //               //                     },
-  //               //                     child: Text(
-  //               //                       'VIP REGISTRATION',
-  //               //                       style: GoogleFonts.raleway(
-  //               //                         fontSize: 11,
-  //               //                         fontWeight: FontWeight.bold,
-  //               //                         color: Colors.red,
-  //               //                       ),
-  //               //                     ),
-  //               //                   ),
-  //               //                 ),
-  //               //                 GestureDetector(
-  //               //                   onTap: () {
-  //               //                     GoRouter.of(context).pushNamed('login',
-  //               //                         extra: {'registration': 'no'});
-  //               //                   },
-  //               //                   child: Text(
-  //               //                     ' | LOGIN',
-  //               //                     style: GoogleFonts.raleway(
-  //               //                       fontSize: 11,
-  //               //                       fontWeight: FontWeight.bold,
-  //               //                       color: const Color(0xff666666),
-  //               //                     ),
-  //               //                   ),
-  //               //                 ),
-  //               //               ],
-  //               //             ),
-  //               //     ],
-  //               //   ),
-  //               // ),
-  //               // // Second row: Logo + Hamburger
-  //               Container(
-  //                 padding:
-  //                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-  //                 child: SizedBox(
-  //                   height: 60,
-  //                   child: Stack(
-  //                     alignment: Alignment.center,
-  //                     children: [
-  //                       // LEFT: Hamburger Menu
-  //                       Align(
-  //                         alignment: Alignment.centerLeft,
-  //                         child: Container(
-  //                           decoration: BoxDecoration(
-  //                             border: Border.all(
-  //                               color: Color(0XFFE2001A),
-  //                               width: 1.0,
-  //                             ),
-  //                             borderRadius: BorderRadius.circular(4),
-  //                           ),
-  //                           child: SizedBox(
-  //                             width: 34,
-  //                             height: 31,
-  //                             child: IconButton(
-  //                               icon: Icon(Icons.menu),
-  //                               onPressed: _toggleNavbar,
-  //                               iconSize: 18,
-  //                               color: const Color(0XFFE2001A),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ),
-
-  //                       // CENTER: Logo (Always stays in center)
-  //                       Center(
-  //                         child: GestureDetector(
-  //                           onTap: () => GoRouter.of(context).pushNamed('home'),
-  //                           child: SizedBox(
-  //                             width: 140,
-  //                             child: Image.asset(
-  //                               'assets/images/logo/Indian-Grill-Logo.webp',
-  //                               fit: BoxFit.contain,
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ),
-
-  //                       // RIGHT: Cart Icon
-  //                       Align(
-  //                         alignment: Alignment.centerRight,
-  //                         child: GestureDetector(
-  //                           onTap: () {
-  //                             GoRouter.of(context).pushNamed('cart');
-  //                           },
-  //                           child: Stack(
-  //                             clipBehavior: Clip.none,
-  //                             children: [
-  //                               Container(
-  //                                 padding: const EdgeInsets.all(8),
-  //                                 decoration: BoxDecoration(
-  //                                   color: Color(0XFFE2001A),
-  //                                   borderRadius: BorderRadius.circular(6),
-  //                                 ),
-  //                                 child: const Icon(
-  //                                   Icons.shopping_cart_outlined,
-  //                                   color: Colors.white,
-  //                                 ),
-  //                               ),
-
-  //                               // Cart badge
-  //                               Positioned(
-  //                                 right: -4,
-  //                                 top: -4,
-  //                                 child: Consumer<Cart>(
-  //                                   builder: (context, cart, child) {
-  //                                     return Container(
-  //                                       padding: const EdgeInsets.all(5),
-  //                                       decoration: const BoxDecoration(
-  //                                         color: Colors.red,
-  //                                         shape: BoxShape.circle,
-  //                                       ),
-  //                                       child: Text(
-  //                                         '${cart.itemCount}',
-  //                                         style: const TextStyle(
-  //                                           color: Colors.white,
-  //                                           fontSize: 10,
-  //                                           fontWeight: FontWeight.bold,
-  //                                         ),
-  //                                       ),
-  //                                     );
-  //                                   },
-  //                                 ),
-  //                               ),
-  //                             ],
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               )
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget buildMobileLayout() {
+   Widget buildMobileLayout() {
     final cart = Provider.of<Cart>(context);
 
     return Container(
@@ -1024,225 +499,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildNavbar() {
-    return Container(
-      width: MediaQuery.of(context).size.width, // Full width
-      color: const Color(0xffE2001A),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Home
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('home');
-              setState(() {
-                _isNavbarOpen = false; // close navbar after tap
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Home123',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          // Order Online
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('orderOnline');
-              setState(() {
-                _isNavbarOpen = false;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Order Online',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          // Catering Enquiry
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('cateringEnquiry');
-              setState(() {
-                _isNavbarOpen = false;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Catering Enquiry',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          // Banquet (Expandable menu)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isBanquetExpanded = !_isBanquetExpanded;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Banquet Hello',
-                        style: GoogleFonts.raleway(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Icon(
-                        _isBanquetExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Submenu items (visible only when expanded)
-              if (_isBanquetExpanded) ...[
-                GestureDetector(
-                  onTap: () {
-                    GoRouter.of(context).pushNamed('banquetHall1');
-                    setState(() {
-                      _isNavbarOpen = false;
-                    });
-                  },
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, top: 10, bottom: 10),
-                    child: Text(
-                      'Banquet Hall 1',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    GoRouter.of(context).pushNamed('banquetHall2');
-                    setState(() {
-                      _isNavbarOpen = false;
-                    });
-                  },
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, top: 10, bottom: 10),
-                    child: Text(
-                      'Banquet Hall 2',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-
-          // Gallery
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('gallery');
-              setState(() {
-                _isNavbarOpen = false;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Gallery',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          // Contact Us
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('contactUs');
-              setState(() {
-                _isNavbarOpen = false;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Contact Us',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          // Our Cakes
-          GestureDetector(
-            onTap: () {
-              GoRouter.of(context).pushNamed('ourCakes');
-              setState(() {
-                _isNavbarOpen = false;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'Our Cakes',
-                style: GoogleFonts.raleway(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildDesktopLayout(int cartItemCount) {
+   Widget buildDesktopLayout(int cartItemCount) {
     return Container(
       color: Colors.white, // Set background color to white
       child: Column(children: [
@@ -1312,7 +569,7 @@ class _HeaderState extends State<Header> with SingleTickerProviderStateMixin {
                                 child: GestureDetector(
                                   onTap: () {
                                     GoRouter.of(context)
-                                        .pushNamed('my-account');
+                                        .pushNamed('my_account');
                                   },
                                   child: Text(
                                     'My Account',
@@ -1640,18 +897,18 @@ class HoverTextTab extends StatefulWidget {
   final Color hoverColor;
 
   const HoverTextTab({
-    Key? key,
+    super.key,
     required this.label,
     required this.onTap,
     this.baseStyle,
     this.hoverColor = Colors.yellow, // or any hover color you want
-  }) : super(key: key);
+  });
 
   @override
-  _HoverTextTabState createState() => _HoverTextTabState();
+  HoverTextTabState createState() => HoverTextTabState();
 }
 
-class _HoverTextTabState extends State<HoverTextTab> {
+class HoverTextTabState extends State<HoverTextTab> {
   bool _isHovering = false;
 
   @override

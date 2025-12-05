@@ -81,10 +81,10 @@ class Career extends StatefulWidget {
   const Career({super.key});
 
   @override
-  _CareerState createState() => _CareerState();
+  CareerState createState() => CareerState();
 }
 
-class _CareerState extends State<Career> {
+class CareerState extends State<Career> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
@@ -133,18 +133,18 @@ class _CareerState extends State<Career> {
 
         if (kIsWeb) {
           if (file.bytes != null) {
-            print("WEB: Received file bytes = ${file.bytes!.length}");
+            // print("WEB: Received file bytes = ${file.bytes!.length}");
           } else {
-            print("WEB: No bytes received!");
+            // print("WEB: No bytes received!");
           }
         }
 
         // --- Mobile / Desktop Handling ---
         else {
           if (file.path != null) {
-            print("MOBILE/DESKTOP: File path = ${file.path}");
+            // print("MOBILE/DESKTOP: File path = ${file.path}");
           } else {
-            print("MOBILE/DESKTOP: No file path available");
+            // print("MOBILE/DESKTOP: No file path available");
           }
         }
       } else {
@@ -155,6 +155,7 @@ class _CareerState extends State<Career> {
         });
       }
     } catch (e) {
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking file: $e')),
       );
@@ -193,6 +194,7 @@ class _CareerState extends State<Career> {
       // );
       _clearForm();
     } else {
+      if(!mounted) return ;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed: ${response.statusCode}")),
       );
@@ -214,15 +216,15 @@ class _CareerState extends State<Career> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(child: LayoutBuilder(
-      builder: (context, Constraints) {
-        double screenWidth = Constraints.maxWidth;
-        // print("Current Width: $screenWidth");
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
+        // // print("Current Width: $screenWidth");
 
         if (kIsWeb) {
           // For web: apply responsive layout based on screen size
           if (screenWidth > 1024) {
-            // print("Web/Desktop layout is being used");
+            // // print("Web/Desktop layout is being used");
             return buildDesktopLayout(); // Desktop layout for web
           } else if (screenWidth > 600) {
             // print("Web/Tablet layout is being used");
@@ -245,7 +247,7 @@ class _CareerState extends State<Career> {
           }
         }
       },
-    ));
+    );
   }
 
   Widget buildDesktopLayout() {
@@ -436,9 +438,7 @@ class _CareerState extends State<Career> {
                             ],
                           ),
                         ),
-
-                        Container(
-                            child: MathCaptcha(controller: captchaController)),
+                         MathCaptcha(controller: captchaController),
                         Container(
                           padding: const EdgeInsets.only(top: 20),
                           child: ElevatedButton(
@@ -706,8 +706,7 @@ class _CareerState extends State<Career> {
                             ],
                           ),
                         ),
-                        Container(
-                            child: MathCaptcha(controller: captchaController)),
+                        MathCaptcha(controller: captchaController),
 
                         Container(
                           padding: const EdgeInsets.only(top: 20),
@@ -978,8 +977,7 @@ class _CareerState extends State<Career> {
                             ],
                           ),
                         ),
-                        Container(
-                            child: MathCaptcha(controller: captchaController)),
+                        MathCaptcha(controller: captchaController),
 
                         Container(
                           padding: const EdgeInsets.only(top: 20),

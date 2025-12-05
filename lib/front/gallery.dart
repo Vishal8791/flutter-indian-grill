@@ -5,10 +5,10 @@ class Gallery extends StatefulWidget {
   const Gallery({super.key});
 
   @override
-  _GalleryState createState() => _GalleryState();
+  GalleryState createState() => GalleryState();
 }
 
-class _GalleryState extends State<Gallery> {
+class GalleryState extends State<Gallery> {
   bool isAllVisible = true;
   bool isCakeVisible = false;
   bool isFoodVisible = false;

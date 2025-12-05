@@ -4,6 +4,7 @@
  * Edits made on original source code by Flutter.
  * Copyright 2014 The Flutter Authors. All rights reserved.
 */
+// ignore_for_file: deprecated_member_use
 
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';

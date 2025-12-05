@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -49,7 +50,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      //  final data = jsonDecode(response.body);
 
         setState(() {
           formSubmitted = true;
@@ -69,6 +70,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
         throw Exception('Failed with status: ${response.statusCode}');
       }
     } catch (e) {
+       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error submitting form.')),
       );
@@ -300,7 +302,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                     return null;
                   },
                 ),
-                Container(child: MathCaptcha(controller: captchaController)),
+                MathCaptcha(controller: captchaController),
                 Container(
                   width: fullWidth ? double.infinity : null,
                   padding: const EdgeInsets.only(top: 20),

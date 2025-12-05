@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -41,10 +40,6 @@ class _LostPasswordPageState extends State<LostPassword> {
             "email": email,
           }),
         );
-
-
-    print("STATUS: ${response.statusCode}");
-    print("BODY: ${response.body}");
 
     final data = jsonDecode(response.body);
 

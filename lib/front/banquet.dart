@@ -20,10 +20,10 @@ class ImageWithTextOverlay extends StatefulWidget {
   });
 
   @override
-  _ImageWithTextOverlayState createState() => _ImageWithTextOverlayState();
+  ImageWithTextOverlayState createState() => ImageWithTextOverlayState();
 }
 
-class _ImageWithTextOverlayState extends State<ImageWithTextOverlay> {
+class ImageWithTextOverlayState extends State<ImageWithTextOverlay> {
   double _scale = 1.0; // Initial scale of the image
 
   @override
@@ -58,16 +58,14 @@ class _ImageWithTextOverlayState extends State<ImageWithTextOverlay> {
                 duration: const Duration(
                     milliseconds: 200), // Smooth transition duration
                 curve: Curves.easeInOut, // Smooth curve for the animation
-                transform: Matrix4.identity()
-                  ..translate(
-                      width / 2, height / 2) // Center image before scaling
-                  ..scale(_scale) // Apply scale transformation
-                  ..translate(
-                      -width / 2, -height / 2), // Re-center image after scaling
-                child: Image.asset(
-                  widget.imagePath,
-                  fit: BoxFit.cover,
-                ),
+                child: Transform.scale(
+      scale: _scale,
+      alignment: Alignment.center,
+      child: Image.asset(
+        widget.imagePath,
+        fit: BoxFit.cover,
+      ),
+    ),
               ),
             ),
           ),
@@ -77,7 +75,7 @@ class _ImageWithTextOverlayState extends State<ImageWithTextOverlay> {
             height: height,
             decoration: BoxDecoration(
               color: Colors.black
-                  .withOpacity(0.4), // Adjust opacity for the overlay
+                  .withAlpha((0.4 * 255).round()), // Adjust opacity for the overlay
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
@@ -95,7 +93,7 @@ class _ImageWithTextOverlayState extends State<ImageWithTextOverlay> {
                   shadows: [
                     Shadow(
                       blurRadius: 10.0,
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withAlpha((0.5 * 255).round()),
                       offset: const Offset(2.0, 2.0),
                     ),
                   ],
@@ -119,8 +117,8 @@ class Banquet extends StatelessWidget {
     return Container(
         color: Colors.white,
         child: LayoutBuilder(
-          builder: (context, Constraints) {
-            double screenWidth = Constraints.maxWidth;
+          builder: (context, constraints) {
+            double screenWidth = constraints.maxWidth;
             // print("Current Width: $screenWidth");
 
             if (kIsWeb) {
@@ -249,7 +247,7 @@ class Banquet extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () {
-                    print('Send button pressed!');
+               //     print('Send button pressed!');
                   },
                   style: ButtonStyle(
                     foregroundColor: WidgetStateProperty.resolveWith<Color>(
@@ -416,7 +414,7 @@ class Banquet extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () {
-                    print('Send button pressed!');
+                 //   print('Send button pressed!');
                   },
                   style: ButtonStyle(
                     foregroundColor: WidgetStateProperty.resolveWith<Color>(
@@ -576,7 +574,7 @@ class Banquet extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () {
-                    print('Send button pressed!');
+                  //  print('Send button pressed!');
                   },
                   style: ButtonStyle(
                     foregroundColor: WidgetStateProperty.resolveWith<Color>(
@@ -631,7 +629,7 @@ Widget buildImageTile(BuildContext context, String imagePath,
       showDialog(
         context: context,
         builder: (_) => Dialog(
-          backgroundColor: Colors.black.withOpacity(0.9),
+          backgroundColor: Colors.black.withAlpha((0.9 * 255).round()),
           insetPadding: EdgeInsets.zero,
           child: InteractiveViewer(
             child: Image.asset(

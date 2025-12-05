@@ -20,9 +20,8 @@ class _AboutusState  extends State<Aboutus> {
   Widget build(BuildContext context) {
   
 
-    return Container(
-      child: LayoutBuilder(builder: (context, Constraints) {
-        double screenWidth = Constraints.maxWidth;
+    return LayoutBuilder(builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
 
         if (kIsWeb) {
           if (screenWidth > 1024) {
@@ -47,7 +46,7 @@ class _AboutusState  extends State<Aboutus> {
             return buildMobileLayout(); // Mobile layout for web
           }
         }
-      }),
+      },
     );
   }
 
@@ -416,7 +415,7 @@ class _AboutusState  extends State<Aboutus> {
 
   Widget buildMobileLayout() {
     int currentIndex = 0;
-    final PageController _pageController = PageController(viewportFraction: 0.85);
+    final PageController pageController = PageController(viewportFraction: 0.85);
    
     return SingleChildScrollView(
     child:Container(
@@ -662,7 +661,7 @@ class _AboutusState  extends State<Aboutus> {
                   SizedBox(
                     height: 230,
                     child: PageView(
-                      controller: _pageController,
+                      controller: pageController,
                       onPageChanged: (index) {
                         setState(() {
                           currentIndex = index;
@@ -678,7 +677,7 @@ class _AboutusState  extends State<Aboutus> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withAlpha((0.1 * 255).round()),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -722,7 +721,7 @@ class _AboutusState  extends State<Aboutus> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withAlpha((0.1 * 255).round()),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -766,7 +765,7 @@ class _AboutusState  extends State<Aboutus> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withAlpha((0.1 * 255).round()),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),

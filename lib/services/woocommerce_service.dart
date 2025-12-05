@@ -90,12 +90,12 @@ class WooCommerceService {
       "?consumer_key=$consumerKey"
       "&consumer_secret=$consumerSecret";
 
-  print("🔍 Fetching payment gateways from: $url");
+  // print("🔍 Fetching payment gateways from: $url");
 
   final response = await http.get(Uri.parse(url));
 
-  print("🔍 Status Code: ${response.statusCode}");
-  print("🔍 Body: ${response.body}");
+  // print("🔍 Status Code: ${response.statusCode}");
+  // print("🔍 Body: ${response.body}");
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body);

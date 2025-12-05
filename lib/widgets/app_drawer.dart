@@ -89,7 +89,7 @@ Widget _drawerItem(
       contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
       visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      hoverColor: Colors.grey.withOpacity(0.12),
+      hoverColor: Colors.grey.withAlpha((0.12 * 255).round()),
       onTap: onTap,
     ),
   );
@@ -135,7 +135,7 @@ Widget _subMenuItem(
 
   @override
   Widget build(BuildContext context) {
-    final String currentRoute = GoRouter.of(context).location;
+    final String currentRoute = GoRouterState.of(context).uri.toString();
     final isBanquetGroupActive = isRouteInGroup('/banquet', currentRoute);
     if (isBanquetGroupActive && !_banquetController.isCompleted) {
         isBanquetExpanded = true;      // keep state consistent
@@ -232,9 +232,9 @@ Expanded(
           "My Account",
           () {
             Navigator.pop(context);
-            context.go('/my-account');
+            context.go('/my_account');
           },
-          isActive: currentRoute == '/my-account',
+          isActive: currentRoute == '/my_account',
         ),
 
       // BANQUETS HEADER — auto expand if submenu active
@@ -436,6 +436,7 @@ SizeTransition(
                               // If confirmed, log out
                               if (shouldLogout == true) {
                                 await session.logOut();
+                                if (!context.mounted) return;
                                 Navigator.pop(context);
                               }
                             },
@@ -496,7 +497,7 @@ Widget _expandableDrawerHeader({
       contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
       visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      hoverColor: Colors.grey.withOpacity(0.12),
+      hoverColor: Colors.grey.withAlpha((0.12 * 255).round()),
       onTap: onTap,
     ),
   );

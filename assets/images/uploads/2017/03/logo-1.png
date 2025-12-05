@@ -623,7 +623,7 @@ var woocommerce_product_options_settings = {"ajaxurl":"https:\/\/www.indian-gril
                         </div>
                         <div class="right">
                             <ul class="top-dropdown">
-                                <li class="top-login"><a href="https://www.indian-grill.com/my-account/">Account</a></li>                            </ul>
+                                <li class="top-login"><a href="https://www.indian-grill.com/my_account/">Account</a></li>                            </ul>
                         </div>
                     </div>
                 </div>
@@ -655,7 +655,7 @@ var woocommerce_product_options_settings = {"ajaxurl":"https:\/\/www.indian-gril
 					<div class="header-addtocart d-table-cell">
 						
 						 <ul class="top-dropdown">
-							<li class="top-login"><a href="https://www.indian-grill.com/my-account/">Account</a></li>						</ul>
+							<li class="top-login"><a href="https://www.indian-grill.com/my_account/">Account</a></li>						</ul>
 
 						<!--  -->
 
@@ -1050,7 +1050,7 @@ var wpgmp_local = {"all_location":"All","show_locations":"Show Locations","sort_
 		<li id="wp-admin-bar-revslider" class="menupop revslider-menu"><a class="ab-item" aria-haspopup="true" href="https://www.indian-grill.com/wp-admin/admin.php?page=revslider"><span class="rs-label">Slider Revolution</span></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-revslider-default" class="ab-submenu">
 		<li id="wp-admin-bar-homeslider" class="revslider-sub-menu"><a class="ab-item" href="https://www.indian-grill.com/wp-admin/admin.php?page=revslider&#038;view=slide&#038;id=new&#038;slider=1"><span class="rs-label" data-alias="homeslider">homeslider</span></a>		</li></ul></div>		</li></ul><ul id="wp-admin-bar-top-secondary" class="ab-top-secondary ab-top-menu">
 		<li id="wp-admin-bar-search" class="admin-bar-search"><div class="ab-item ab-empty-item" tabindex="-1"><form action="https://www.indian-grill.com/" method="get" id="adminbarsearch"><input class="adminbar-input" name="s" id="adminbar-search" type="text" value="" maxlength="150" /><label for="adminbar-search" class="screen-reader-text">Search</label><input type="submit" class="adminbar-button" value="Search"/></form></div>		</li>
-		<li id="wp-admin-bar-my-account" class="menupop with-avatar"><a class="ab-item" aria-haspopup="true" href="https://www.indian-grill.com/wp-admin/profile.php">Howdy, <span class="display-name">indiagrills</span><img alt='' src='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=26&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=52&#038;d=mm&#038;r=g 2x' class='avatar avatar-26 photo' height='26' width='26' /></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-user-actions" class="ab-submenu">
+		<li id="wp-admin-bar-my_account" class="menupop with-avatar"><a class="ab-item" aria-haspopup="true" href="https://www.indian-grill.com/wp-admin/profile.php">Howdy, <span class="display-name">indiagrills</span><img alt='' src='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=26&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=52&#038;d=mm&#038;r=g 2x' class='avatar avatar-26 photo' height='26' width='26' /></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-user-actions" class="ab-submenu">
 		<li id="wp-admin-bar-user-info"><a class="ab-item" tabindex="-1" href="https://www.indian-grill.com/wp-admin/profile.php"><img alt='' src='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=64&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/fee259cd3dbc2b5cdd70ef5fb51546b0?s=128&#038;d=mm&#038;r=g 2x' class='avatar avatar-64 photo' height='64' width='64' /><span class='display-name'>indiagrills</span></a>		</li>
 		<li id="wp-admin-bar-edit-profile"><a class="ab-item" href="https://www.indian-grill.com/wp-admin/profile.php">Edit My Profile</a>		</li>
 		<li id="wp-admin-bar-logout"><a class="ab-item" href="https://www.indian-grill.com/igmanager?action=logout&#038;_wpnonce=e7da83e78f">Log Out</a>		</li></ul></div>		</li></ul>			</div>

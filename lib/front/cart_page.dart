@@ -1,9 +1,8 @@
-import 'dart:convert';
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:indiangrill/main.dart';
 import 'package:indiangrill/providers/cart_provider.dart';
 import 'package:indiangrill/services/woocommerce_service.dart';
 import 'package:indiangrill/style/style.dart' show AppColors;
@@ -26,7 +25,7 @@ class _CartScreenState extends State<CartScreen> {
   double couponDiscount = 0.0;
   bool isApplyingCoupon = false;
   String? _couponError;
-  bool _couponApplying = false;
+
 
   @override
   void initState() {
@@ -62,7 +61,7 @@ class _CartScreenState extends State<CartScreen> {
   if (code.isEmpty) return;
 
   setState(() {
-    _couponApplying = true;
+  
     _couponError = null;
   });
 
@@ -76,7 +75,7 @@ class _CartScreenState extends State<CartScreen> {
 
       setState(() {
         _couponError = null;
-        _couponApplying = false;
+       
       });
       showCouponDialog(
         context: context,
@@ -87,7 +86,7 @@ class _CartScreenState extends State<CartScreen> {
     } else {
       setState(() {
         _couponError = response["message"] ?? "Invalid coupon";
-        _couponApplying = false;
+        
       });
       showCouponDialog(
         context: context,
@@ -99,7 +98,7 @@ class _CartScreenState extends State<CartScreen> {
   } catch (e) {
     setState(() {
       _couponError = "Something went wrong";
-      _couponApplying = false;
+     
     });
      showCouponDialog(
       context: context,
@@ -177,7 +176,7 @@ class _CartScreenState extends State<CartScreen> {
   // final double grandTotal = subTotal + cart.tipAmount;
   final double grandTotal = cart.totalAfterDiscount; 
 
-  final double tax = 0.0;
+ // final double tax = 0.0;
 
   if (_tipController.text.isEmpty && cart.tipAmount > 0) {
     _tipController.text = cart.tipAmount.toStringAsFixed(2);
@@ -494,9 +493,9 @@ if (cart.tipAmount > 0)
 
  Widget buildCartItemCard(CartItem item) {
   final cart = Provider.of<Cart>(context);
-  final double subTotal = cart.items.values
-      .map((item) => item.price * item.quantity)
-      .fold(0.0, (prev, element) => prev + element);
+  // final double subTotal = cart.items.values
+  //     .map((item) => item.price * item.quantity)
+  //     .fold(0.0, (prev, element) => prev + element);
 
   if (_tipController.text.isEmpty && cart.tipAmount > 0) {
     _tipController.text = cart.tipAmount.toStringAsFixed(2);
@@ -509,7 +508,7 @@ if (cart.tipAmount > 0)
       borderRadius: BorderRadius.circular(16),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.black.withAlpha((0.04 * 255).round()),
           blurRadius: 8,
           offset: const Offset(0, 4),
         ),
@@ -903,14 +902,12 @@ if (cart.tipAmount > 0)
               ),
             );
           }
-        }).toList(),
+        }),
         SizedBox(height: spacing),
         Row(
           children: [
             ElevatedButton(
               onPressed: () => GoRouter.of(context).pushNamed('order-online'),
-              child: Text("Continue Shopping",
-                  style: GoogleFonts.raleway(fontSize: fontSize)),
               style: ButtonStyle(
                 backgroundColor:
                     WidgetStateProperty.resolveWith<Color>((states) {
@@ -932,6 +929,8 @@ if (cart.tipAmount > 0)
                 shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero)),
               ),
+              child: Text("Continue Shopping",
+                  style: GoogleFonts.raleway(fontSize: fontSize)),
             ),
             SizedBox(width: spacing),
             Expanded(
@@ -974,7 +973,7 @@ if (cart.tipAmount > 0)
                     IconButton(
                       icon: const Icon(Icons.add, color: Color(0xffE2001A)),
                       onPressed: () {
-                        print("Apply Coupon button clicked");
+                       
                       },
                       padding: EdgeInsets.zero,
                     ),
@@ -1279,109 +1278,6 @@ void _handleDecrease(BuildContext context, String productId) {
     );
   } else {
     cart.decreaseQuantity(productId);
-  }
-}
-
-
-class _RedOutlineButtonMobile extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final double? width; // 👈 Optional width parameter
-
-  const _RedOutlineButtonMobile({
-    required this.label,
-    required this.onPressed,
-    this.width, // 👈 Allow width to be nullable
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      // width: width ?? double.infinity,
-      //height: 46,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(
-            color: Color(0xffE2001A),
-            width: 1.0, // 👈 Equal border thickness on all sides
-          ),
-          foregroundColor: const Color(0xffE2001A),
-          backgroundColor: Colors.white,
-          shape: const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.zero, // 👈 Sharp corners (no uneven curves)
-          ),
-          textStyle: GoogleFonts.raleway(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-          alignment: Alignment.center,
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: GoogleFonts.raleway(
-            fontSize: 8,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xffE2001A),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RedOutlineButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final double? width; // 👈 Optional width parameter
-
-  const _RedOutlineButton({
-    required this.label,
-    required this.onPressed,
-    this.width, // 👈 Allow width to be nullable
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width ?? double.infinity,
-      height: 46,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(
-            color: Color(0xffE2001A),
-            width: 1.0, // 👈 Equal border thickness on all sides
-          ),
-          foregroundColor: const Color(0xffE2001A),
-          backgroundColor: Colors.white,
-          shape: const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.zero, // 👈 Sharp corners (no uneven curves)
-          ),
-          textStyle: GoogleFonts.raleway(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-          alignment: Alignment.center,
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: GoogleFonts.raleway(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xffE2001A),
-          ),
-        ),
-      ),
-    );
   }
 }
 

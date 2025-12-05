@@ -1,10 +1,11 @@
 // import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:indiangrill/front/cart_page.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 
@@ -14,10 +15,10 @@ class OrderOnline extends StatefulWidget {
   const OrderOnline({super.key});
 
   @override
-  _OrderOnlineState createState() => _OrderOnlineState();
+  OrderOnlineState createState() => OrderOnlineState();
 }
 
-class _OrderOnlineState extends State<OrderOnline> {
+class OrderOnlineState extends State<OrderOnline> {
   final WooCommerceService wooCommerceService = WooCommerceService();
   final WooCommerceCategory wooCommerceCategory = WooCommerceCategory();
   List<dynamic> products = [];
@@ -66,16 +67,7 @@ mobileScrollController.addListener(() {
 }
 
 
-  Future<void> _loadFirstMobilePage() async {
-  setState(() {
-    mobileProducts = [];
-    mobilePage = 1;
-    mobileHasMore = true;
-  });
-
-  await _loadMoreMobileProducts();
-}
-
+ 
 /// Resets and loads the first page for mobile
 Future<void> _loadInitialMobileProducts() async {
   setState(() {
@@ -141,7 +133,7 @@ Future<void> _loadMoreMobileProducts() async {
             }).toList();
       });
     } catch (error) {
-      print("Error fetching categories: $error");
+      // print("Error fetching categories: $error");
     }
   }
 
@@ -567,10 +559,10 @@ class MenuItemCard extends StatefulWidget {
       required this.comboOptions});
 
   @override
-  _MenuItemCardState createState() => _MenuItemCardState();
+  MenuItemCardState createState() => MenuItemCardState();
 }
 
-class _MenuItemCardState extends State<MenuItemCard> {
+class MenuItemCardState extends State<MenuItemCard> {
   int quantity = 1;
   String? selectedPreparation; // For Preparation selection
   String? selectedChoice; // For Choice of with Rice selection
@@ -609,16 +601,15 @@ class _MenuItemCardState extends State<MenuItemCard> {
               // Left Column: Food Type Images
               SizedBox(
                 width: 24, // fixed width to align text always
-                child: Column(
-                  children: [
-                    if ((widget.foodType ?? '').toLowerCase().contains('veg'))
-                      Image.asset('assets/images/veg.webp',
-                          width: 25, height: 25),
-                    if ((widget.foodType ?? '').toLowerCase().contains('spicy'))
-                      Image.asset('assets/images/spicy.webp',
-                          width: 25, height: 25),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  if (widget.foodType.toLowerCase().contains('veg'))
+                    Image.asset('assets/images/veg.webp', width: 25, height: 25),
+                  if (widget.foodType.toLowerCase().contains('spicy'))
+                    Image.asset('assets/images/spicy.webp', width: 25, height: 25),
+                ],
+              ),
+
               ),
 
               const SizedBox(width: 8), // spacing between columns
@@ -892,12 +883,12 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                     );
                                   },
                                   style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
+                                    backgroundColor: WidgetStateProperty.all(
                                         const Color(0xffE2001A)),
                                     foregroundColor:
-                                        MaterialStateProperty.all(Colors.white),
-                                    elevation: MaterialStateProperty.all(0),
-                                    padding: MaterialStateProperty.all(
+                                        WidgetStateProperty.all(Colors.white),
+                                    elevation: WidgetStateProperty.all(0),
+                                    padding: WidgetStateProperty.all(
                                       const EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 12),
                                     ),
@@ -1228,9 +1219,7 @@ class WooCommerceService {
             int productId = product['id'];
 
             // --- Fetch custom meta from your custom API ---
-            String customApiUrl =
-                'https://dev.indian-grill.com/wp-json/custom-api/v1/product-meta/$productId';
-
+           
             String foodType = '';
             String spiceLevel = '';
 
@@ -1263,8 +1252,7 @@ class WooCommerceService {
                 }
               }
             } catch (err) {
-              print(
-                  '⚠️ Failed to fetch custom meta for product ${product['id']}: $err');
+              // print('⚠️ Failed to fetch custom meta for product ${product['id']}: $err');
             }
 
             //  print(foodType);
@@ -1326,12 +1314,11 @@ class WooCommerceService {
 
         return enrichedProducts;
       } else {
-        print(
-            '❌ Failed to fetch products. Status code: ${response.statusCode}');
+        // print('❌ Failed to fetch products. Status code: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Unexpected error: $e');
+      // print('Unexpected error: $e');
       return [];
     }
   }
@@ -1359,7 +1346,7 @@ class WooCommerceService {
         return 0;
       }
     } catch (e) {
-      print('Error fetching total count: $e');
+      // print('Error fetching total count: $e');
       return 0;
     }
   }
@@ -1614,7 +1601,7 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
                                   style: const TextStyle(fontSize: 14)),
                             ],
                           );
-                        }).toList()
+                        })
                       ],
                     ),
 

@@ -1,5 +1,7 @@
-import 'dart:convert';
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,10 +15,10 @@ class CateringEnquiry extends StatefulWidget {
   const CateringEnquiry({super.key});
 
   @override
-  _CateringEnquiryState createState() => _CateringEnquiryState();
+  CateringEnquiryState createState() => CateringEnquiryState();
 }
 
-class _CateringEnquiryState extends State<CateringEnquiry> {
+class CateringEnquiryState extends State<CateringEnquiry> {
   final List<String> eventTime = <String>[
     'Lunch',
     'Dinner',
@@ -111,7 +113,7 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+       // final data = jsonDecode(response.body);
 
         setState(() {
           formSubmitted = true;
@@ -166,8 +168,8 @@ class _CateringEnquiryState extends State<CateringEnquiry> {
     return Container(
         color: Colors.white,
         child: LayoutBuilder(
-          builder: (context, Constraints) {
-            double screenWidth = Constraints.maxWidth;
+          builder: (context, constraints) {
+            double screenWidth = constraints.maxWidth;
             // // print("Current Width: $screenWidth");
 
             if (kIsWeb) {

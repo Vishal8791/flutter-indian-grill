@@ -38,8 +38,7 @@ class _FooterState extends State<Footer> {
         ? Colors.red
         : (_isHovering && isDesktop ? Colors.red : const Color(0xff444444));
 
-    return Container(
-      child: LayoutBuilder(
+    return LayoutBuilder(
         builder: (context, constraints) {
           double screenWidth = constraints.maxWidth;
 
@@ -51,7 +50,6 @@ class _FooterState extends State<Footer> {
             return buildMobileLayout(context, addressColor);
           }
         },
-      ),
     );
   }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,10 +14,10 @@ class MyAccount extends StatefulWidget {
   const MyAccount({super.key, this.args});
 
   @override
-  _MyAccountState createState() => _MyAccountState();
+  MyAccountState createState() => MyAccountState();
 }
 
-class _MyAccountState extends State<MyAccount> {
+class MyAccountState extends State<MyAccount> {
   late String displayText;
   String selectedRoute = '/dashboard'; // default selected route
 
@@ -100,9 +102,12 @@ class _MyAccountState extends State<MyAccount> {
                   );
 
                   if (confirm == true) {
-                    userSession.logOut();
-                    GoRouter.of(context).pushNamed('logout');
-                  }
+  userSession.logOut();
+
+  if (!mounted) return; // protect context
+  GoRouter.of(context).pushNamed('logout');
+}
+
                 } else {
                   setState(() {
                     selectedRoute = route;
@@ -184,7 +189,9 @@ class _MyAccountState extends State<MyAccount> {
 
             if (confirm == true) {
               await userSession.logOut();
-              if (context.mounted) context.go('/login');
+             if (!mounted) return;
+                context.go('/login');
+
             }
           } else {
             setState(() {
@@ -257,7 +264,7 @@ class SidebarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 200,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -308,11 +315,9 @@ class DashboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(
+    return Text(
         'Welcome to Dashboard!',
         style: GoogleFonts.raleway(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
     );
   }
 }
@@ -506,12 +511,10 @@ class DownloadsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(
+    return  Text(
         'Download your resources here.',
         style: GoogleFonts.raleway(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
+          );
   }
 }
 
@@ -520,11 +523,9 @@ class AddressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(
+    return Text(
         'Manage your addresses here.',
         style: GoogleFonts.raleway(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
     );
   }
 }
@@ -534,11 +535,10 @@ class AccountDetailsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(
+    return Text(
         'Update your account details.',
         style: GoogleFonts.raleway(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
+     
     );
   }
 }
