@@ -37,6 +37,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   String? selectedShippingMethodId;
   String? selectedShippingTitle;
   String? selectedShippingCost;
+  bool addCutlery = false;
 
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
@@ -56,162 +57,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     orderNote.dispose();
     super.dispose();
   }
-
-  // Future<void> createOrder(BuildContext context) async {
-  //   final cart = Provider.of<Cart>(context, listen: false);
-
-  //   if (cart.items.isEmpty) {
-  //     ScaffoldMessenger.of(context)
-  //         .showSnackBar(const SnackBar(content: Text("Your cart is empty.")));
-  //     return;
-  //   }
-
-  //   // Basic validation (ensure required fields are present)
-  //   if (firstName.text.trim().isEmpty ||
-  //       lastName.text.trim().isEmpty ||
-  //       address1.text.trim().isEmpty ||
-  //       city.text.trim().isEmpty ||
-  //       postcode.text.trim().isEmpty ||
-  //       email.text.trim().isEmpty ||
-  //       phone.text.trim().isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content: Text("Please fill all required billing fields.")),
-  //     );
-  //     return;
-  //   }
-
-  //   if (selectedPaymentMethod == null) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please select a payment method.")),
-  //     );
-  //     return;
-  //   }
-  //   setState(() => _isLoading = true);
-
-  //   final url = Uri.parse(
-  //       'https://dev.indian-grill.com/wp-json/custom/v1/create-order');
-
-  //   // Prepare items for API — assumes each cart item has `id`, `quantity`
-  //   List<Map<String, dynamic>> items = cart.items.values.map((item) {
-  //     return {
-  //       "product_id": item.id,
-  //       "qty": item.quantity,
-  //     };
-  //   }).toList();
-
-  //   final billing = {
-  //     "first_name": firstName.text.trim(),
-  //     "last_name": lastName.text.trim(),
-  //     "address_1": address1.text.trim(),
-  //     "address_2": address2.text.trim(),
-  //     "city": city.text.trim(),
-  //     "state": stateCtrl.text.trim(),
-  //     "postcode": postcode.text.trim(),
-  //     "country": "US", // change if needed or make dynamic
-  //     "email": email.text.trim(),
-  //     "phone": phone.text.trim(),
-  //   };
-
-  //   final shipping = {
-  //     "first_name": firstName.text.trim(),
-  //     "last_name": lastName.text.trim(),
-  //     "address_1": address1.text.trim(),
-  //     "address_2": address2.text.trim(),
-  //     "city": city.text.trim(),
-  //     "state": stateCtrl.text.trim(),
-  //     "postcode": postcode.text.trim(),
-  //     "country": "US",
-  //   };
-
-  //   final body = {
-  //     "user_id":
-  //         0, // 0 for guest checkout — change if you pass logged-in user id
-  //     "items": items,
-  //     "billing": billing,
-  //     "shipping": shipping,
-  //     "note": orderNote.text.trim(),
-  //     "payment_method": selectedPaymentMethod,
-  //   };
-
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
-  //       },
-  //       body: jsonEncode(body),
-  //     );
-
-  //     debugPrint('Order API status: ${response.statusCode}');
-  //     debugPrint('Order API body: ${response.body}');
-
-  //     if (response.statusCode == 200) {
-  //       final jsonRes = jsonDecode(response.body);
-  //       final orderId = jsonRes['order_id'] ?? jsonRes['data']?['order_id'];
-
-  //       final orderedItems = cart.items.values.map((item) {
-  //       return {
-  //         "name": item.name,
-  //         "qty": item.quantity,
-  //         "total": item.total.toStringAsFixed(2),
-  //       };
-  //     }).toList();
-
-  //     final totals = {
-  //       "subtotal": cart.subtotal.toStringAsFixed(2),
-  //       "tax": cart.tax.toStringAsFixed(2),
-  //       "shipping": cart.shipping.toStringAsFixed(2),
-  //       "total": cart.total.toStringAsFixed(2),
-  //     };
-
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Order Created Successfully! ID: $orderId")),
-  //       );
-
-  //       // Clear cart — make sure your Cart provider exposes clearCart()
-  //       // If your provider uses a different method (e.g., clear()), change this line.
-  //       try {
-  //         cart.clear();
-  //       } catch (e) {
-  //         // If clearCart() doesn't exist, try clear()
-  //         try {
-  //           cart.clear();
-  //         } catch (e2) {
-  //           debugPrint('Could not clear cart: $e / $e2');
-  //         }
-  //       }
-
-  //       // Optionally navigate to order confirmation page
-  //       // Navigator.of(context).pushNamed('/order-confirmation', arguments: orderId);
-  //     } else {
-  //       String message = 'Order failed';
-  //       try {
-  //         final jsonRes = jsonDecode(response.body);
-  //         if (jsonRes is Map && jsonRes['message'] != null) {
-  //           message = jsonRes['message'];
-  //         } else {
-  //           message = response.body;
-  //         }
-  //       } catch (_) {
-  //         message = response.body;
-  //       }
-
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Order Failed: $message")),
-  //       );
-  //     }
-  //   } catch (e) {
-  //       debugPrint('Order error: $e');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("An error occurred: $e")),
-  //       );
-  //   } finally {
-  //     if (mounted) setState(() => _isLoading = false);
-  //   }
-
-  // }
 
   Future<void> createOrder(BuildContext context) async {
     final cart = Provider.of<Cart>(context, listen: false);
@@ -310,7 +155,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
       "shipping": cart.shipping.toStringAsFixed(2),
       "tip": cart.tipAmount.toStringAsFixed(2),
       "total": cart.total.toStringAsFixed(2),
-    };
+    };  
+
+    String finalOrderNote = orderNote.text.trim();
+
+    // If cutlery is selected, add it to the note
+    if (addCutlery) {
+      finalOrderNote += (finalOrderNote.isEmpty ? "" : "\n") + "Add disposable cutlery.";
+    }
+
 
     // API request body
     final body = {
@@ -318,7 +171,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       "items": items,
       "billing": billing,
       "shipping": shipping,
-      "note": orderNote.text.trim(),
+      "note": finalOrderNote,
       "payment_method": selectedPaymentMethod,
       "shipping_method_id": selectedShippingMethodId,
       "shipping_method_title": selectedShippingTitle,
@@ -860,11 +713,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
         Padding(
           padding: const EdgeInsets.only(bottom: 10, left: 4),
           child: Text(
-            'BILLING & SHIPPING',
+            'Billing & Shipping',
             style: GoogleFonts.raleway(
-              fontSize: 14,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: const Color(0xff666666),
+              color: Colors.black,
             ),
             textAlign: TextAlign.start,
           ),
@@ -973,7 +826,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           style: GoogleFonts.raleway(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Colors.black,
           ),
         ),
 
@@ -1021,12 +874,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
             children: [
               Transform.scale(
                 scale: 1.2,
-                child: Checkbox(
-                  value: false,
-                  onChanged: (val) {},
-                  activeColor: const Color(0xffe2001a),
-                  side: BorderSide(color: Colors.grey.shade400),
-                ),
+              child: Checkbox(
+                value: addCutlery,
+                onChanged: (val) {
+                  setState(() {
+                    addCutlery = val ?? false;
+                  });
+                },
+                activeColor: const Color(0xffe2001a),
+                side: BorderSide(color: Colors.grey.shade400),
+              ),
+
               ),
               Expanded(
                 child: Text(
@@ -1094,8 +952,8 @@ class CartSummarySection extends StatelessWidget {
           "Your Order",
           style: GoogleFonts.raleway(
             fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
 
@@ -1322,9 +1180,9 @@ class _PaymentGatewaysWidgetState extends State<PaymentGatewaysWidget> {
             Text(
               "Payment Method",
               style: GoogleFonts.raleway(
-                fontSize: 17,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.black,
               ),
             ),
             const SizedBox(height: 6),
@@ -1508,9 +1366,9 @@ class _ShippingMethodsWidgetState extends State<ShippingMethodsWidget> {
             Text(
               "Select Shipping Method",
               style: GoogleFonts.raleway(
-                fontSize: 17,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.black,
               ),
             ),
             const SizedBox(height: 6),

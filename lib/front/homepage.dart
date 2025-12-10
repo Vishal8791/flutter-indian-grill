@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:indiangrill/style/style.dart' show AppColors;
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -507,25 +508,23 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: List.generate(3, (index) {
-                                      // Adjust the number of dots based on the number of images
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 2.0, vertical: 25),
-                                        width: 8.0,
-                                        height: 8.0,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: _currentIndex == index
-                                              ? Colors.black // Active dot color
-                                              : Colors
-                                                  .grey, // Inactive dot color
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(3, (index) {
+                                    // Adjust the number of dots based on the number of images
+                                    return Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2.0, vertical: 25),
+                                      width: 8.0,
+                                      height: 8.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: _currentIndex == index
+                                            ? Colors.black // Active dot color
+                                            : Colors.grey, // Inactive dot color
+                                      ),
+                                    );
+                                  }),
+                                ),
                               ],
                             ))),
                   ],
@@ -727,38 +726,36 @@ class _HomePageState extends State<HomePage> {
 
         // CDC Guideline Text
         Container(
-  padding: const EdgeInsets.all(16),
-  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  decoration: BoxDecoration(
-    gradient: LinearGradient(
-      colors: [
-        Colors.red.shade50,
-        Colors.red.shade100,
-      ],
-    ),
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Icon(Icons.warning_amber_rounded,
-          color: const Color(0xFFE2001A), size: 40),
-
-      const SizedBox(height: 10),
-
-      Text(
-        'We follow all CDC COVID-19 safety guidelines for our customers and staff.',
-        textAlign: TextAlign.center,
-        style: GoogleFonts.raleway(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          height: 1.5,
-          color: const Color(0XFFE2001A),
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.red.shade50,
+                Colors.red.shade100,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.warning_amber_rounded,
+                  color: const Color(0xFFE2001A), size: 40),
+              const SizedBox(height: 10),
+              Text(
+                'We follow all CDC COVID-19 safety guidelines for our customers and staff.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.raleway(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: 1.5,
+                  color: const Color(0XFFE2001A),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    ],
-  ),
-),
         buildRestaurantTimingCard(),
         // Image.asset(
         //   'assets/images/timing.webp',
@@ -1070,25 +1067,23 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: List.generate(3, (index) {
-                                      // Adjust the number of dots based on the number of images
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 2.0, vertical: 25),
-                                        width: 8.0,
-                                        height: 8.0,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: _currentIndex == index
-                                              ? Colors.black // Active dot color
-                                              : Colors
-                                                  .grey, // Inactive dot color
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(3, (index) {
+                                    // Adjust the number of dots based on the number of images
+                                    return Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2.0, vertical: 25),
+                                      width: 8.0,
+                                      height: 8.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: _currentIndex == index
+                                            ? Colors.black // Active dot color
+                                            : Colors.grey, // Inactive dot color
+                                      ),
+                                    );
+                                  }),
+                                ),
                               ],
                             ))),
                   ],
@@ -1216,41 +1211,64 @@ Widget buildRestaurantTimingCard() {
               child: const Icon(Icons.phone, color: Colors.red, size: 20),
             ),
             const SizedBox(width: 10),
-            Text(
-              "215-855-4900",
-              style: GoogleFonts.raleway(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+            GestureDetector(
+              onTap: () async {
+                final Uri phoneUri = Uri(scheme: 'tel', path: '2158554900');
+
+                if (await canLaunchUrl(phoneUri)) {
+                  await launchUrl(phoneUri);
+                }
+              },
+              child: Text(
+                "215-855-4900",
+                style: GoogleFonts.raleway(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
+            )
           ],
         ),
 
         const SizedBox(height: 10),
 
         // CONTACT EMAIL
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.email, color: Colors.red, size: 20),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              "contact@indian-grill.com",
-              style: GoogleFonts.raleway(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+     GestureDetector(
+  onTap: () async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'contact@indian-grill.com',
+      query: 'subject=Inquiry',
+    );
+
+    await launchUrl(
+                          emailUri,
+                          mode: LaunchMode.externalApplication,
+                        );
+  },
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          shape: BoxShape.circle,
         ),
-      ],
+        child: const Icon(Icons.email, color: Colors.red, size: 20),
+      ),
+      const SizedBox(width: 10),
+      Text(
+        "contact@indian-grill.com",
+        style: GoogleFonts.raleway(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  ),
+)
+  ],
     ),
   );
 }
@@ -1354,7 +1372,7 @@ Widget _buildMobileCarouselItem(
         ),
 
         Padding(
-          padding: const EdgeInsets.only(top: 50),
+          padding: const EdgeInsets.only(top: 10),
           child: Text(
             middleText,
             textAlign: TextAlign.center,

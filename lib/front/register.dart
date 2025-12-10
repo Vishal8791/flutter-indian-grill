@@ -7,11 +7,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:indiangrill/front/my_account.dart';
 import 'package:indiangrill/session/user_session.dart';
+import 'package:indiangrill/style/style.dart' show AppColors;
 
 class Register extends StatefulWidget {
   final Map<String, dynamic>? args;
   final String registration;
-
+  
   const Register({super.key, this.args, required this.registration});
 
   @override
@@ -23,7 +24,80 @@ class RegisterState extends State<Register> {
   final TextEditingController emailController = TextEditingController();
   late String displayText;
 
+  String? emailError;
+  String? passwordError;
+  String? loginEmailError;
+  String? loginPasswordError;
+
   String msg = ''; // Declare a message variable
+
+  void validateAndLogin() {
+  setState(() {
+    loginEmailError = null;
+    loginPasswordError = null;
+  });
+
+  String email = emailController.text.trim();
+  String password = passwordController.text.trim();
+  bool isValid = true;
+
+  if (email.isEmpty) {
+    loginEmailError = "Email cannot be empty";
+    isValid = false;
+  } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+    loginEmailError = "Enter a valid email";
+    isValid = false;
+  }
+
+  if (password.isEmpty) {
+    loginPasswordError = "Password cannot be empty";
+    isValid = false;
+  } else if (password.length < 6) {
+    loginPasswordError = "Password must be at least 6 characters";
+    isValid = false;
+  }
+
+  setState(() {});
+
+  if (!isValid) return;
+
+  loginUser();
+}
+
+  void validateAndRegister() {
+  setState(() {
+    emailError = null;
+    passwordError = null;
+  });
+
+  String email = emailController.text.trim();
+  String password = passwordController.text.trim();
+  bool isValid = true;
+
+  if (email.isEmpty) {
+    emailError = "Email cannot be empty";
+    isValid = false;
+  } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+    emailError = "Enter a valid email";
+    isValid = false;
+  }
+
+  if (password.isEmpty) {
+    passwordError = "Password cannot be empty";
+    isValid = false;
+  } else if (password.length < 6) {
+    passwordError = "Password must be at least 6 characters";
+    isValid = false;
+  }
+
+  setState(() {});
+
+  if (!isValid) return;
+
+  registerUser();
+}
+
+
   Future<void> registerUser() async {
     const String registerapiUrl =
         'https://dev.indian-grill.com/wp-json/custom/v1/register-user'; // Replace with your API URL
@@ -205,7 +279,7 @@ class RegisterState extends State<Register> {
                                     style: TextStyle(
                                       color: msg == 'Registration successful'
                                           ? Colors.green
-                                          : Colors.red,
+                                          : AppColors.primary,
                                       fontSize: 16,
                                     ),
                                   ),
@@ -385,7 +459,7 @@ class RegisterState extends State<Register> {
                                     child: Text(
                                       msg,
                                       style: GoogleFonts.raleway(
-                                        color: Colors.red,
+                                        color: AppColors.primary,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -941,23 +1015,25 @@ class RegisterState extends State<Register> {
                   children: [
                     // Top Text
                     Text(
-                      'Let\'s get Something',
+                      'Getting started',
                       style: GoogleFonts.raleway(
                           fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Good to see you back.',
+                      'Create an account to continue. ',
                       style: GoogleFonts.raleway(
                           fontSize: 14, color: Colors.black),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height:40),
+                 
 
-                    // Username input
+                    // Email input
                     _buildRoundedInput(
                       controller: emailController,
-                      hint: 'Username',
+                      hint: 'Email',
                       icon: Icons.person_outline,
+                      errorText: emailError,
                     ),
                     const SizedBox(height: 25),
 
@@ -967,6 +1043,7 @@ class RegisterState extends State<Register> {
                       hint: 'Password',
                       icon: Icons.lock_outline,
                       isPassword: true,
+                      errorText: passwordError,
                     ),
                     const SizedBox(height: 25),
 
@@ -974,7 +1051,7 @@ class RegisterState extends State<Register> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          registerUser();
+                          validateAndRegister();
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -1030,24 +1107,25 @@ class RegisterState extends State<Register> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Top Text
-                    Text(
-                      'Getting started',
+                      Text(
+                      'Let\'s get Something',
                       style: GoogleFonts.raleway(
                           fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Create an account to continue. ',
+                      'Good to see you back.',
                       style: GoogleFonts.raleway(
                           fontSize: 14, color: Colors.black),
                     ),
                     const SizedBox(height: 25),
 
-                    // Username input
+                    // Email input
                     _buildRoundedInput(
                       controller: emailController,
-                      hint: 'Username',
+                      hint: 'Email',
                       icon: Icons.person_outline,
+                      errorText: loginEmailError,
                     ),
                     const SizedBox(height: 25),
 
@@ -1057,6 +1135,7 @@ class RegisterState extends State<Register> {
                       hint: 'Password',
                       icon: Icons.lock_outline,
                       isPassword: true,
+                      errorText: loginPasswordError,
                     ),
                     MouseRegion(
                       cursor: SystemMouseCursors.click,
@@ -1088,7 +1167,7 @@ class RegisterState extends State<Register> {
                         child: Text(
                           msg,
                           style: GoogleFonts.raleway(
-                              color: Colors.red,
+                              color: AppColors.primary,
                               fontSize: 14,
                               fontWeight: FontWeight.w500),
                         ),
@@ -1100,7 +1179,7 @@ class RegisterState extends State<Register> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          loginUser();
+                          validateAndLogin();
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -1150,60 +1229,80 @@ class RegisterState extends State<Register> {
 
   bool _obscurePassword = true; // in your State class
 
-  Widget _buildRoundedInput({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    bool isPassword = false,
-  }) {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.black87),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              obscureText: isPassword ? _obscurePassword : false,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: hint,
-                hintStyle: GoogleFonts.raleway(
+ Widget _buildRoundedInput({
+  required TextEditingController controller,
+  required String hint,
+  required IconData icon,
+  bool isPassword = false,
+  String? errorText,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.black87),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                obscureText: isPassword ? _obscurePassword : false,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: hint,
+                  hintStyle: GoogleFonts.raleway(
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+                style: GoogleFonts.raleway(
                   fontSize: 13,
-                  color: Colors.grey.shade500,
+                  color: Colors.black87,
                 ),
               ),
-              style: GoogleFonts.raleway(
-                fontSize: 13,
-                color: Colors.black87,
+            ),
+            if (isPassword)
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+                child: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 18,
+                  color: Colors.black87,
+                ),
               ),
+          ],
+        ),
+      ),
+
+      // ✔ error text displayed BELOW the input
+      if (errorText != null)
+        Padding(
+          padding: const EdgeInsets.only(left: 6, top: 6),
+          child: Text(
+            errorText!,
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              height: 1.2,
             ),
           ),
-          if (isPassword)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
-              child: Icon(
-                _obscurePassword
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                size: 18,
-                color: Colors.black87,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+        ),
+    ],
+  );
+}
 }
 
 // Custom widget for Label with TextField

@@ -496,7 +496,7 @@ if (cart.tipAmount > 0)
   // final double subTotal = cart.items.values
   //     .map((item) => item.price * item.quantity)
   //     .fold(0.0, (prev, element) => prev + element);
-
+  print(item.selectedoptions);
   if (_tipController.text.isEmpty && cart.tipAmount > 0) {
     _tipController.text = cart.tipAmount.toStringAsFixed(2);
   }
@@ -547,6 +547,46 @@ if (cart.tipAmount > 0)
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              
+      if (item.selectedoptions.isNotEmpty) ...[
+  const SizedBox(height: 4),
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: item.selectedoptions.map((opt) {
+      // Extract key and value from the map
+      String label = opt.keys.first.toString();
+      String value = opt.values.first?.toString() ?? "";
+
+      print("Label: $label   Value: $value");
+
+      return Text(
+        "$label $value",
+        style: GoogleFonts.raleway(
+          fontSize: 13,
+          color: Colors.grey[700],
+          fontWeight: FontWeight.w500,
+        ),
+      );
+    }).toList(),
+  ),
+],
+
+
+
+// --- Show Special Instruction (if exists) ---
+if (item.specialInstruction != null && item.specialInstruction!.isNotEmpty) ...[
+  const SizedBox(height: 6),
+  Text(
+    "Note: ${item.specialInstruction!}",
+    maxLines: 2,
+    overflow: TextOverflow.ellipsis,
+    style: GoogleFonts.raleway(
+      fontSize: 13,
+      color: Colors.black54,
+      fontStyle: FontStyle.italic,
+    ),
+  ),
+],
               // const SizedBox(height: 2),
               // // Subtitle
               // Text(
@@ -569,7 +609,7 @@ if (cart.tipAmount > 0)
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-
+                  
                   // Quantity Stepper
                   Container(
                     padding:

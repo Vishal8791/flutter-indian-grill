@@ -215,7 +215,7 @@ Future<void> _loadMoreMobileProducts() async {
   Widget _buildMobileLayout() {
   return Container(
     color: Colors.white,
-    height: MediaQuery.of(context).size.height,
+    // height: MediaQuery.of(context).size.height,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,6 +232,8 @@ Future<void> _loadMoreMobileProducts() async {
         Expanded(
           child: SingleChildScrollView(
             controller: mobileScrollController,
+            child:Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -274,6 +276,7 @@ Future<void> _loadMoreMobileProducts() async {
 
                 // SPECIAL NOTES
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade400),
@@ -315,6 +318,7 @@ Future<void> _loadMoreMobileProducts() async {
                 const SizedBox(height: 30),
               ],
             ),
+          ),
           ),
         ),
       ],
@@ -715,51 +719,87 @@ class MenuItemCardState extends State<MenuItemCard> {
                             const SizedBox(height: 16),
 
                             // Combo Option
-                            if (widget.optionName != "Served With" &&
-                                widget.comboOptions.isNotEmpty &&
-                                selectedPreparation != null)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Choice of with Rice:",
-                                    style: GoogleFonts.raleway(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Transform.scale(
-                                        scale: 0.7,
-                                        child: Radio<String>(
-                                          value: widget.comboOptions.first,
-                                          groupValue: selectedChoice,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedChoice = value!;
-                                            });
-                                          },
-                                          activeColor: Colors.blue,
-                                        ),
-                                      ),
-                                      Text(
-                                        widget.comboOptions.first
-                                            .replaceFirst(
-                                                RegExp(r'^.*\+\s*'), '')
-                                            .replaceAllMapped(
-                                              RegExp(r'\(\+\s*\$?([\d.]+)\)'),
-                                              (match) =>
-                                                  '(\$${match.group(1)})',
-                                            ),
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            // if (widget.optionName != "Served With" &&
+                            //     widget.comboOptions.isNotEmpty &&
+                            //     selectedPreparation != null)
+                            //   Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Text(
+                            //         "Choice of with Rice:",
+                            //         style: GoogleFonts.raleway(
+                            //           fontSize: 14,
+                            //           fontWeight: FontWeight.bold,
+                            //           color: Colors.red,
+                            //         ),
+                            //       ),
+                            //       const SizedBox(height: 8),
+                            //       Row(
+                            //         children: [
+                            //           Transform.scale(
+                            //             scale: 0.7,
+                            //             child: Radio<String>(
+                            //               value: widget.comboOptions.first,
+                            //               groupValue: selectedChoice,
+                            //               onChanged: (value) {
+                            //                 setState(() {
+                            //                   selectedChoice = value!;
+                            //                 });
+                            //               },
+                            //               activeColor: Colors.blue,
+                            //             ),
+                            //           ),
+                            //           Text(
+                            //             widget.comboOptions.first
+                            //                 .replaceFirst(
+                            //                     RegExp(r'^.*\+\s*'), '')
+                            //                 .replaceAllMapped(
+                            //                   RegExp(r'\(\+\s*\$?([\d.]+)\)'),
+                            //                   (match) =>
+                            //                       '(\$${match.group(1)})',
+                            //                 ),
+                            //             style: const TextStyle(fontSize: 14),
+                            //           ),
+                            //         ],
+                            //       ),
+                            //     ],
+                            //   ),
+
+                            if (widget.comboOptions.isNotEmpty && selectedPreparation != null)
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Choice of with Rice:",
+        style: GoogleFonts.raleway(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.red,
+        ),
+      ),
+      const SizedBox(height: 8),
+      ...widget.comboOptions.map((option) {
+        return Row(
+          children: [
+            Transform.scale(
+              scale: 0.7,
+              child: Radio<String>(
+                value: option,
+                groupValue: selectedChoice,
+                onChanged: (value) {
+                  setState(() {
+                    selectedChoice = value!;
+                  });
+                },
+                activeColor: Colors.blue,
+              ),
+            ),
+            Text(option, style: const TextStyle(fontSize: 14)),
+          ],
+        );
+      }).toList(),
+    ],
+  ),
 
                             const SizedBox(height: 16),
 
@@ -846,41 +886,34 @@ class MenuItemCardState extends State<MenuItemCard> {
                                       return;
                                     }
 
-                                    List<Map<String, String>> selectedOptions =
-                                        [];
+                                    List<Map<String, String>> selectedOptions = [];
 
-                                    if (selectedPreparation != null) {
-                                      selectedOptions.add({
-                                        widget.optionName: selectedPreparation!
-                                      });
-                                    }
+// Base options
+if (selectedPreparation != null) {
+  selectedOptions.add({widget.optionName: selectedPreparation!});
+}
 
-                                    if (widget.baseOptions.isNotEmpty) {
-                                      if (selectedChoice != null) {
-                                        selectedOptions.add(
-                                            {"Choice of with Rice:": "Yes"});
-                                      } else {
-                                        selectedOptions.add(
-                                            {"Choice of with Rice:": "No"});
-                                      }
-                                    }
+// Combo options (only if combo exists and user selected one)
+if (widget.comboOptions.isNotEmpty && selectedChoice != null) {
+  selectedOptions.add({"Choice of with Rice": selectedChoice!});
+}
 
-                                    final String combinedOption =
-                                        (preparation.isNotEmpty &&
-                                                choice.isNotEmpty)
-                                            ? '$preparation + $choice'
-                                            : '$preparation$choice';
+// Combined option string
+final String combinedOption = (preparation.isNotEmpty && choice.isNotEmpty)
+    ? '$preparation + $choice'
+    : '$preparation$choice';
 
-                                    _addToCart(
-                                      context,
-                                      widget.productId,
-                                      widget.title,
-                                      widget.price,
-                                      quantity,
-                                      combinedOption,
-                                      specialInstruction, // ✅ FIXED
-                                      selectedOptions,
-                                    );
+_addToCart(
+  context,
+  widget.productId,
+  widget.title,
+  widget.price,
+  quantity,
+  combinedOption,
+  specialInstruction,
+  selectedOptions,
+);
+
                                   },
                                   style: ButtonStyle(
                                     backgroundColor: WidgetStateProperty.all(
@@ -993,7 +1026,6 @@ void _addToCart(
   // final safeProductId = productId ?? '0';
 
   final safeTitle = title ?? 'Product';
-  // print("Product $productId Title $safeTitle Price $price Quantity $quantity");
 
   String? optionAmount = _optionAmount(option);
   if (optionAmount != null) {
@@ -1472,6 +1504,7 @@ class MobileMenuItemCard extends StatefulWidget {
     required this.comboOptions,
   });
 
+
   @override
   State<MobileMenuItemCard> createState() => _MobileMenuItemCardState();
 }
@@ -1480,7 +1513,7 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
   int quantity = 1;
   String? selectedPreparation;
   String? selectedChoice;
-
+  
   final TextEditingController _specialInstController = TextEditingController();
 
   @override
@@ -1501,6 +1534,7 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
 
   @override
   Widget build(BuildContext context) {
+  
     return GestureDetector(
       onTap: widget.onExpand,
       child: Container(
@@ -1525,7 +1559,7 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
                 Column(
                   children: [
                     if (widget.foodType.toLowerCase().contains("veg"))
-                      Image.asset("assets/images/veg.webpp",
+                      Image.asset("assets/images/veg.webp",
                           width: 20, height: 20),
                     if (widget.foodType.toLowerCase().contains("spicy"))
                       Padding(
@@ -1707,12 +1741,12 @@ class _MobileMenuItemCardState extends State<MobileMenuItemCard> {
                                 .add({widget.optionName: selectedPreparation!});
                           }
 
-                          if (widget.baseOptions.isNotEmpty) {
-                            selectedOptions.add({
-                              "Choice of with Rice:":
-                                  selectedChoice != null ? "Yes" : "No"
-                            });
-                          }
+                          if (widget.comboOptions.isNotEmpty) {
+  selectedOptions.add({
+    "Choice of with Rice": selectedChoice != null ? "Yes" : "No",
+  });
+}
+
 
                           final combinedOption = (prep.isNotEmpty &&
                                   choice.isNotEmpty)

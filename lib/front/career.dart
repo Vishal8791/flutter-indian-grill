@@ -330,7 +330,7 @@ class CareerState extends State<Career> {
                               r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
                             );
                             if (!emailRegex.hasMatch(value.trim())) {
-                              return 'Please enter a valid email address';
+                              return 'Please enter a valid email';
                             }
 
                             return null;
@@ -599,7 +599,7 @@ class CareerState extends State<Career> {
                               r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
                             );
                             if (!emailRegex.hasMatch(value.trim())) {
-                              return 'Please enter a valid email address';
+                              return 'Please enter a valid email';
                             }
 
                             return null;
@@ -869,7 +869,7 @@ class CareerState extends State<Career> {
                               r"^(?!\.)[A-Za-z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
                             );
                             if (!emailRegex.hasMatch(value.trim())) {
-                              return 'Please enter a valid email address';
+                              return 'Please enter a valid email';
                             }
 
                             return null;

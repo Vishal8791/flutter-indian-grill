@@ -40,7 +40,8 @@ class _MathCaptchaState extends State<MathCaptcha> {
               'Captcha: What is $a + $b?',
               style: GoogleFonts.raleway(
                 fontSize: 13,
-                color: const Color(0xff666666),
+                color: Colors.black,
+                fontWeight: FontWeight.w600
               ),
             ),
             const SizedBox(width: 10),

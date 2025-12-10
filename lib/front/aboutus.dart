@@ -15,7 +15,19 @@ class Aboutus extends StatefulWidget {
 }
 
 class _AboutusState  extends State<Aboutus> {
- 
+  
+     int currentIndex = 0;
+    late PageController pageController;
+    @override
+void initState() {
+  super.initState();
+  pageController = PageController(viewportFraction: 0.85);
+}
+@override
+void dispose() {
+  pageController.dispose();
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
   
@@ -414,8 +426,7 @@ class _AboutusState  extends State<Aboutus> {
   }
 
   Widget buildMobileLayout() {
-    int currentIndex = 0;
-    final PageController pageController = PageController(viewportFraction: 0.85);
+ 
    
     return SingleChildScrollView(
     child:Container(

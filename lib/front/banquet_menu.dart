@@ -59,7 +59,7 @@ class BanquetMenu extends StatelessWidget {
   ];
 
   final List<String> nonvegentree = const <String>[
-    'Chicken tikka masala',
+    'Chicken Tikka Masala',
     'Chicken Makhani',
     'Chilli Chicken Curry',
     'Chicken Korma',

@@ -1106,7 +1106,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             LabeledTextField(
-                              labelText: 'Name',
+                              labelText: 'Name :',
                               controller: nameController,
                               validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -1127,7 +1127,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                             ),
 
                             LabeledTextField(
-                              labelText: 'Email',
+                              labelText: 'Email :',
                               controller: emailController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -1144,7 +1144,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                               keyboardType: TextInputType.emailAddress,
                             ),
                             LabeledTextField(
-                              labelText: 'Contact Number',
+                              labelText: 'Contact Number :',
                               controller: mobileController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -1162,7 +1162,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                             ),
                             DatePickerField(
                               controller: dateController,
-                              labelText: "Event Date",
+                              labelText: "Event Date :",
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
@@ -1170,7 +1170,8 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 'Event Time : ',
                                 style: GoogleFonts.raleway(
                                   fontSize: 13,
-                                  color: const Color(0xff666666),
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
@@ -1223,10 +1224,11 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Type of Catering:',
+                                    'Type of Catering :',
                                     style: GoogleFonts.raleway(
                                       fontSize: 13,
-                                      color: const Color(0xff666666),
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600
                                     ),
                                   ),
                                   Row(
@@ -1288,7 +1290,8 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 'Occasion :',
                                 style: GoogleFonts.raleway(
                                   fontSize: 13,
-                                  color: const Color(0xff666666),
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
@@ -1338,10 +1341,11 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Type of Food:',
+                                    'Type of Food :',
                                     style: GoogleFonts.raleway(
                                       fontSize: 13,
-                                      color: const Color(0xff666666),
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600
                                     ),
                                   ),
                                   Row(
@@ -1420,7 +1424,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                               ),
                             ),
                             LabeledTextField(
-                              labelText: 'Estimated Number of Guests',
+                              labelText: 'Estimated Number of Guests :',
                               controller: guestController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -1440,7 +1444,8 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 'Comments :',
                                 style: GoogleFonts.raleway(
                                   fontSize: 13,
-                                  color: const Color(0xff666666),
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
@@ -1484,7 +1489,8 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 'How Did You Hear About Us :',
                                 style: GoogleFonts.raleway(
                                   fontSize: 13,
-                                  color: const Color(0xff666666),
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
@@ -1537,58 +1543,48 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                         ),
                       ),
               ),
-              Container(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: !formSubmitted
-                      ? ElevatedButton(
-                              onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      isLoading = true;
-                    });
-
-                    await submitcateringForm(context);
-
-                    setState(() {
-                      isLoading = false;
-                    });
-                  }
-                },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: const Color(0xffe2001a),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            textStyle: const TextStyle(fontSize: 20),
-                          ).copyWith(
-                            shape:
-                                WidgetStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                          ),
-                           child: isLoading
-    ? const SizedBox(
-        height: 22,
-        width: 22,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.white,
-        ),
-      )
-    :Center( 
-    child:Text(
-        'Send',
-        style: GoogleFonts.raleway(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-                        )
-                      )
-                      : const SizedBox()),
-            ],
+      Container(
+  padding: const EdgeInsets.only(top: 20),
+  child: !formSubmitted
+      ? Center(
+          child: ElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                setState(() => isLoading = true);
+                await submitcateringForm(context);
+                setState(() => isLoading = false);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xffe2001a),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: const TextStyle(fontSize: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: isLoading
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    'Send',
+                    style: GoogleFonts.raleway(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+          ),
+        )
+      : const SizedBox(),
+)
+      ],
           ),
         ],
       ),

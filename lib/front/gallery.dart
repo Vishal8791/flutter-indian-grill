@@ -146,15 +146,18 @@ class GalleryState extends State<Gallery> {
                                 ),
                               ),
                               // Close button above the image
-                              Positioned(
-                                top: -10, // slightly above
-                                right: -10, // slightly outside right
-                                child: IconButton(
-                                  icon: const Icon(Icons.close,
-                                      color: Colors.black, size: 30),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                ),
-                              ),
+                             Positioned(
+  top: -10, // slightly above if needed
+  left: 0,
+  right: 0,
+  child: Center(
+    child: IconButton(
+      icon: const Icon(Icons.close, color: Colors.black, size: 30),
+      onPressed: () => Navigator.of(context).pop(),
+    ),
+  ),
+),
+
                             ],
                           ),
                         ),

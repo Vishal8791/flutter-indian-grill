@@ -277,7 +277,7 @@ class _CakeDetailsContent extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          "Price: $price",
+          "Price: \$${double.tryParse(price)?.toStringAsFixed(2) ?? price}",
           style: GoogleFonts.raleway(
             fontSize: 20,
             fontWeight: FontWeight.bold,

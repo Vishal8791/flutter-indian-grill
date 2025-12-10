@@ -48,7 +48,8 @@ class _DatePickerFieldState extends State<DatePickerField> {
           widget.labelText,
           style: GoogleFonts.raleway(
             fontSize: 13,
-            color: const Color(0xff666666),
+            color: Colors.black,
+            fontWeight: FontWeight.w600
           ),
         ),
         const SizedBox(height: 6),

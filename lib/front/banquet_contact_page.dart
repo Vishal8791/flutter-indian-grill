@@ -245,7 +245,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                   },
                 ),
                 LabeledTextField(
-                  labelText: 'Email Address',
+                  labelText: 'Email',
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -258,7 +258,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                     );
 
                     if (!emailRegex.hasMatch(value.trim())) {
-                      return 'Please enter a valid email address';
+                      return 'Please enter a valid email';
                     }
 
                     return null;
@@ -304,9 +304,9 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                 ),
                 MathCaptcha(controller: captchaController),
                 Container(
-                  width: fullWidth ? double.infinity : null,
+               //   width: fullWidth ? double.infinity : null,
                   padding: const EdgeInsets.only(top: 20),
-                  child: ElevatedButton(
+                  child:Center(child: ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           setState(() {
@@ -324,9 +324,9 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                         foregroundColor: Colors.white,
                         backgroundColor: const Color(0xffe2001a),
                         textStyle: const TextStyle(fontSize: 18),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(25),
                         ),
                       ),
                       child: isLoading
@@ -345,10 +345,11 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
                                 'Submit',
                                 style: GoogleFonts.raleway(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             )),
+                ),
                 ),
               ]
                   .expand((widget) => [widget, const SizedBox(height: 8)])

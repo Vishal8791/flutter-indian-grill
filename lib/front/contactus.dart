@@ -2,6 +2,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -484,119 +485,215 @@ class _ContactusState extends State<Contactus> {
     );
   }
 
-  Widget buildMobileLayout() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      child: formSubmitted
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Thank you!',
-                  style: GoogleFonts.raleway(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
+Widget buildMobileLayout() {
+  return Container(
+    color: Colors.white,
+    padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+    child: formSubmitted
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Thank you!',
+                style: GoogleFonts.raleway(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Your form has been submitted. We will contact you soon.',
-                  style: GoogleFonts.raleway(fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Your form has been submitted. We will contact you soon.',
+                style: GoogleFonts.raleway(fontSize: 16),
+              ),
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ---------------------------
+              // ⭐ CONTACT DETAILS SECTION
+              // ---------------------------
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "Indian Grill\nHotBreads Cakes & Curries",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.raleway(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "969 Bethlehem Pike\nMontgomeryville PA 18936",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // PHONE CLICKABLE
+                    GestureDetector(
+                      onTap: () async {
+                        final Uri phoneUri =
+                            Uri(scheme: 'tel', path: '2158554900');
+
+                        await launchUrl(
+                          phoneUri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Text(
+                        "Phone: 215-855-4900",
+                        style: GoogleFonts.raleway(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // EMAIL CLICKABLE
+                    GestureDetector(
+                      onTap: () async {
+                        final Uri emailUri = Uri(
+                          scheme: 'mailto',
+                          path: 'contact@indian-grill.com',
+                          query: 'subject=Inquiry',
+                        );
+
+                        await launchUrl(
+                          emailUri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Text(
+                        "E-mail: contact@indian-grill.com",
+                        style: GoogleFonts.raleway(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "Website: indian-grill.com",
+                      style: GoogleFonts.raleway(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
                 ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Contact Us',
-                  style: GoogleFonts.raleway(
-                    fontSize: 20,
-                    color: const Color(0xffE2001A),
-                    fontWeight: FontWeight.w800,
-                  ),
+              ),
+
+              // ---------------------------
+              // CONTACT FORM TITLE
+              // ---------------------------
+              Text(
+                'Contact Us',
+                style: GoogleFonts.raleway(
+                  fontSize: 20,
+                  color: const Color(0xffE2001A),
+                  fontWeight: FontWeight.w800,
                 ),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LabeledTextField(
-                        labelText: 'Name',
-                        controller: nameController,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your name';
-                          }
+              ),
 
-                          final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
-                          if (!nameRegex.hasMatch(value.trim())) {
-                            return 'Please enter a valid name (letters only)';
-                          }
+              // ---------------------------
+              // CONTACT FORM FIELDS
+              // ---------------------------
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LabeledTextField(
+                      labelText: 'Name',
+                      controller: nameController,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter your name';
+                        }
 
-                          if (value.trim().length < 2) {
-                            return 'Name must be at least 2 characters';
-                          }
+                        final nameRegex = RegExp(r"^[a-zA-Z\s'-]+$");
+                        if (!nameRegex.hasMatch(value.trim())) {
+                          return 'Please enter a valid name (letters only)';
+                        }
 
-                          return null;
-                        },
-                      ),
-                      LabeledTextField(
-                        labelText: 'Email',
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                          if (!regex.hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      LabeledTextField(
-                        labelText: 'Telephone',
-                        controller: mobileController,
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your phone number';
-                          }
-                          if (value.length < 10) {
-                            return 'Phone number must be at least 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                      LabeledTextField(
-                        labelText: 'Comment',
-                        controller: commentController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a comment';
-                          }
-                          return null;
-                        },
-                      ),
-                      MathCaptcha(controller: captchaController),
-                      Container(
-                        padding: const EdgeInsets.only(top: 20),
+                        if (value.trim().length < 2) {
+                          return 'Name must be at least 2 characters';
+                        }
+
+                        return null;
+                      },
+                    ),
+                    LabeledTextField(
+                      labelText: 'Email',
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                        if (!regex.hasMatch(value)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    LabeledTextField(
+                      labelText: 'Telephone',
+                      controller: mobileController,
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your phone number';
+                        }
+                        if (value.length < 10) {
+                          return 'Phone number must be at least 10 digits';
+                        }
+                        return null;
+                      },
+                    ),
+                    LabeledTextField(
+                      labelText: 'Comment',
+                      controller: commentController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a comment';
+                        }
+                        return null;
+                      },
+                    ),
+                    MathCaptcha(controller: captchaController),
+
+                    // SUBMIT BUTTON CENTERED
+                    Container(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Center(
                         child: ElevatedButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              setState(() {
-                                isLoading = true;
-                              });
+                              setState(() => isLoading = true);
 
                               await submitContactForm(context);
 
-                              setState(() {
-                                isLoading = false;
-                              });
+                              setState(() => isLoading = false);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -605,8 +702,7 @@ class _ContactusState extends State<Contactus> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 26, vertical: 12),
                             shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadiusGeometry.circular(30)),
+                                borderRadius: BorderRadius.circular(30)),
                           ),
                           child: isLoading
                               ? const SizedBox(
@@ -626,11 +722,12 @@ class _ContactusState extends State<Contactus> {
                                 ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-    );
-  }
+              ),
+            ],
+          ),
+  );
+}
 }
