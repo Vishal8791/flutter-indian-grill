@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:indiangrill/front/my_account.dart';
 import 'package:indiangrill/session/user_session.dart';
 import 'package:indiangrill/style/style.dart' show AppColors;
+import 'package:indiangrill/services/api_config.dart';
 
 class Register extends StatefulWidget {
   final Map<String, dynamic>? args;
@@ -74,13 +75,15 @@ class RegisterState extends State<Register> {
   String password = passwordController.text.trim();
   bool isValid = true;
 
-  if (email.isEmpty) {
-    emailError = "Email cannot be empty";
-    isValid = false;
-  } else if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
-    emailError = "Enter a valid email";
-    isValid = false;
-  }
+ if (email.isEmpty) {
+  emailError = "Email cannot be empty";
+  isValid = false;
+} else if (!RegExp(
+  r'^[a-zA-Z0-9]+([._-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$',
+).hasMatch(email.trim())) {
+  emailError = "Enter a valid email";
+  isValid = false;
+}
 
   if (password.isEmpty) {
     passwordError = "Password cannot be empty";
@@ -99,8 +102,8 @@ class RegisterState extends State<Register> {
 
 
   Future<void> registerUser() async {
-    const String registerapiUrl =
-        'https://dev.indian-grill.com/wp-json/custom/v1/register-user'; // Replace with your API URL
+    final String registerapiUrl =
+        ApiConfig.registerUser; // Centralized API URL
 
     try {
       final response = await http.post(
@@ -137,8 +140,8 @@ class RegisterState extends State<Register> {
   }
 
   Future<void> loginUser() async {
-    const String loginApiUrl =
-        'https://dev.indian-grill.com/wp-json/custom/v1/login'; // Your API endpoint
+    final String loginApiUrl =
+        ApiConfig.loginUser; // Centralized API endpoint
 
     try {
       final response = await http.post(
@@ -149,7 +152,7 @@ class RegisterState extends State<Register> {
           'password': passwordController.text,
         }),
       );
-      // print(response);
+      print(response);
       if (response.statusCode == 200) {
         //   // print('login done');
         // Assuming success if status code is 200
@@ -204,30 +207,12 @@ class RegisterState extends State<Register> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           double screenWidth = constraints.maxWidth;
-          if (kIsWeb) {
-            // For web: apply responsive layout based on screen size
-            if (screenWidth > 1024) {
-              // print("Web/Desktop layout is being used");
-              return buildDesktopLayout(); // Desktop layout for web
-            } else if (screenWidth > 600) {
-              // print("Web/Tablet layout is being used");
-              return buildTabletLayout(); // Tablet layout for web
-            } else {
-              // print("Web/Mobile layout is being used");
-              return buildMobileLayout(); // Mobile layout for web
-            }
+          if (screenWidth > 1024) {
+            return buildDesktopLayout();
+          } else if (screenWidth > 600) {
+            return buildTabletLayout();
           } else {
-            // For web: apply responsive layout based on screen size
-            if (screenWidth > 1024) {
-              // print("Web/Desktop layout is being used");
-              return buildDesktopLayout(); // Desktop layout for web
-            } else if (screenWidth > 600) {
-              // print("Web/Tablet layout is being used");
-              return buildTabletLayout(); // Tablet layout for web
-            } else {
-              // print("Web/Mobile layout is being used");
-              return buildMobileLayout(); // Mobile layout for web
-            }
+            return buildMobileLayout();
           }
         },
       ),
@@ -235,14 +220,18 @@ class RegisterState extends State<Register> {
   }
 
   Widget buildDesktopLayout() {
-    return Container(
-      color: Colors.white,
-      height: 700,
-      child: userSession.isLoggedIn
-          ? MyAccount()
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(400, 50, 200, 30),
-              child: Row(
+    return SingleChildScrollView(
+      child: Container(
+        color: Colors.white,
+        width: double.infinity,
+        child: userSession.isLoggedIn
+            ? const MyAccount()
+            : Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1000),
+                    child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Flexible(
@@ -613,6 +602,9 @@ class RegisterState extends State<Register> {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -932,47 +924,7 @@ class RegisterState extends State<Register> {
                             ],
                           ),
                         ),
-                        // const SizedBox(
-                        //     height: 20), // Space between text and buttons
-
-                        // // Facebook button
-                        // _buildSocialButton(
-                        //   color: const Color(0xff3b5998),
-                        //   icon: Icons.facebook,
-                        //   label: 'Like on ',
-                        //   boldLabel: 'facebook',
-                        //   onTap: () {
-                        //     print('Facebook tapped');
-                        //   },
-                        // ),
-
-                        // const SizedBox(height: 10), // Space between buttons
-
-                        // // Google+ button
-                        // _buildSocialButton(
-                        //   color: const Color(0xffdb4a39),
-                        //   icon: Icons
-                        //       .g_mobiledata, // Example icon, customize as needed
-                        //   label: 'Like on ',
-                        //   boldLabel: 'google+',
-                        //   onTap: () {
-                        //     print('Google+ tapped');
-                        //   },
-                        // ),
-
-                        // const SizedBox(height: 10), // Space between buttons
-
-                        // // Twitter button
-                        // _buildSocialButton(
-                        //   color: const Color(0xff1DA1F2),
-                        //   icon: Icons
-                        //       .alternate_email, // Example icon, customize as needed
-                        //   label: 'Like on ',
-                        //   boldLabel: 'twitter',
-                        //   onTap: () {
-                        //     print('Twitter tapped');
-                        //   },
-                        // ),
+                       
                       ],
                     ),
                   ),

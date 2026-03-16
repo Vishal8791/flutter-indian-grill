@@ -111,4 +111,14 @@ class AppTextStyle {
         fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
         color: isActive ? AppColors.primary : AppColors.sideMenuText,
       );
+  static const double horizontalPadding = 190;
+  static const double sectionVerticalPadding = 50;
+
+  static const EdgeInsets sectionPadding = EdgeInsets.symmetric(
+    vertical: sectionVerticalPadding,
+    horizontal: horizontalPadding,
+  );
+
+  static const EdgeInsets bannerPadding =
+      EdgeInsets.fromLTRB(horizontalPadding, 40, horizontalPadding, 60);
 }

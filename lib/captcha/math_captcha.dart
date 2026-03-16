@@ -52,27 +52,40 @@ class _MathCaptchaState extends State<MathCaptcha> {
           ],
         ),
         const SizedBox(height: 5),
-        TextFormField(
-          controller: widget.controller,
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            int? answer = int.tryParse(value ?? '');
-            if (value == null || value.isEmpty) {
-              return 'Please solve the captcha';
-            }
-            if (answer != (a + b)) {
-              _generateCaptcha();
-              return 'Incorrect answer, try again';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                  const BorderSide(color: Color(0xff666666), width: 0.5),
+          TextFormField(
+            controller: widget.controller,
+            keyboardType: TextInputType.number,
+            onTapOutside: (event) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            validator: (value) {
+              int? answer = int.tryParse(value ?? '');
+              if (value == null || value.isEmpty) {
+                return 'Please solve the captcha';
+              }
+              if (answer != (a + b)) {
+                _generateCaptcha();
+                return 'Incorrect answer, try again';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.black26),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.black26),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.red.shade400, width: 1.2),
+              ),
             ),
-          ),
         ),
       ],
     );

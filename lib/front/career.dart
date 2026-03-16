@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:indiangrill/style/style.dart'; // Import AppColors
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:indiangrill/captcha/math_captcha.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:indiangrill/services/api_config.dart';
 
-// Custom widget for Label with TextField
 class LabeledTextField extends StatelessWidget {
   final String labelText;
   final TextEditingController controller;
@@ -46,6 +49,9 @@ class LabeledTextField extends StatelessWidget {
             keyboardType: keyboardType,
             validator: validator,
             maxLines: maxLines,
+            onTapOutside: (event) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
             decoration: InputDecoration(
               prefixIcon: icon != null
                   ? Icon(icon, color: Colors.red.shade400)
@@ -57,15 +63,15 @@ class LabeledTextField extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
 
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                // borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.black26),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                // borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.black26),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                // borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.red.shade400, width: 1.2),
               ),
             ),
@@ -75,6 +81,7 @@ class LabeledTextField extends StatelessWidget {
     );
   }
 }
+
 
 // Career widget now changed to StatefulWidget to manage controllers
 class Career extends StatefulWidget {
@@ -164,7 +171,7 @@ class CareerState extends State<Career> {
 
   Future<void> _submitForm() async {
     final uri = Uri.parse(
-        "https://www.dev.indian-grill.com/wp-json/flutter/v1/careerForm");
+        "${ApiConfig.baseUrl}/wp-json/flutter/v1/careerForm");
 
     var request = http.MultipartRequest("POST", uri);
 

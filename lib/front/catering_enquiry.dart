@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:indiangrill/front/datepicker/date_picker_field.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:indiangrill/captcha/math_captcha.dart';
+import 'package:indiangrill/services/api_config.dart';
 
 class CateringEnquiry extends StatefulWidget {
   const CateringEnquiry({super.key});
@@ -91,7 +92,7 @@ class CateringEnquiryState extends State<CateringEnquiry> {
 
   Future<void> submitcateringForm(BuildContext context) async {
     final url = Uri.parse(
-        'https://www.dev.indian-grill.com/wp-json/flutter/v1/cateringForm');
+        '${ApiConfig.baseUrl}/wp-json/flutter/v1/cateringForm');
 
     try {
       final response = await http.post(
@@ -1430,11 +1431,19 @@ class CateringEnquiryState extends State<CateringEnquiry> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter number of guests';
                                 }
+
                                 if (!RegExp(r'^\d+$').hasMatch(value)) {
                                   return 'Please enter a valid number';
                                 }
+
+                                final int guests = int.parse(value);
+                                if (guests <= 0) {
+                                  return 'Number of guests must be greater than 0';
+                                }
+
                                 return null;
                               },
+
                               keyboardType: TextInputType.number,
                             ),
                             const SizedBox(height: 20),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:indiangrill/services/api_config.dart';
 
 class LostPassword extends StatefulWidget {
   const LostPassword({super.key});
@@ -26,7 +27,7 @@ class _LostPasswordPageState extends State<LostPassword> {
   }
 
   final url = Uri.parse(
-    'https://dev.indian-grill.com/wp-json/custom/v1/lost-password',
+    '${ApiConfig.wpApiBase}/custom/v1/lost-password',
   );
 
   try {

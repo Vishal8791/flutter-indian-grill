@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/session/user_session.dart';
 import 'package:indiangrill/services/woocommerce_service.dart';
 import 'package:indiangrill/style/style.dart';
+import 'package:intl/intl.dart';
 
 class MyAccount extends StatefulWidget {
   final Map<String, dynamic>? args;
@@ -372,7 +373,8 @@ class _OrdersWidgetState extends State<OrdersWidget> {
             itemBuilder: (context, index) {
               final order = orders[index];
               final orderId = order['id'];
-              final date = order['date_created'];
+              // final date = order['date_created'];
+              final String orderDate = DateFormat('MM/dd/yyyy').format(DateTime.parse(order['date_created']));
               final status = order['status'];
               final total = order['total'];
 
@@ -406,7 +408,7 @@ class _OrdersWidgetState extends State<OrdersWidget> {
                           ),
                         ),
                         subtitle: Text(
-                          'Date: $date\nStatus: ${status.toUpperCase()}',
+                          'Date: $orderDate\nStatus: ${status.toUpperCase()}',
                           style: GoogleFonts.raleway(fontSize: 14),
                         ),
                         trailing: Text(

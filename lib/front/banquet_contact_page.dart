@@ -7,6 +7,7 @@ import 'package:indiangrill/front/career.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indiangrill/front/datepicker/date_picker_field.dart';
 import 'package:indiangrill/captcha/math_captcha.dart';
+import 'package:indiangrill/services/api_config.dart';
 
 // BanquetContactPage converted to StatefulWidget
 class BanquetContactPage extends StatefulWidget {
@@ -32,7 +33,7 @@ class _BanquetContactPageState extends State<BanquetContactPage> {
 
   Future<void> submitbanquetForm(BuildContext context) async {
     final url = Uri.parse(
-        'https://www.dev.indian-grill.com/wp-json/flutter/v1/banquetform');
+        '${ApiConfig.baseUrl}/wp-json/flutter/v1/banquetform');
 
     try {
       final response = await http.post(

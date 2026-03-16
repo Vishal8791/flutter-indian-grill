@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
+import 'package:indiangrill/services/api_config.dart';
 
 import '../providers/cart_provider.dart';
 
@@ -213,118 +214,117 @@ Future<void> _loadMoreMobileProducts() async {
   }
 
   Widget _buildMobileLayout() {
-  return Container(
-    color: Colors.white,
-    // height: MediaQuery.of(context).size.height,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // CATEGORY BAR (Fixed)
-        HorizontalSidebarWidget(
-          items: categories,
-          onCategorySelected: onCategorySelected,
-          selectedCategoryId: selectedCategoryId,
-        ),
-
-        const SizedBox(height: 10),
-
-        // Scrollable part
-        Expanded(
-          child: SingleChildScrollView(
-            controller: mobileScrollController,
-            child:Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // PRODUCT LIST (non-scrollable ListView)
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: mobileProducts.length + (mobileHasMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == mobileProducts.length) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-
-                    final product = mobileProducts[index];
-
-                    return MobileMenuItemCard(
-                      key: ValueKey(index),
-                      foodType: product['foodType'],
-                      title: product['name'],
-                      productId: product['productId'],
-                      optionName: product['optionName'],
-                      description: product['description'] ?? "No description available",
-                      price: double.tryParse(product['price'] ?? "0") ?? 0.0,
-                      isExpanded: expandedIndex == index,
-                      onExpand: () {
-                        setState(() {
-                          expandedIndex = expandedIndex == index ? null : index;
-                        });
-                      },
-                      baseOptions: List<String>.from(product['baseOptions'] ?? []),
-                      comboOptions: List<String>.from(product['comboOptions'] ?? []),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // SPECIAL NOTES
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Special Notes",
-                        style: GoogleFonts.raleway(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ...notes.map(
-                        (note) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("•  ",
-                                  style: GoogleFonts.raleway(fontSize: 12)),
-                              Expanded(
-                                child: Text(
-                                  note,
-                                  style: GoogleFonts.raleway(fontSize: 13.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-              ],
+    return Container(
+      color: Colors.white,
+      child: CustomScrollView(
+        controller: mobileScrollController,
+        slivers: [
+          // CATEGORY BAR (Fixed at top of scroll view)
+          SliverToBoxAdapter(
+            child: HorizontalSidebarWidget(
+              items: categories,
+              onCategorySelected: onCategorySelected,
+              selectedCategoryId: selectedCategoryId,
             ),
           ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 10)),
+
+          // PRODUCT LIST (Lazy loaded)
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == mobileProducts.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final product = mobileProducts[index];
+
+                  return MobileMenuItemCard(
+                    key: ValueKey(index),
+                    foodType: product['foodType'],
+                    title: product['name'],
+                    productId: product['productId'],
+                    optionName: product['optionName'],
+                    description:
+                        product['description'] ?? "No description available",
+                    price: double.tryParse(product['price'] ?? "0") ?? 0.0,
+                    isExpanded: expandedIndex == index,
+                    onExpand: () {
+                      setState(() {
+                        expandedIndex = expandedIndex == index ? null : index;
+                      });
+                    },
+                    baseOptions:
+                        List<String>.from(product['baseOptions'] ?? []),
+                    comboOptions:
+                        List<String>.from(product['comboOptions'] ?? []),
+                  );
+                },
+                childCount: mobileProducts.length + (mobileHasMore ? 1 : 0),
+              ),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+          // SPECIAL NOTES
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            sliver: SliverToBoxAdapter(
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Special Notes",
+                      style: GoogleFonts.raleway(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...notes.map(
+                      (note) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("•  ",
+                                style: GoogleFonts.raleway(fontSize: 12)),
+                            Expanded(
+                              child: Text(
+                                note,
+                                style: GoogleFonts.raleway(fontSize: 13.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 30)),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTabletLayout() {
     return Container(
@@ -1385,9 +1385,9 @@ class WooCommerceService {
 }
 
 class WooCommerceCategory {
-  final String baseUrl = "https://www.dev.indian-grill.com/wp-json/wc/v1";
-  final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
-  final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
+  final String baseUrl = ApiConfig.wcApiBase;
+  final String consumerKey = ApiConfig.consumerKey;
+  final String consumerSecret = ApiConfig.consumerSecret;
   final String categoryId = '60';
 
   Future<List<dynamic>> fetchSubcategories() async {

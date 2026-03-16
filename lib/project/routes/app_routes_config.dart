@@ -28,6 +28,24 @@ class MyAppRouter {
   MyAppRouter() {
     router = GoRouter(
       refreshListenable: userSession,
+      redirect: (context, state) {
+        final isLoggedIn = userSession.isLoggedIn;
+        final isLoggingIn = state.uri.toString() == '/login';
+        final isLostPassword = state.uri.toString() == '/lost-password';
+
+        // 1. If not logged in, force to login (unless already on login or lost password)
+        if (!isLoggedIn) {
+          if (isLoggingIn || isLostPassword) return null;
+          return '/login';
+        }
+
+        // 2. If logged in and trying to go to login, send to home
+        if (isLoggingIn) {
+          return '/';
+        }
+
+        return null;
+      },
       routes: [
         GoRoute(
           name: 'privacy-policy',

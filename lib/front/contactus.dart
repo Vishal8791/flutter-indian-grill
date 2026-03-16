@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:indiangrill/front/career.dart';
 import 'package:indiangrill/captcha/math_captcha.dart';
+import 'package:indiangrill/services/api_config.dart';
 
 class Contactus extends StatefulWidget {
   const Contactus({super.key});
@@ -32,7 +33,7 @@ class _ContactusState extends State<Contactus> {
 
   Future<void> submitContactForm(BuildContext context) async {
     final url = Uri.parse(
-        'https://www.dev.indian-grill.com/wp-json/flutter/v1/contact');
+        '${ApiConfig.baseUrl}/wp-json/flutter/v1/contact');
 
     try {
       final response = await http.post(
@@ -587,13 +588,39 @@ Widget buildMobileLayout() {
 
                     const SizedBox(height: 6),
 
-                    Text(
-                      "Website: indian-grill.com",
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Website: ",
+                          style: GoogleFonts.raleway(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            const url = 'https://www.indian-grill.com';
+                            if (await canLaunch(url)) {
+                              await launch(url);
+                            } else {
+                              final Uri websiteUri =
+                                  Uri.parse("https://www.indian-grill.com");
+                              await launchUrl(websiteUri,
+                                  mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Text(
+                            "indian-grill.com",
+                            style: GoogleFonts.raleway(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 20),

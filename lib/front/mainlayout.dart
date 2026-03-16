@@ -84,7 +84,7 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  @override
+@override
 Widget build(BuildContext context) {
   final isMobile = MediaQuery.of(context).size.width < 600;
 
@@ -95,24 +95,36 @@ Widget build(BuildContext context) {
     drawer: const AppDrawer(),
 
     body: SafeArea(
-      child: Column(
-        children: [
-          if (!widget.hideHeader) const Header(),
+      child: isMobile
+          // ---------------- MOBILE ----------------
+          ? Column(
+              children: [
+                if (!widget.hideHeader) const Header(),
 
-          // 👇 Page content (each page decides if it scrolls)
-          
-          Expanded(
-            child: widget.child,
-          ),
+                Expanded(
+                  child: widget.child,
+                ),
 
-          if (!isMobile) Footer(),
-        ],
-      ),
+                if (!isMobile) const Footer(),
+              ],
+            )
+
+          // ---------------- DESKTOP / TABLET ----------------
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (!widget.hideHeader) const Header(),
+
+                  widget.child,
+
+                  const Footer(),
+                ],
+              ),
+            ),
     ),
 
-    // 👇 Bottom nav only on mobile + hidden on specific pages
-    bottomNavigationBar: 
-      isMobile && !_hideBottomNav(GoRouterState.of(context).uri.toString())
+    bottomNavigationBar: isMobile &&
+            !_hideBottomNav(GoRouterState.of(context).uri.toString())
         ? _buildBottomNavBar()
         : null,
   );

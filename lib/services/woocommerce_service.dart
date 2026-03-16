@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:indiangrill/services/api_config.dart';
 // Assuming the Product class is defined here
 
 class WooCommerceService {
-  final String baseUrl = 'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
-  final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
-  final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
+  final String baseUrl = ApiConfig.baseUrl;
+  final String consumerKey = ApiConfig.consumerKey;
+  final String consumerSecret = ApiConfig.consumerSecret;
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(
       Uri.parse(
-          '$baseUrl/wp-json/wc/v3/products?consumer_key=$consumerKey&consumer_secret=$consumerSecret'),
+          '${ApiConfig.wcApiBase}/products?consumer_key=$consumerKey&consumer_secret=$consumerSecret'),
     );
  // print('📦 Response Status: ${response.statusCode}');
     if (response.statusCode == 200) {
@@ -23,7 +24,7 @@ class WooCommerceService {
         // Fetch product options from custom endpoint
         final optionResponse = await http.get(
           Uri.parse(
-              '$baseUrl/wp-json/custom-api/v1/product-options/${product.id}'),
+              '${ApiConfig.baseUrl}/wp-json/custom-api/v1/product-options/${product.id}'),
         );
 
         if (optionResponse.statusCode == 200) {
@@ -42,7 +43,7 @@ class WooCommerceService {
 
   Future<Map<String, dynamic>> validateCoupon(String code) async {
   final url =
-      "https://dev.indian-grill.com/wp-json/custom/v1/validate-coupon?code=$code";
+      "${ApiConfig.validateCoupon}?code=$code";
 
   final response = await http.get(Uri.parse(url));
 
@@ -58,7 +59,7 @@ class WooCommerceService {
   Future<List<String>> fetchCustomFields() async {
     final response = await http.get(
       Uri.parse(
-          '$baseUrl/wp-json/wc/v1/products/custom-fields/names?consumer_key=$consumerKey&consumer_secret=$consumerSecret'),
+          '${ApiConfig.wcApiBase}/products/custom-fields/names?consumer_key=$consumerKey&consumer_secret=$consumerSecret'),
     );
 
     if (response.statusCode == 200) {
@@ -74,7 +75,7 @@ class WooCommerceService {
 
     final response = await http.get(
       Uri.parse(
-        'https://www.dev.indian-grill.com/wp-json/custom/v1/orders?email=$email',
+        '${ApiConfig.fetchOrders}?email=$email',
       ),
     );
   // print(response);
@@ -86,7 +87,7 @@ class WooCommerceService {
   }
 
   Future<List<dynamic>> fetchPaymentGateways() async {
-  final String url = "$baseUrl/wp-json/wc/v3/payment_gateways"
+  final String url = "${ApiConfig.wcApiBase}/payment_gateways"
       "?consumer_key=$consumerKey"
       "&consumer_secret=$consumerSecret";
 

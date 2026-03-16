@@ -10,7 +10,7 @@ class CartItem {
   final int tip;
   final String option;
   final List<Map<String, String>> selectedoptions;
-  final String? specialInstruction; 
+  final String? specialInstruction;
 
   CartItem({
     required this.id,
@@ -101,7 +101,6 @@ class Cart with ChangeNotifier {
     return total - couponDiscount;
   }
 
-
   void addItem(
     String productId,
     String title,
@@ -110,7 +109,6 @@ class Cart with ChangeNotifier {
     String option,
     List<Map<String, String>> selectedoptions,
     String? specialInstruction,
-   
   ) {
     if (_items.containsKey(productId)) {
       _items.update(
@@ -123,7 +121,8 @@ class Cart with ChangeNotifier {
           tip: existingCartItem.tip,
           option: existingCartItem.option,
           selectedoptions: existingCartItem.selectedoptions,
-          specialInstruction: specialInstruction ?? existingCartItem.specialInstruction,
+          specialInstruction:
+              specialInstruction ?? existingCartItem.specialInstruction,
         ),
       );
     } else {
@@ -210,13 +209,13 @@ class Cart with ChangeNotifier {
     String cartJson = json.encode(cartList);
     await prefs.setString('cart', cartJson);
     await prefs.setDouble('tipAmount', _tipAmount); // ✅ save tip separately
-     if (appliedCouponCode != null) {
-    await prefs.setString('appliedCouponCode', appliedCouponCode!);
-    await prefs.setDouble('couponDiscount', couponDiscount);
-  } else {
-    await prefs.remove('appliedCouponCode');
-    await prefs.remove('couponDiscount');
-  }
+    if (appliedCouponCode != null) {
+      await prefs.setString('appliedCouponCode', appliedCouponCode!);
+      await prefs.setDouble('couponDiscount', couponDiscount);
+    } else {
+      await prefs.remove('appliedCouponCode');
+      await prefs.remove('couponDiscount');
+    }
   }
 
   // ✅ Load cart + tip from SharedPreferences
@@ -233,7 +232,7 @@ class Cart with ChangeNotifier {
       };
     }
     appliedCouponCode = prefs.getString('appliedCouponCode');
-  couponDiscount = prefs.getDouble('couponDiscount') ?? 0.0;
+    couponDiscount = prefs.getDouble('couponDiscount') ?? 0.0;
   }
 
   // Load the cart when the app starts
@@ -241,29 +240,28 @@ class Cart with ChangeNotifier {
     await _loadCartFromPreferences();
     notifyListeners();
   }
+
   // Subtotal (without tip)
-double get subtotal {
-  double sum = 0.0;
-  _items.forEach((key, cartItem) {
-    sum += cartItem.price * cartItem.quantity;
-  });
-  return sum;
-}
+  double get subtotal {
+    double sum = 0.0;
+    _items.forEach((key, cartItem) {
+      sum += cartItem.price * cartItem.quantity;
+    });
+    return sum;
+  }
 
 // You can change tax logic if needed
-double get tax {
-  return subtotal * 0.00; // No tax? Change here
-}
+  double get tax {
+    return subtotal * 0.06; // 6% tax
+  }
 
 // Shipping (optional)
-double get shipping {
-  return 0.0; // Add delivery charges if required
-}
+  double get shipping {
+    return 0.0; // Add delivery charges if required
+  }
 
-// Total (subtotal + tip)
-double get total {
-  return subtotal + _tipAmount;
+// Total (subtotal + tax + tip)
+  double get total {
+    return subtotal + tax + _tipAmount;
+  }
 }
-
-}
-

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:indiangrill/front/orderonline.dart';
+import 'package:indiangrill/services/api_config.dart';
 class OurCakes extends StatefulWidget {
   const OurCakes({super.key});
 
@@ -300,7 +301,7 @@ class OurCakesState extends State<OurCakes> {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.6, // matches your design
+        childAspectRatio: 0.55, // Adjusted to allow more space for text
       ),
       itemCount: products.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
@@ -478,7 +479,7 @@ class ProductCardMobile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SizedBox(
-              height: 40,
+              // height: 40, // Removed fixed height
               child: Center(
                 child: Text(
                   product['name'] ?? 'Cake Item',
@@ -486,7 +487,8 @@ class ProductCardMobile extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 2,
+                  maxLines: 4, // Increased max lines
+                  textAlign: TextAlign.center, // Center align text
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -746,10 +748,9 @@ class PaginationBar extends StatelessWidget {
 }
 
 class WooCommerceService {
-  final String baseUrl =
-      'https://www.dev.indian-grill.com/wp-json/wc/v1/products';
-  final String consumerKey = 'ck_67efc00d8d814b67877da8fffad40d61d4366602';
-  final String consumerSecret = 'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
+  final String baseUrl = ApiConfig.wcApiBase;
+  final String consumerKey = ApiConfig.consumerKey;
+  final String consumerSecret = ApiConfig.consumerSecret;
   final String cakeCategoryId = '73';
   final int productsPerPage = 10;
 
@@ -769,7 +770,7 @@ class WooCommerceService {
     category ??= cakeCategoryId;
 
     // Modify the URL to include category and offset
-    String url = '$baseUrl?per_page=$productsPerPage&offset=$offset';
+    String url = '$baseUrl/products?per_page=$productsPerPage&offset=$offset';
     url +=
         '&category=$category'; // Only include category filter if it's not null
 
@@ -827,9 +828,9 @@ class WooCommerceService {
 }
 
 class WooCommerceCategory {
-  final String baseUrl = "https://www.dev.indian-grill.com";
-  final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
-  final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
+  final String baseUrl = ApiConfig.wcApiBase;
+  final String consumerKey = ApiConfig.consumerKey;
+  final String consumerSecret = ApiConfig.consumerSecret;
   final String categoryId = '73';
 
   Future<List<dynamic>> fetchSubcategories() async {

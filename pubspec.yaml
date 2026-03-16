@@ -1,6 +1,6 @@
 name: indiangrill
 description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -53,6 +53,8 @@ flutter:
     - assets/images/veg.webp
     - assets/images/spicy.webp
     - assets/images/timing.webp
+    - assets/images/home/
+    - assets/images/cakes/
 
 flutter_launcher_icons:
   android: "launcher_icon"

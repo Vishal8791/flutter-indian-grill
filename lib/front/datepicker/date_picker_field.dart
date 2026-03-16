@@ -40,9 +40,17 @@ class _DatePickerFieldState extends State<DatePickerField> {
     final fontSize = isMobile ? 12.0 : 14.0;
     final headerFontSize = isMobile ? 14.0 : 16.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return TapRegion(
+      onTapOutside: (event) {
+        if (_showCalendar) {
+          setState(() {
+            _showCalendar = false;
+          });
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         // Label
         Text(
           widget.labelText,
@@ -55,42 +63,40 @@ class _DatePickerFieldState extends State<DatePickerField> {
         const SizedBox(height: 6),
 
         // Textbox
-        GestureDetector(
+        TextField(
+          controller: widget.controller,
+          readOnly: true,
+          showCursor: false, // Prevents caret from showing
           onTap: () {
             setState(() {
               _showCalendar = !_showCalendar;
             });
           },
-          child: AbsorbPointer(
-            child: TextField(
-              controller: widget.controller,
-              readOnly: true,
-              decoration: InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(0),
-                  borderSide: const BorderSide(
-                    color: Color(0xff666666),
-                    width: 0.5,
-                  ),
-                ),
-                suffixIcon: const Icon(Icons.calendar_today),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(0), // No rounded corners
-                  borderSide: const BorderSide(
-                    color: Colors
-                        .grey, // Border color when text field is not focused
-                    width: 0.5,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(0), // No rounded corners
-                  borderSide: const BorderSide(
-                    color:
-                        Colors.grey, // Border color when text field is focused
-                    width: 0.5,
-                  ),
-                ),
+          decoration: InputDecoration(
+            isDense: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(0),
+              borderSide: const BorderSide(
+                color: Color(0xff666666),
+                width: 0.5,
+              ),
+            ),
+            suffixIcon: Icon(
+              Icons.calendar_today,
+              color: _showCalendar ? const Color(0xffe2001a) : Colors.grey,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(0),
+              borderSide: BorderSide(
+                color: _showCalendar ? const Color(0xffe2001a) : Colors.grey,
+                width: _showCalendar ? 1.5 : 0.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(0),
+              borderSide: BorderSide(
+                color: _showCalendar ? const Color(0xffe2001a) : Colors.black54,
+                width: _showCalendar ? 1.5 : 1.0,
               ),
             ),
           ),
@@ -183,6 +189,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
             ),
           ),
       ],
+      ),
     );
   }
 }

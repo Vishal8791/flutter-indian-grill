@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:indiangrill/services/api_config.dart';
 
 class WooCommerceCategory {
-  final String baseUrl = "https://www.dev.indian-grill.com";
-  final String consumerKey = "ck_67efc00d8d814b67877da8fffad40d61d4366602";
-  final String consumerSecret = "cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b";
+  final String baseUrl = ApiConfig.baseUrl;
+  final String consumerKey = ApiConfig.consumerKey;
+  final String consumerSecret = ApiConfig.consumerSecret;
   final String categoryId = '73';
 
   Future<List<dynamic>> fetchSubcategories() async {
     final String url =
-        "$baseUrl/wp-json/wc/v3/products/categories?parent=$categoryId&consumer_key=$consumerKey&consumer_secret=$consumerSecret";
+        "${ApiConfig.wcApiBase}/products/categories?parent=$categoryId&consumer_key=$consumerKey&consumer_secret=$consumerSecret";
 
     try {
       final response = await http.get(Uri.parse(url));

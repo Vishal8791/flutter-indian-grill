@@ -5,12 +5,14 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:indiangrill/providers/cart_provider.dart'; // adjust path if needed
+import 'package:indiangrill/services/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:indiangrill/front/header_back_button.dart';
-import 'package:provider/provider.dart';
-import 'package:indiangrill/providers/cart_provider.dart'; // adjust path if needed
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -100,7 +102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => _isLoading = true);
 
     final url = Uri.parse(
-        'https://dev.indian-grill.com/wp-json/custom/v1/create-order');
+        '${ApiConfig.wpApiBase}/custom/v1/create-order');
 
     // Ordered items for API
     List<Map<String, dynamic>> items = cart.items.values.map((item) {
@@ -245,6 +247,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     required TextEditingController controller,
     TextInputType? keyboardType,
     bool requiredField = true,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? customValidator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,6 +267,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
@@ -302,6 +307,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
           validator: (value) {
             if (requiredField && (value == null || value.trim().isEmpty)) {
               return "$label is required";
+            }
+            if (customValidator != null) {
+              return customValidator(value);
             }
             return null;
           },
@@ -726,20 +734,42 @@ class _CheckoutPageState extends State<CheckoutPage> {
         isMobile
             ? Column(
                 children: [
-                  _buildTextField("First Name", controller: firstName),
+                  _buildTextField(
+                    "First Name",
+                    controller: firstName,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
+                    ],
+                  ),
                   const SizedBox(height: 10),
-                  _buildTextField("Last Name", controller: lastName),
+                  _buildTextField(
+                    "Last Name",
+                    controller: lastName,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
+                    ],
+                  ),
                 ],
               )
             : Row(
                 children: [
                   Expanded(
-                      child:
-                          _buildTextField("First Name", controller: firstName)),
+                      child: _buildTextField(
+                    "First Name",
+                    controller: firstName,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
+                    ],
+                  )),
                   const SizedBox(width: 20),
                   Expanded(
-                      child:
-                          _buildTextField("Last Name", controller: lastName)),
+                      child: _buildTextField(
+                    "Last Name",
+                    controller: lastName,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
+                    ],
+                  )),
                 ],
               ),
         const SizedBox(height: 10),
@@ -789,28 +819,69 @@ class _CheckoutPageState extends State<CheckoutPage> {
         isMobile
             ? Column(
                 children: [
-                  _buildTextField("ZIP", controller: postcode),
+                  _buildTextField(
+                    "ZIP",
+                    controller: postcode,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
                   const SizedBox(height: 10),
-                  _buildTextField("Phone",
-                      controller: phone,
-                      fontSize: 12,
-                      keyboardType: TextInputType.phone),
+                  _buildTextField(
+                    "Phone",
+                    controller: phone,
+                    fontSize: 12,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    customValidator: (value) {
+                      if (value != null && value.length < 10) {
+                        return "Enter at least 10 digits";
+                      }
+                      return null;
+                    },
+                  ),
                 ],
               )
             : Row(
                 children: [
-                  Expanded(child: _buildTextField("ZIP", controller: postcode)),
+                  Expanded(
+                    child: _buildTextField(
+                      "ZIP",
+                      controller: postcode,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                  ),
                   const SizedBox(width: 20),
                   Expanded(
-                      child: _buildTextField("Phone",
-                          controller: phone,
-                          fontSize: 12,
-                          keyboardType: TextInputType.phone)),
+                    child: _buildTextField(
+                      "Phone",
+                      controller: phone,
+                      fontSize: 12,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      customValidator: (value) {
+                        if (value != null && value.length < 10) {
+                          return "Enter at least 10 digits";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
                 ],
               ),
         const SizedBox(height: 10),
-        _buildTextField("Email address",
-            controller: email, keyboardType: TextInputType.emailAddress),
+        _buildTextField(
+          "Email address",
+          controller: email,
+          keyboardType: TextInputType.emailAddress,
+          customValidator: (value) {
+            final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+            if (value != null && !emailRegex.hasMatch(value)) {
+              return "Enter a valid email address";
+            }
+            return null;
+          },
+        ),
       ],
     );
   }
