@@ -11,7 +11,7 @@ class WooCommerceCategory {
   Future<List<dynamic>> fetchSubcategories() async {
     final String url =
         "${ApiConfig.wcApiBase}/products/categories?parent=$categoryId&consumer_key=$consumerKey&consumer_secret=$consumerSecret";
-
+    print(url);
     try {
       final response = await http.get(Uri.parse(url));
 

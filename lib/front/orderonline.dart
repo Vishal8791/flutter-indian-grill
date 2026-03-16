@@ -461,29 +461,6 @@ Future<void> _loadMoreMobileProducts() async {
               ),
             ),
           ),
-          const SizedBox(height: 10,),
-          Row(
-          children: [
-            Row(
-              children: [
-                Image.asset('assets/images/veg.webp', width: 28, height: 28),
-                const SizedBox(width: 4),
-                const Text('Veg', style: TextStyle(fontSize: 12)),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Container(width: 1, height: 18, color: Colors.grey),
-            const SizedBox(width: 12),
-            Row(
-              children: [
-                Image.asset('assets/images/spicy.webp', width: 28, height: 28),
-                const SizedBox(width: 4),
-                const Text('Spicy', style: TextStyle(fontSize: 12)),
-              ],
-            ),
-          ],
-        ),
-    
         ],
       ),
     );

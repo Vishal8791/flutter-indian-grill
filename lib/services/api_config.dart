@@ -6,7 +6,7 @@ class ApiConfig {
       'cs_4cd4f797f1aef69089a3ce3f008d6726e98f352b';
 
   static String get wpApiBase => '$baseUrl/wp-json';
-  static String get wcApiBase => '$baseUrl/wp-json/wc/v3';
+  static String get wcApiBase => '$baseUrl/wp-json/wc/v1';
   static String get customApiBase => '$baseUrl/wp-json/custom/v1';
 
   // Specific endpoints
